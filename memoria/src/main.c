@@ -1,7 +1,7 @@
 #include "main.h"
 
 int main() {
-    int conexion;
+    // int conexion;
 
     t_log *logger = log_create("memoria.log", "memoria", true, LOG_LEVEL_INFO);
 	log_info(logger, "Iniciando Memoria...");
@@ -17,8 +17,10 @@ int main() {
 	log_info(logger, "Listo para recibir al CPU");
     int socket_cliente_cpu = esperar_cliente(socket_servidor_memoria, logger);
     
+	log_info(logger, "Listo para recibir al Kernel");
     int socket_cliente_kernel = esperar_cliente(socket_servidor_memoria, logger);
     
+	log_info(logger, "Listo para recibir al IO");
     int socket_cliente_io = esperar_cliente(socket_servidor_memoria, logger);
 
     return 0;

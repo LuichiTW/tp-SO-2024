@@ -11,7 +11,7 @@ void* serializar_paquete(t_paquete* paquete, int bytes){
 	return magic;
 }
 
-int crear_conexion(char *ip, char* puerto){
+int crear_conexion(char *ip, char* puerto, char* identificador){
 	struct addrinfo hints;
 	struct addrinfo *server_info;
 	memset(&hints, 0, sizeof(hints));
@@ -22,6 +22,7 @@ int crear_conexion(char *ip, char* puerto){
 	int socket_cliente = socket(server_info->ai_family,server_info->ai_socktype,server_info->ai_protocol);
 	connect(socket_cliente,server_info->ai_addr,server_info->ai_addrlen);
 	freeaddrinfo(server_info);
+	enviar_mensaje(identificador, socket_cliente);
 	return socket_cliente;
 }
 

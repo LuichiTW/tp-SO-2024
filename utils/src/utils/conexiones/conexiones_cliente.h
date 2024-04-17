@@ -32,9 +32,10 @@ typedef struct
  * @brief 
  * @param ip direccion donde nos vamos a conectar
  * @param puerto puerto en el cual nos vamos a conectar
+ * @param identificador nombre de quien se esta identificando
  * @return retrona el socket del servidor
 */
-int crear_conexion(char* ip, char* puerto);
+int crear_conexion(char* ip, char* puerto, char* identificador);
 /**
  * @fn enviar_mensaje
  * @brief 

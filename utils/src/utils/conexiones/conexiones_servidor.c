@@ -8,7 +8,7 @@ int iniciar_servidor(char* puerto){
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    getaddrinfo(NULL, &puerto, &hints, &serverinfo);
+    getaddrinfo(NULL, puerto, &hints, &serverinfo);
     socket_servidor = socket(serverinfo->ai_family,serverinfo->ai_socktype,serverinfo->ai_protocol);
     bind(socket_servidor, serverinfo->ai_addr, serverinfo->ai_addrlen);
     freeaddrinfo(serverinfo);
@@ -18,6 +18,8 @@ int iniciar_servidor(char* puerto){
 int esperar_cliente(int socket_servidor, t_log *logger){
     int socket_cliente = accept(socket_servidor, NULL, NULL);
     log_info(logger, "Se conecto un Cliente.");
+    recibir_operacion(socket_cliente);
+    recibir_mensaje(socket_cliente, logger);
     return socket_cliente;
 }
 int recibir_operacion(int socket_cliente){

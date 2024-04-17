@@ -13,7 +13,7 @@ int main() {
     char *ip_memoria = config_get_string_value(config, "IP_MEMORIA");
     int conexion_memoria = crear_conexion(ip_memoria,puerto_memoria,"Hola soy el CPU");
 
-    int conexion;
+    //int conexion;
 	char *puerto = config_get_string_value(config, "PUERTO_ESCUCHA_DISPATCH");
     int socket_servidor_cpu = iniciar_servidor(puerto);
 	log_info(logger, "Listo para recibir al Kernel");

@@ -15,7 +15,7 @@
  * @param puerto determina el puerto
  * @return retorna elsocket del servidor
 */
-int iniciar_servidor(int);
+int iniciar_servidor(char*);
 /**
  * @fn esperar_cliente
  * @brief Espera a que el cliente se conecte al servidor
@@ -38,7 +38,7 @@ void* recibir_buffer(int*, int );
  * @param socket_cliente socket donde se recibira el mensaje
  * @param logger puntero del archivo log al cual se enviara el estado.
 */
-void recibir_mensaje(int, t_log);
+void recibir_mensaje(int, t_log*);
 /**
  * @fn recibir_paquete
  * @brief recibe un paquete de datos del cliente indicado

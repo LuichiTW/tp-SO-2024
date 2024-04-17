@@ -1,6 +1,6 @@
 #include "utils/conexiones/conexiones_servidor.h"
 
-int iniciar_servidor(int puerto){
+int iniciar_servidor(char* puerto){
     int socket_servidor;
     struct addrinfo hints, *serverinfo;
     
@@ -8,7 +8,7 @@ int iniciar_servidor(int puerto){
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
-    getaddrinfo(NULL, puerto, &hints, &serverinfo);
+    getaddrinfo(NULL, &puerto, &hints, &serverinfo);
     socket_servidor = socket(serverinfo->ai_family,serverinfo->ai_socktype,serverinfo->ai_protocol);
     bind(socket_servidor, serverinfo->ai_addr, serverinfo->ai_addrlen);
     freeaddrinfo(serverinfo);
@@ -22,7 +22,7 @@ int esperar_cliente(int socket_servidor, t_log *logger){
 }
 int recibir_operacion(int socket_cliente){
     int codigo_operacion;
-    if (recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL)>0)
+    if (recv(socket_cliente, &codigo_operacion, sizeof(int), MSG_WAITALL)>0)
     {
         return codigo_operacion;
     } else {

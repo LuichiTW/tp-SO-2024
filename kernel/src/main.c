@@ -14,7 +14,7 @@ int main() {
     //memoria
     char *puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
     char *ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-    int conexion_memoria = crear_conexion(ip_memoria,puerto_memoria, "Hola soy el kernel");
+    int conexion_memoria = crear_conexion(ip_memoria, puerto_memoria, "Hola soy el kernel");
     
     //cpu
     char *puerto_cpu = config_get_string_value(config, "PUERTO_CPU_DISPATCH");
@@ -28,6 +28,7 @@ int main() {
 	log_info(logger, "Listo para recibir al IO");
     int socket_cliente_io = esperar_cliente(socket_servidor_kernel, logger);
     
+    char* algo = readline("> ");
     //se tendria que liberar el especio de memoria usado por los elementos
     return 0;
 }

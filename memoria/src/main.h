@@ -7,6 +7,7 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/error.h>
+#include <readline/readline.h>
 
 
 

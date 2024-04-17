@@ -1,8 +1,6 @@
 #include "main.h"
 
 int main() {
-    // int conexion;
-
     t_log *logger = log_create("memoria.log", "memoria", true, LOG_LEVEL_INFO);
 	log_info(logger, "Iniciando Memoria...");
     t_config *config = config_create("memory.config");
@@ -23,5 +21,6 @@ int main() {
 	log_info(logger, "Listo para recibir al IO");
     int socket_cliente_io = esperar_cliente(socket_servidor_memoria, logger);
 
+    char* algo = readline("> ");
     return 0;
 }

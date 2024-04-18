@@ -4,7 +4,7 @@ int main() {
     //Iniciar logger del kernel y su config
     t_log *logger = log_create("kernel.log", "kernel", true, LOG_LEVEL_INFO);
     log_info(logger, "Iniciando kernel...");
-    t_config *config = config_create("kernel.config");
+    t_config *config = config_create("../kernel.config");
     if (config == NULL) {
         log_error(logger, "No se leyo el archivo de configuracion");
         exit(EXIT_FAILURE);

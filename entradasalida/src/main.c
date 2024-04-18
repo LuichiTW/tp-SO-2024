@@ -2,7 +2,7 @@
 int main() {
     t_log *logger = log_create("io.log", "io", true, LOG_LEVEL_INFO);
     log_info(logger, "Iniciando I/O...");
-    t_config *config = config_create("io.config");
+    t_config *config = config_create("../io.config");
     if (config == NULL) {
         log_error(logger, "No se leyo el archivo de configuracion");
         exit(EXIT_FAILURE);

@@ -3,7 +3,7 @@
 int main() {
     t_log *logger = log_create("memoria.log", "memoria", true, LOG_LEVEL_INFO);
 	log_info(logger, "Iniciando Memoria...");
-    t_config *config = config_create("memory.config");
+    t_config *config = config_create("../memory.config");
     if (config == NULL)
     {
         log_error(logger, "No se leyo el archivo de configuracion");

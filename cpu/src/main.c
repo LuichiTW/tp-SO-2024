@@ -3,7 +3,7 @@
 int main() {
     t_log *logger = log_create("cpu.log", "cpu", true, LOG_LEVEL_INFO);
 	log_info(logger, "Iniciando CPU...");
-    t_config *config = config_create("cpu.config");
+    t_config *config = config_create("../cpu.config");
     if (config == NULL)
     {
         log_error(logger, "No se leyo el archivo de configuracion");

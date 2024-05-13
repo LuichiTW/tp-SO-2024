@@ -9,5 +9,10 @@
 #include <commons/log.h>
 #include <commons/error.h>
 #include <readline/readline.h>
+#include <pthread.h>
+#include <string.h>
+
+void iniciar_consola_interactiva(t_log* logger);
+bool validacion_de_instruccion_de_consola(char* leido, t_log* logger);
 
 #endif // !MAIN_KERNEL

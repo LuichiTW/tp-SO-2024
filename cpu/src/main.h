@@ -10,4 +10,9 @@
 #include <commons/error.h>
 #include <readline/readline.h>
 
+#include "funcionesexecute.h"
+#include "registros.h"
+
+
+
 #endif // !MAIN_CPU

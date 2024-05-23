@@ -24,19 +24,6 @@ int main() {
 	log_info(loggerPrincipal, "Listo para recibir al Kernel");
     int socket_cliente_kernel = esperar_cliente(socket_servidor_cpu, loggerPrincipal);
  */
-    regcpu.AX=2;
-    regcpu.BX=50;
-    regcpu.EAX=5;
-    regcpu.EBX=15;
-    regcpu.ECX=100;
-    
-    SET(AX, 123);
-    // SET(AX,59);
-    // SET(BX,155456);
-    // SET(EAX,465214566);
-    // SET(EAX,4514566);
-
-
 
     char test=readline("> ");
     return 0;

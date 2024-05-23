@@ -1,7 +1,7 @@
 #ifndef REGISTROSCPU
 #define REGISTROSCPU
 
-#include "main.h"
+// #include "main.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <utils/conexiones/conexiones_servidor.h>
@@ -20,18 +20,10 @@ typedef struct {
 
 extern registros_cpu regcpu;
 //CANTIDAD DE REGISTROS Q TIENE EL CPU
-typedef enum {
-    AX,
-    BX,
-    CX,
-    DX,
-    EAX,
-    EBX,
-    ECX,
-    EDX,
-    PC,
-    SI,
-    DI,
+typedef enum lista_registros_CPU{
+    AX, BX, CX, DX,
+    EAX, EBX, ECX, EDX,
+    PC, SI, DI,
 } lista_registros_CPU;
 
 int tamanioRegistro(lista_registros_CPU);

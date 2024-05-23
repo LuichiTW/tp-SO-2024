@@ -11,7 +11,7 @@ void SUM(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
     
     if (regA==NULL || regB==NULL){
         //logger error
-        log_error(loggerPrincipal, "Uno de los registros del execute SUM no son validos");
+        // log_error(loggerPrincipal, "Uno de los registros del execute SUM no son validos");
         //enviar error al kernel
         //suspender proceso
         return;
@@ -42,7 +42,7 @@ void SUB(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
     
     if (regA==NULL || regB==NULL){
         //logger error
-        log_error(loggerPrincipal, "Uno de los registros del execute SUB no son validos");
+        // log_error(loggerPrincipal, "Uno de los registros del execute SUB no son validos");
         //enviar error al kernel
         //suspender proceso
         return;
@@ -65,13 +65,13 @@ void SUB(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
         } break;
     }
 }
-void SET(lista_registros_CPU regLetraA, int valor){
+void SET(enum lista_registros_CPU regLetraA, int valor){
     void* regA = obtenerRegistro(regLetraA);
     int tamanioA = tamanioRegistro(regLetraA);
     
     if (regA==NULL){
         //logger error
-        log_error(loggerPrincipal, "El registro del execute SET no es valido");
+        // log_error(loggerPrincipal, "El registro del execute SET no es valido");
         //enviar error al kernel
         //suspender proceso
         return;

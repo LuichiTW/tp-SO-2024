@@ -83,3 +83,47 @@ void liberar_conexion(int socket_cliente);
 void eliminar_paquete(t_paquete* paquete);
 
 #endif // !CONEXIONES_CLIENTE
+ * @param mensaje
+ * @param socket_cliente
+ * @return 
+*/
+void enviar_mensaje(char* mensaje, int socket_cliente);
+/**
+ * @fn crear_paquete
+ * @brief 
+ * @return 
+*/
+t_paquete* crear_paquete(void);
+/**
+ * @fn agregar_a_paquete
+ * @brief 
+ * @param paquete
+ * @param valor
+ * @param tamanio
+ * @return 
+*/
+void agregar_a_paquete(t_paquete* paquete, void* valor, int tamanio);
+/**
+ * @fn enviar_paquete
+ * @brief 
+ * @param paquete
+ * @param socket_cliente
+ * @return 
+*/
+void enviar_paquete(t_paquete* paquete, int socket_cliente);
+/**
+ * @fn liberar_conexion
+ * @brief 
+ * @param socket_cliente
+ * @return 
+*/
+void liberar_conexion(int socket_cliente);
+/**
+ * @fn eliminar_paquete
+ * @brief 
+ * @param 
+ * @return 
+*/
+void eliminar_paquete(t_paquete* paquete);
+
+#endif // !CONEXIONES_CLIENTE

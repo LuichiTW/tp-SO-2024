@@ -9,6 +9,6 @@
 #include <commons/error.h>
 #include <readline/readline.h>
 
-
+#include "memoria.h"
 
 #endif // MAIN_MEMORIA

@@ -1,15 +1,16 @@
 #include "main.h"
 
 int main() {
+
     t_log *logger = log_create("memoria.log", "memoria", true, LOG_LEVEL_INFO);
+
 	log_info(logger, "Iniciando Memoria...");
-    t_config *config = config_create("../memory.config");
-    if (config == NULL)
-    {
-        log_error(logger, "No se leyo el archivo de configuracion");
-        exit(EXIT_FAILURE);
-    }
-	char *puerto = config_get_string_value(config, "PUERTO_ESCUCHA");
+
+    cargar_config();
+    iniciar_mem_usuario();
+
+	char puerto[5];
+    sprintf(puerto, "%d", config_memoria.puerto_escucha);
 
     int socket_servidor_memoria = iniciar_servidor(puerto);
 	log_info(logger, "Listo para recibir al CPU");
@@ -21,6 +22,8 @@ int main() {
 	log_info(logger, "Listo para recibir al IO");
     int socket_cliente_io = esperar_cliente(socket_servidor_memoria, logger);
 
-    char* algo = readline("> ");
+    printf("%i\n%i\n%i\n%i\n", socket_servidor_memoria, socket_cliente_cpu, socket_cliente_kernel, socket_cliente_io);
+
+    //char* algo = readline("> ");
     return 0;
 }

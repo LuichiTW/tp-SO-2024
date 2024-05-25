@@ -9,7 +9,7 @@ void cargar_config() {
     t_log *logger = crear_memlogger();
     log_info(logger, "Cargando configuración del módulo memoria...");
 
-    t_config *config = config_create("../memory.config");
+    t_config *config = config_create("memory.config");
 
     if (config == NULL) {
         log_error(logger, "Ocurrió un error al cargar el archivo de configuración");
@@ -21,13 +21,14 @@ void cargar_config() {
     config_memoria.tam_pagina = config_get_int_value(config, "TAM_PAGINA");
     config_memoria.path_instrucciones = config_get_string_value(config, "PATH_INSTRUCCIONES");
     config_memoria.retardo_respuesta = config_get_int_value(config, "RETARDO_RESPUESTA");
+
+    config_memoria.config = config;
     
     //! Debería comprobar que cargó cada cosa bien
 
     log_info(logger, "Configuración del módulo memoria cargada con éxito");
 
     log_destroy(logger);
-    config_destroy(config);
 }
 
 
@@ -43,6 +44,29 @@ void iniciar_mem_usuario() {
 
     log_info(logger, "Memoria asignada con éxito");
     log_destroy(logger);
+}
+
+
+
+/*t_tabla_paginas crear_tabla_paginas(int pid) {
+    t_tabla_paginas tabla;
+    tabla.pid = pid;
+    tabla.paginas = list_create();
+    return tabla;
+}*/
+
+
+void leer_archivo(const char *filename) {
+    char path[strlen(filename) + strlen(config_memoria.path_instrucciones) + 2];
+    strcat(strcat(strcat(path, config_memoria.path_instrucciones), "/"), filename);
+    FILE *stream;
+    stream = fopen(path, "r");
+    while (!feof(stream)) {
+        char line[50] = "";
+        fgets(line, 50, stream);
+        printf("%s\n", line);
+    }
+    
 }
 
 

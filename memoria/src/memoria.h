@@ -7,6 +7,7 @@
 #include <commons/log.h>
 #include <commons/error.h>
 #include <commons/bitarray.h>
+#include <string.h>
 
 typedef struct {
     int puerto_escucha;
@@ -14,13 +15,26 @@ typedef struct {
     int tam_pagina;
     char* path_instrucciones;
     int retardo_respuesta;
+    t_config *config;
 } t_config_memoria;
+
+typedef struct {
+    int pid;
+    t_list *paginas;
+} t_tabla_paginas;
+
+typedef struct {
+    int pagina;
+    int marco;
+} t_pagina_frame;
 
 extern void *mem_usuario;
 extern t_config_memoria config_memoria;
 
 void cargar_config();
 void iniciar_mem_usuario();
+//t_tabla_paginas crear_tabla_paginas(int);
+void leer_archivo(const char*);
 t_log *crear_memlogger();
 
 #endif // MEMORIA_H

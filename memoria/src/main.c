@@ -1,5 +1,7 @@
 #include "main.h"
 
+char* PLACEHOLDER_PATH_SCRIPT = "prueba.txt";
+
 int main() {
 
     t_log *logger = log_create("memoria.log", "memoria", true, LOG_LEVEL_INFO);
@@ -8,6 +10,8 @@ int main() {
 
     cargar_config();
     iniciar_mem_usuario();
+    
+    //leer_archivo(PLACEHOLDER_PATH_SCRIPT);
 
 	char puerto[5];
     sprintf(puerto, "%d", config_memoria.puerto_escucha);
@@ -25,5 +29,6 @@ int main() {
     printf("%i\n%i\n%i\n%i\n", socket_servidor_memoria, socket_cliente_cpu, socket_cliente_kernel, socket_cliente_io);
 
     //char* algo = readline("> ");
+    config_destroy(config_memoria.config);
     return 0;
 }

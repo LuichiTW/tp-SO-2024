@@ -1,5 +1,19 @@
 #include "main.h"
 
+typedef struct
+    {
+        int PID;     // Identificador del proceso
+        int PC;      // Contador de Programa
+        int Quantum; // Unidad de tiempo utilizada para el algoritmo VRR
+        //necesito el tipo de dato de los registros que vienen del cpu
+    }pcb;
+
+typedef struct 
+{
+    pcb PCBS;
+    struct NodoColaPCBS*sig;
+}NodoColaPCBS;
+
 int main() {
     //Iniciar logger del kernel y su config
     t_log *logger = log_create("kernel.log", "kernel", true, LOG_LEVEL_INFO);
@@ -30,16 +44,25 @@ int main() {
 	log_info(logger, "Listo para recibir al IO");
     int socket_cliente_io = esperar_cliente(socket_servidor_kernel, logger);
     
-    char* algo = readline("> ");
+    //char* algo = readline("> "); // Deshabilitado para probar la consola
     //se tendria que liberar el especio de memoria usado por los elementos
 
     //CONSOLA INTERACTIVA
-    iniciar_consola_interactiva(logger);
+    iniciar_consola_interactiva(logger,conexion_cpu);
     return 0;
 }
 
-void iniciar_consola_interactiva(t_log* logger)
+void iniciar_consola_interactiva(t_log*logger,int conexion_cpu)
 {
+    printf("Bienvenido a la Consola Interactiva de Kernel. Ingrese una funcion:\n"
+    " -   EJECUTAR_SCRIPT\n"
+    " -   INICIAR_PROCESO\n"
+    " -   FINALIZAR_PROCESO\n"
+    " -   DETENER_PLANIFICACION\n"
+    " -   INICIAR_PLANIFICACION\n"
+    " -   MULTIPROGRAMACION\n"
+    " -   PROCESO_ESTADO\n"
+    "\n");
     char* leido;
     leido = readline("> ");
     bool validacion_leido;
@@ -49,57 +72,88 @@ void iniciar_consola_interactiva(t_log* logger)
         validacion_leido= validacion_de_instruccion_de_consola(leido, logger);
         if (!validacion_leido)
         {
-            log_error (logger,"Comando de CONSOLA no reconocido");
+            log_error (logger,"Comando de CONSOLA no reconocido, por favor ingrese un comando de nuevo");
             free(leido);
             leido = readline(">");
             continue; //Saltar y continuar con el resto de la iteracion
         }
-        //atender_instruccion_valida(leido);
+        atender_instruccion_valida(leido, logger, conexion_cpu);
         free(leido);
         leido = readline("> ");
     }
     free(leido);
 }
 
-bool validacion_de_instruccion_de_consola(char* leido, t_log* logger)
+void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu)
 {
-    char** comando_consola = string_split(leido, " ");
+    //VERIFICACION DE QUE COMANDO SE ESTA LLAMANDO
+    char* comando_consola = strtok(leido, " ");
+    int opcion_valida=0;
+    if (strcmp(comando_consola,"EJECUTAR_SCRIPT")==0)
+        opcion_valida=1;
+    else if (strcmp(comando_consola,"INICIAR_PROCESO")==0)
+        opcion_valida=2;
+    else if (strcmp(comando_consola,"FINALIZAR_PROCESO")==0)
+        opcion_valida=3;
+    else if (strcmp(comando_consola,"DETENER_PLANIFICACION")==0)
+        opcion_valida=4;
+    else if (strcmp(comando_consola,"INICIAR_PLANIFICACION")==0)
+        opcion_valida=5;
+    else if (strcmp(comando_consola,"MULTIPROGRAMACION")==0)
+        opcion_valida=6;
+    else if (strcmp(comando_consola,"PROCESO_ESTADO")==0)
+        opcion_valida=7;
+    else
+        log_error(logger,"Error durante la validacion de la instruccion en la consola.");
+    
+    switch (opcion_valida)
+    {
+    case 1: //EJECUTAR_SCRIPT
+        pid_pcb++;
+        char*pid_pcb_char;
+        sprintf(pid_pcb_char,"%d",pid_pcb);
+        enviar_mensaje(pid_pcb_char,conexion_cpu);
+        break;
+    case 2: //INICIAR_PROCESO
+        break;
+    case 3: //FINALIZAR_PROCESO
+        break;
+    case 4: //DETENER_PLANIFICACION
+        break;
+    case 5: //INICIAR_PLANIFICACION
+        break;
+    case 6: //MULTIPROGRAMACION
+        break;
+    case 7: //PROCESO_ESTADO
+        break;
+    default:
+        log_error(logger,"Error durante la validacion de la instruccion en la consola.");
+        break;
+    }
+}
 
-    //HABRIA QUE AGREGAR MAS VALIDACIONES, COMO EN LOS PARAMETROS
-
-    bool resultado_validacion = false;
-    if (strcmp(comando_consola[0], "EJECUTAR_SCRIPT") == 0)
-    {
-        resultado_validacion = true;
-    }
-    else if(strcmp(comando_consola[0], "INICIAR_PROCESO") == 0)
-    {
-        resultado_validacion = true;
-    }
-    else if(strcmp(comando_consola[0], "FINALIZAR_PROCESO") == 0)
-    {
-        resultado_validacion = true;
-    }
-    else if(strcmp(comando_consola[0], "DETENER_PLANIFICACION") == 0)
-    {
-        resultado_validacion = true;
-    }
-    else if(strcmp(comando_consola[0], "INICIAR_PLANIFICACION") == 0)
-    {
-        resultado_validacion = true;
-    }
-    else if(strcmp(comando_consola[0], "MULTIPROGRAMACION") == 0)
-    {
-        resultado_validacion = true;
-    }
-    else if(strcmp(comando_consola[0], "PROCESO_ESTADO") == 0)
-    {
-        resultado_validacion = true;
-    }else
+bool validacion_de_instruccion_de_consola(char* leido, t_log*logger)
+{
+    char* comando_consola = strtok(leido, " ");
+    bool opcion_valida=false;
+    if (strcmp(comando_consola,"EJECUTAR_SCRIPT")==0)
+        opcion_valida=true;
+    else if (strcmp(comando_consola,"INICIAR_PROCESO")==0)
+        opcion_valida=true;
+    else if (strcmp(comando_consola,"FINALIZAR_PROCESO")==0)
+        opcion_valida=true;
+    else if (strcmp(comando_consola,"DETENER_PLANIFICACION")==0)
+        opcion_valida=true;
+    else if (strcmp(comando_consola,"INICIAR_PLANIFICACION")==0)
+        opcion_valida=true;
+    else if (strcmp(comando_consola,"MULTIPROGRAMACION")==0)
+        opcion_valida=true;
+    else if (strcmp(comando_consola,"PROCESO_ESTADO")==0)
+        opcion_valida=true;
+    else
     {
         log_error(logger,"Comando no reconocido.");
-        resultado_validacion = false;
+        opcion_valida=false;
     }
-    string_array_destroy(comando_consola);
-    return resultado_validacion;
+    return opcion_valida;
 }

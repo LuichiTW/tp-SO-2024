@@ -2,7 +2,7 @@
 
 void *mem_usuario;
 t_config_memoria config_memoria;
-
+t_list* procesos_actuales;
 
 
 void cargar_config() {
@@ -48,6 +48,7 @@ void iniciar_mem_usuario() {
 
 
 
+
 /*t_tabla_paginas crear_tabla_paginas(int pid) {
     t_tabla_paginas tabla;
     tabla.pid = pid;
@@ -56,18 +57,7 @@ void iniciar_mem_usuario() {
 }*/
 
 
-void leer_archivo(const char *filename) {
-    char path[strlen(filename) + strlen(config_memoria.path_instrucciones) + 2];
-    strcat(strcat(strcat(path, config_memoria.path_instrucciones), "/"), filename);
-    FILE *stream;
-    stream = fopen(path, "r");
-    while (!feof(stream)) {
-        char line[50] = "";
-        fgets(line, 50, stream);
-        printf("%s\n", line);
-    }
-    
-}
+
 
 
 

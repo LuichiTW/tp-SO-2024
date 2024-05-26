@@ -10,5 +10,9 @@
 #include <readline/readline.h>
 
 #include "memoria.h"
+#include "op_memoria.h"
+
+void *recibir_conexiones(int);
+void *recibir_solicitudes(int);
 
 #endif // MAIN_MEMORIA

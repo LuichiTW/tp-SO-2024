@@ -10,34 +10,35 @@
 #include <pthread.h>
 #include <readline/readline.h>
 #include <utils/conexiones/conexiones_servidor.c>
+#include "main.c"
 #endif // !MAIN_IO
 
-
-void iO_GEN_SLEEP(n){
-    for (int i = 0; i < n; i++) {
-        nanosleep(&tiempo, NULL);
-    }
+int leer_entero(char*buffer, int* desplazamiento)
+{
+	int ret;
+	memcpy(&ret, buffer + (*desplazamiento), sizeof(int));
+	(*desplazamiento)+=sizeof(int);
+	return ret;
 }
 
-void cargar_config(void){
-    config = config_create("../io.config");
-    if (config == NULL) {
-        log_error(logger, "No se leyo el archivo de configuracion");
-        exit(EXIT_FAILURE);
-    }
-    char *tipo_interfaz = config_get_string_value(config,"TIPO_INTERFAZ");
-    int *tiempo_unidad_trabajo = config_get_int_value(config,"TIEMPO_UNIDAD_TRABAJO");
-    char *path_base_dialfs = config_get_string_value(config,"PATH_BASE_DIALFS");
-    int *block_size = config_get_int_value(config,"BLOCK_SIZE");
-    int *block_count = config_get_int_value(config,"BLOCK_COUNT");
-    int *retraso_compactacion = config_get_int_value(config,"RETRASO_COMPACTACION");
-    struct timespec tiempo = tiempo_unidad_trabajo;
-    //cliente a memoria
-    char *ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-    char *puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-    //cliente a kernel
-    char *ip_kernel = config_get_string_value(config, "IP_KERNEL");
-    char *puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
+int leer_64(char*buffer, int* desplazamiento)
+{
+	int ret;
+	memcpy(&ret, buffer + (*desplazamiento), sizeof(int));
+	(*desplazamiento)+=sizeof(uint64_t);
+	return ret;
+}
 
-    struct timespec tiempo = tiempo_unidad_trabajo;
+char** leer_array(char*buffer, int* desp)
+{
+	int len = leer_entero(buffer, desp);
+	char** arr = malloc((len+1)*sizeof(char*));
+
+	for(int i = 0; i < len; i++)
+	{
+		arr[i] = leer_64(buffer, desp);
+	}
+	arr[len] = NULL;
+
+	return arr;
 }

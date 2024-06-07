@@ -27,6 +27,14 @@ typedef struct
 	t_buffer* buffer;
 } t_paquete;
 
+typedef struct{
+    int uTrabajo;
+}t_genSleep;
+
+typedef struct{
+    uint64_t direcciones[];
+}t_STD;
+
 /**
  * @fn crear_conexion
  * @brief 

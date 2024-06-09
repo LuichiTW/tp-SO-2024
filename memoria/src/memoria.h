@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <commons/config.h>
 #include <string.h>
+#include <math.h>
 #include <commons/log.h>
 #include <commons/error.h>
 #include <commons/bitarray.h>
@@ -28,7 +29,7 @@ typedef struct {
 typedef struct {
     int pagina;
     int marco;
-} t_pagina_frame;
+} t_pagina;
 
 typedef struct {
     int pid;
@@ -42,12 +43,15 @@ enum OPERACIONES_MEMORIA {
 };
 
 extern void *mem_usuario;
+extern t_bitarray *frames_ocupados;
 extern t_config_memoria config_memoria;
 extern t_list *procesos_actuales;
 
 void cargar_config();
 void iniciar_mem_usuario();
+void iniciar_bitmap_frames_ocupados();
 //t_tabla_paginas crear_tabla_paginas(int);
 t_log *crear_memlogger();
+t_log *alt_memlogger();
 
 #endif // MEMORIA_H

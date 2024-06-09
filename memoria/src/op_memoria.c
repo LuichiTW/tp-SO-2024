@@ -7,7 +7,7 @@ void enviar_instruccion(int socket_cliente) {
     int pid = 1;
     int n_instruccion = 0;
     char* buffer;
-    t_log logger = crear_memlogger();
+    t_log *logger = alt_memlogger();
 
     bool es_proceso_buscado(t_proceso * proceso) {
         return proceso->pid == pid;
@@ -21,7 +21,6 @@ void enviar_instruccion(int socket_cliente) {
     if (n_instruccion >= proceso->cant_instrucciones) {
         // Se pasó del número
     }
-    printf("%s\n", lista_instrucciones[n_instruccion]);
     
 }
 

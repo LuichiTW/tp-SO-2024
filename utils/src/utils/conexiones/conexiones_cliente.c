@@ -76,3 +76,4 @@ void eliminar_paquete(t_paquete* paquete){
 void liberar_conexion(int socket_cliente){
 	close(socket_cliente);
 }
+

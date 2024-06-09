@@ -4,6 +4,7 @@ void *mem_usuario;
 t_bitarray *frames_ocupados;
 t_config_memoria config_memoria;
 t_list *procesos_actuales;
+t_list *tablas_paginas;
 
 
 void cargar_config() {
@@ -39,13 +40,14 @@ void iniciar_mem_usuario() {
     log_info(logger, "Asignando espacio de memoria de usuario...");
     mem_usuario = malloc(config_memoria.tam_memoria);
 
-    iniciar_bitmap_frames_ocupados();
-
     if (mem_usuario == NULL) {
         log_error(logger, "No hay espacio suficiente en memoria");
     }
 
     log_info(logger, "Memoria asignada con éxito");
+
+    iniciar_bitmap_frames_ocupados();
+
     log_destroy(logger);
 }
 
@@ -60,12 +62,13 @@ void iniciar_bitmap_frames_ocupados() {
 }
 
 
-/*t_tabla_paginas crear_tabla_paginas(int pid) {
-    t_tabla_paginas tabla;
-    tabla.pid = pid;
-    tabla.paginas = list_create();
+t_tabla_paginas *crear_tabla_paginas(int pid) {
+    t_tabla_paginas *tabla;
+    tabla = malloc(sizeof(tabla));
+    tabla->pid = pid;
+    tabla->paginas = list_create();
     return tabla;
-}*/
+}
 
 
 

@@ -32,6 +32,7 @@ void crear_proceso(int socket_cliente) {
     t_proceso *proceso = malloc(sizeof(t_proceso));
 
 
+    // Crear estructura de proceso, que tiene las líneas de código del script.
     proceso->instrucciones = leer_script(scriptname);
     while (proceso->instrucciones[++len] != NULL){}
 
@@ -39,6 +40,10 @@ void crear_proceso(int socket_cliente) {
     proceso->cant_instrucciones = len;
 
     list_add(procesos_actuales, proceso);
+
+    // Crear tabla de páginas para el proceso.
+    t_tabla_paginas *tabla = crear_tabla_paginas(pid);
+    list_add(tablas_paginas, tabla);
 }
 
 

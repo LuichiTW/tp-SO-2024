@@ -17,6 +17,7 @@ int main() {
     log_info(logger, "Memoria lista para recibir conexiones");
 
     procesos_actuales = list_create();
+    tablas_paginas = list_create();
 
     //Testeo
     crear_proceso(1);

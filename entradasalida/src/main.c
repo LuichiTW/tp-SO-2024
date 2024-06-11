@@ -3,9 +3,9 @@
 int main() {
     t_log *logger = log_create("io.log", "io", true, LOG_LEVEL_INFO);
     log_info(logger, "Iniciando I/O...");
+
+    //cargar config
     t_config *config = config_create("./io.config");
-    
-    
     if (config == NULL) {
         log_error(logger, "No se leyo el archivo de configuracion");
         exit(EXIT_FAILURE);
@@ -22,28 +22,33 @@ int main() {
     //kernel
     char *ip_kernel = config_get_string_value(config, "IP_KERNEL");
     char *puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
+    //log_info(logger, "Config cargado");
 
-
+    //cargar parametros para cargar al hilo
     tiempo.tv_sec = tiempo_unidad_trabajo;
     
     t_parametroEsperar parametros;
 
-    
     //cliente a memoria
     parametros.conexion_memoria = crear_conexion(ip_memoria, puerto_memoria, "Hola soy el IO");
-   
 
     //cliente a kernel
     parametros.conexion_kernel = crear_conexion(ip_kernel, puerto_kernel, "Hola soy el IO");
    
     //servidor
-
     parametros.server_fd = iniciar_servidor(puerto_kernel);
     parametros.logger = logger;
 
+    //crear hilo para manejar espera
     pthread_t kernel_t;
-    pthread_create(&kernel_t,NULL,(void*)esperar,(void*)&parametros);
+    int resutado = pthread_create(&kernel_t,NULL,(void*)esperar,(void*)&parametros);
+    if(resutado != 0){
+        log_error(logger, "Error crear hilo");
+        return 1;
+    }
+    pthread_join(kernel_t, NULL);
     pthread_detach(kernel_t);
+
 
 
     return 0;
@@ -76,12 +81,17 @@ void manejarConexion(t_parametroEsperar parametros){
 
 
 void esperar(t_parametroEsperar parametros){
-   
+    printf("esperar");
     while(1){
         parametros.socket_cliente = esperar_cliente(parametros.server_fd,parametros.logger);     
-        
+        int resultado;
         pthread_t t;
         pthread_create(&t,NULL,(void*)manejarConexion,(void*)&parametros);
+        if(resultado != 0){
+            log_error(parametros.logger, "Error crear hilo");
+            return 1;
+        }
+        pthread_join(t, NULL);
         pthread_detach(t);
     }
 }

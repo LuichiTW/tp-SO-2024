@@ -5,6 +5,7 @@ t_bitarray *frames_ocupados;
 t_config_memoria config_memoria;
 t_list *procesos_actuales;
 t_list *tablas_paginas;
+u_int cant_frames;
 
 
 void cargar_config() {
@@ -53,7 +54,7 @@ void iniciar_mem_usuario() {
 
 
 void iniciar_bitmap_frames_ocupados() {
-    int cant_frames = config_memoria.tam_memoria / config_memoria.tam_pagina;
+    cant_frames = config_memoria.tam_memoria / config_memoria.tam_pagina;
 
     int cant_frames_en_bytes = ceil(cant_frames / 8);
     void *espacio_frames = calloc(cant_frames_en_bytes, sizeof(char)); // Divido por 8 porque necesito un bit por frame (no un byte).
@@ -67,11 +68,35 @@ t_tabla_paginas *crear_tabla_paginas(int pid) {
     tabla = malloc(sizeof(tabla));
     tabla->pid = pid;
     tabla->paginas = list_create();
+    tabla->cant = 0;
     return tabla;
 }
 
 
+u_int cant_frames_libres() {
+    u_int libres = 0;
+    for (int i = 0; i < cant_frames; i++) {
+        if (!bitarray_test_bit(frames_ocupados, i)) libres++;
+    }
 
+    return libres;
+}
+
+int prox_frame_libre() {
+    for (int i = 0; i < cant_frames; i++) {
+        if (!bitarray_test_bit(frames_ocupados, i)) return i;
+    }
+
+    return -1;
+}
+
+t_tabla_paginas *obtener_tabla_por_pid(int pid) {
+    int es_el_buscado(t_tabla_paginas* tabla) {
+        return tabla->pid == pid;
+    }
+
+    return list_find(tablas_paginas, (void*) es_el_buscado);
+}
 
 
 

@@ -13,5 +13,6 @@
 void enviar_instruccion(int);
 void crear_proceso(int);
 char **leer_script(const char*);
+void resize_proceso(int, size_t);
 
 #endif

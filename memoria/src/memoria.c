@@ -90,6 +90,22 @@ int prox_frame_libre() {
     return -1;
 }
 
+void print_frames_ocupados(uint longitud_linea) {
+    if (longitud_linea == 0) {
+        longitud_linea = 16;
+    }
+
+    printf("Frames ocupados:");
+
+    for (int i = 0; i < cant_frames; i++) {
+        if ((i) % longitud_linea == 0) {
+            printf("\n");
+        }
+        printf("%i ", bitarray_test_bit(frames_ocupados, i));
+    }
+    printf("\n");
+}
+
 t_tabla_paginas *obtener_tabla_por_pid(int pid) {
     int es_el_buscado(t_tabla_paginas* tabla) {
         return tabla->pid == pid;

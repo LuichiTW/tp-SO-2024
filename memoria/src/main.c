@@ -141,6 +141,8 @@ void *recibir_solicitudes(int socket_cliente) {
             default:
                 break;
         }
+
+        print_frames_ocupados(0);
     }
     
     return NULL;

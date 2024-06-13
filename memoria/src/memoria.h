@@ -29,7 +29,7 @@ typedef struct {
 } t_tabla_paginas;
 
 typedef struct {
-    int pagina;
+    //int pagina;
     int frame;
 } t_pagina;
 
@@ -61,9 +61,10 @@ void iniciar_bitmap_frames_ocupados();
 t_tabla_paginas *crear_tabla_paginas(int);
 
 u_int cant_frames_libres();
-
 // Retorna el índice del primer frame libre en el bitarray, o -1 si no hay.
 int prox_frame_libre();
+void print_frames_ocupados(uint);
+
 t_tabla_paginas *obtener_tabla_por_pid(int);
 t_proceso *obtener_proceso_por_pid(int);
 

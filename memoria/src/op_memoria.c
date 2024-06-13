@@ -103,10 +103,32 @@ char **leer_script(const char *filename) {
 }
 
 
+void acceso_tabla_paginas(int pid, int pagina_buscada) {
+    t_tabla_paginas *tabla;
+    t_pagina *pagina;
+    
+    tabla = obtener_tabla_por_pid(pid);
+    if (tabla == NULL) {
+        // ! No encontró la tabla
+    }
+
+    pagina = list_get(tabla->paginas, pagina_buscada);
+    if (pagina == NULL) {
+        // ! Número de página no válido
+    }
+    
+    t_log *logger = crear_memlogger();
+    log_info(logger, "PID: %i - Pagina: %i - Marco: %i", pid, pagina_buscada, pagina->frame);
+    log_destroy(logger);
+
+    // DEBUG
+    printf("Frame: %i\n", pagina->frame);
+    // DEBUG
+
+}
+
 
 void resize_proceso(int pid, uint nuevo_tam) {
-    t_log *logger = crear_memlogger();
-
     int cant_paginas_nueva = iceildiv(nuevo_tam, config_memoria.tam_pagina);
     int cant_paginas_actual;
     int cant_paginas_agregar;
@@ -142,14 +164,16 @@ void resize_proceso(int pid, uint nuevo_tam) {
             // Reserva memoria para la nueva página y le asigna los valores.
             t_pagina *pag = malloc(sizeof(t_pagina));
             pag->frame = frame;
-            pag->pagina = list_size(tabla_paginas->paginas);
+            //pag->pagina = list_size(tabla_paginas->paginas);
 
             // Agrega la página a la tabla y setea el marco usado como ocupado.
             list_add(tabla_paginas->paginas, pag);
             tabla_paginas->cant++;
             bitarray_set_bit(frames_ocupados, frame);
         }
+        t_log *logger = crear_memlogger();
         log_info(logger, "PID: %i - Tamaño Actual: %i - Tamaño a Ampliar: %i", pid, cant_paginas_actual*config_memoria.tam_pagina, cant_paginas_nueva*config_memoria.tam_pagina);
+        log_destroy(logger);
     }
     else {
         for (int i = cant_paginas_agregar; i < 0; i++) {
@@ -163,10 +187,11 @@ void resize_proceso(int pid, uint nuevo_tam) {
             free(pagina);
             tabla_paginas->cant--;
         }
+        t_log *logger = crear_memlogger();
         log_info(logger, "PID: %i - Tamaño Actual: %i - Tamaño a Reducir: %i", pid, cant_paginas_actual*config_memoria.tam_pagina, cant_paginas_nueva*config_memoria.tam_pagina);
+        log_destroy(logger);
     }
 
-    log_destroy(logger);
 }
 
 

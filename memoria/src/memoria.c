@@ -98,6 +98,13 @@ t_tabla_paginas *obtener_tabla_por_pid(int pid) {
     return list_find(tablas_paginas, (void*) es_el_buscado);
 }
 
+t_proceso *obtener_proceso_por_pid(int pid) {
+    bool es_el_buscado(t_proceso * proceso) {
+        return proceso->pid == pid;
+    }
+
+    return list_find(procesos_actuales, (void*) es_el_buscado);
+}
 
 
 t_log *crear_memlogger() {

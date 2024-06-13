@@ -19,15 +19,20 @@ int main() {
     procesos_actuales = list_create();
     tablas_paginas = list_create();
 
-    //Testeo
-    crear_proceso(1);
-    enviar_instruccion(1);
+    //mem_hexdump(mem_usuario, config_memoria.tam_memoria);
 
     // Crea un hilo que se encargue de esperar clientes para gestionar sus conexiones.
+
+    // DEBUG (descomentar)
+    /*
     pthread_t thread_receptor;
     pthread_create(&thread_receptor, NULL, recibir_conexiones, (void*)socket_server);
     pthread_detach(thread_receptor);
+    */
 
+   // DEBUG
+   recibir_solicitudes(1);
+   // DEBUG
     while (true) {}    
     
     //list_destroy_and_destroy_elements(procesos_actuales);
@@ -55,17 +60,86 @@ void *recibir_conexiones(int socket_server) {
 
 void *recibir_solicitudes(int socket_cliente) {
     while (true) {
-        int op = recibir_operacion(socket_cliente);
+        //int op = recibir_operacion(socket_cliente);
+
+        // DEBUG (todo lo relacionado con readline)
+
+        char* input;
+        input = readline("> ");
+
+        printf("Codigo de operacion:\n");
+        int op = strtol(input, NULL, 10);
+        printf("%i\n", op);
+
+        int pid;
 
         switch (op) {
-        case CREAR_PROCESO:
-            crear_proceso(socket_cliente);
-            break;
-        case ENVIAR_INSTRUCCION:
-            enviar_instruccion(socket_cliente);
-            break;
-        default:
-            break;
+            case CREAR_PROCESO:
+                char *scriptname;
+
+                // DEBUG
+                char *input;
+                printf("PID:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                pid = strtol(input, NULL, 10);
+
+                printf("SCRIPT NAME:\n");
+                scriptname = readline("> ");
+                printf("%s\n", scriptname);
+                // DEBUG
+
+                crear_proceso(pid, scriptname);
+                break;
+
+            case ENVIAR_INSTRUCCION:
+                uint n_instruccion;
+
+                // DEBUG
+                printf("PID:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                pid = strtol(input, NULL, 10);
+
+                printf("Num Instr:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                n_instruccion = strtol(input, NULL, 10);
+                // DEBUG
+
+                enviar_instruccion(pid, n_instruccion);
+                break;
+
+            case FINALIZAR_PROCESO:
+                // DEBUG
+                printf("PID:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                pid = strtol(input, NULL, 10);
+                // DEBUG
+                finalizar_proceso(pid);
+                break;
+                
+            case RESIZE_PROCESO:
+                uint nuevo_tam;
+
+                // DEBUG
+                printf("PID:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                pid = strtol(input, NULL, 10);
+
+                printf("Nuevo tam:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                nuevo_tam = strtol(input, NULL, 10);
+                // DEBUG
+
+                resize_proceso(pid, nuevo_tam);
+                break;
+
+            default:
+                break;
         }
     }
     

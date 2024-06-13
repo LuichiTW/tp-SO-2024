@@ -1,34 +1,31 @@
 #include "op_memoria.h"
 
 
-void enviar_instruccion(int socket_cliente) {
-    int pid = 1;
-    int n_instruccion = 0;
-    char* buffer;
-    t_log *logger = alt_memlogger();
+void enviar_instruccion(int pid, uint n_instruccion) {
+    //char* buffer;
+    //t_log *logger = alt_memlogger();
 
-    bool es_proceso_buscado(t_proceso * proceso) {
-        return proceso->pid == pid;
-    }
-
-    // TODO Recibir del buffer el pid y n_instruccion
-    t_proceso* proceso = list_find(procesos_actuales, es_proceso_buscado);
+    t_proceso *proceso;
+    proceso = obtener_proceso_por_pid(pid);
 
     char** lista_instrucciones = proceso->instrucciones;
 
     if (n_instruccion >= proceso->cant_instrucciones) {
         // ! Se pasó del número
     }
+
+    // DEBUG
+
+    printf("%s\n", lista_instrucciones[n_instruccion]);
+
+    // DEBUG
     
 }
 
 
-void crear_proceso(int socket_cliente) {
-    int pid = 1;
-    char* scriptname = "prueba.txt";
+void crear_proceso(int pid, const char *scriptname) {
     int len = -1;
     t_proceso *proceso = malloc(sizeof(t_proceso));
-
 
     // Crea la estructura de proceso, que tiene las líneas de código del script.
     proceso->instrucciones = leer_script(scriptname);
@@ -42,10 +39,36 @@ void crear_proceso(int socket_cliente) {
     // Crea la tabla de páginas para el proceso.
     t_tabla_paginas *tabla = crear_tabla_paginas(pid);
     list_add(tablas_paginas, tabla);
+
+
+}
+
+
+void finalizar_proceso(int pid) {
+
+    // Liberar espacio de memoria
+    t_tabla_paginas *tabla;
+    tabla = obtener_tabla_por_pid(pid);
+    if (tabla != NULL) {
+        resize_proceso(pid, 0);
+        list_remove_element(tablas_paginas, tabla);
+        free(tabla);
+    }
+
+    // Eliminar estructura de proceso
+    t_proceso *proceso;
+    proceso = obtener_proceso_por_pid(pid);
+    if (proceso != NULL) {
+        string_array_destroy(proceso->instrucciones);
+        list_remove_element(procesos_actuales, proceso);
+        free(proceso);
+    }
+
 }
 
 
 char **leer_script(const char *filename) {
+    // ? Podría usar las funciones de commons acá
     
     // Concateno el nombre del archivo con la ruta de scripts
     char *path = string_from_format("%s/%s", config_memoria.path_instrucciones, filename);
@@ -81,8 +104,10 @@ char **leer_script(const char *filename) {
 
 
 
-void resize_proceso(int pid, size_t nuevo_tam) {
-    int cant_paginas_nueva = ceil(nuevo_tam / config_memoria.tam_pagina);
+void resize_proceso(int pid, uint nuevo_tam) {
+    t_log *logger = crear_memlogger();
+
+    int cant_paginas_nueva = iceildiv(nuevo_tam, config_memoria.tam_pagina);
     int cant_paginas_actual;
     int cant_paginas_agregar;
 
@@ -120,15 +145,16 @@ void resize_proceso(int pid, size_t nuevo_tam) {
             pag->pagina = list_size(tabla_paginas->paginas);
 
             // Agrega la página a la tabla y setea el marco usado como ocupado.
-            list_add(tabla_paginas, pag);
+            list_add(tabla_paginas->paginas, pag);
             tabla_paginas->cant++;
             bitarray_set_bit(frames_ocupados, frame);
         }
+        log_info(logger, "PID: %i - Tamaño Actual: %i - Tamaño a Ampliar: %i", pid, cant_paginas_actual*config_memoria.tam_pagina, cant_paginas_nueva*config_memoria.tam_pagina);
     }
     else {
         for (int i = cant_paginas_agregar; i < 0; i++) {
             // Quita la página de la tabla.
-            t_pagina *pagina = list_remove(tabla_paginas->paginas, tabla_paginas->cant);
+            t_pagina *pagina = list_remove(tabla_paginas->paginas, tabla_paginas->cant-1);
 
             // Libera el marco usado para la página.
             bitarray_clean_bit(frames_ocupados, pagina->frame);
@@ -137,5 +163,13 @@ void resize_proceso(int pid, size_t nuevo_tam) {
             free(pagina);
             tabla_paginas->cant--;
         }
+        log_info(logger, "PID: %i - Tamaño Actual: %i - Tamaño a Reducir: %i", pid, cant_paginas_actual*config_memoria.tam_pagina, cant_paginas_nueva*config_memoria.tam_pagina);
     }
+
+    log_destroy(logger);
+}
+
+
+int iceildiv (int dividend, int divisor) {
+    return dividend / divisor + (dividend % divisor != 0);
 }

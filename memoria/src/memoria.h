@@ -41,7 +41,11 @@ typedef struct {
 
 enum OPERACIONES_MEMORIA {
     CREAR_PROCESO,
-    ENVIAR_INSTRUCCION
+    ENVIAR_INSTRUCCION,
+    FINALIZAR_PROCESO,
+    ACCESO_TABLA_PAGINAS,
+    ACCESO_MEMORIA_USUARIO,
+    RESIZE_PROCESO
 };
 
 extern void *mem_usuario;
@@ -61,6 +65,7 @@ u_int cant_frames_libres();
 // Retorna el índice del primer frame libre en el bitarray, o -1 si no hay.
 int prox_frame_libre();
 t_tabla_paginas *obtener_tabla_por_pid(int);
+t_proceso *obtener_proceso_por_pid(int);
 
 t_log *crear_memlogger();
 t_log *alt_memlogger();

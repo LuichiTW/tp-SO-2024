@@ -1,15 +1,11 @@
 #include "main.h"
 
 int main() {
-    t_log *logger = log_create("io.log", "io", true, LOG_LEVEL_INFO);
-    log_info(logger, "Iniciando I/O...");
+    t_log *logger = iniciar_logger_io();
 
     //cargar config
-    t_config *config = config_create("./io.config");
-    if (config == NULL) {
-        log_error(logger, "No se leyo el archivo de configuracion");
-        exit(EXIT_FAILURE);
-    }
+    t_config *config = iniciar_config_io();
+
     char *tipo_interfaz = config_get_string_value(config,"TIPO_INTERFAZ");
     int tiempo_unidad_trabajo = config_get_int_value(config,"TIEMPO_UNIDAD_TRABAJO");
     char *path_base_dialfs = config_get_string_value(config,"PATH_BASE_DIALFS");
@@ -22,7 +18,7 @@ int main() {
     //kernel
     char *ip_kernel = config_get_string_value(config, "IP_KERNEL");
     char *puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
-    //log_info(logger, "Config cargado");
+    
 
     //cargar parametros para cargar al hilo
     tiempo.tv_sec = tiempo_unidad_trabajo;
@@ -44,16 +40,58 @@ int main() {
     int resutado = pthread_create(&kernel_t,NULL,(void*)esperar,(void*)&parametros);
     if(resutado != 0){
         log_error(logger, "Error crear hilo");
-        return 1;
+        exit(EXIT_FAILURE);
     }
     pthread_join(kernel_t, NULL);
     pthread_detach(kernel_t);
 
 
-
+    log_destroy(logger);
+    config_destroy(config);
     return 0;
     ///////////////////////////////////////////////////////////////////
 }
+
+t_log *iniciar_logger_io(void){
+    
+    t_log *logger = log_create("io.log", "io", true, LOG_LEVEL_INFO);
+    log_info(logger, "Iniciando I/O...");
+    if(logger == NULL){
+        perror("Error al iniciar logger");
+        exit(EXIT_FAILURE);
+    }
+    return logger;
+}
+
+t_config *iniciar_config_io(void){
+    t_config *config = config_create("./io.config");
+    if(config == NULL){
+        perror("Error al iniciar config");
+        exit(EXIT_FAILURE);
+    }
+    return config;
+}
+
+void esperar(t_parametroEsperar parametros){
+    
+    while(1){
+        parametros.socket_cliente = esperar_cliente(parametros.server_fd,parametros.logger);     
+        int resultado;
+
+        if(parametros.socket_cliente != -1){
+        pthread_t t;
+        pthread_create(&t,NULL,(void*)manejarConexion,(void*)&parametros);
+        if(resultado != 0){
+            log_error(parametros.logger, "Error crear hilo");
+            return 1;
+        }
+        pthread_join(t, NULL);
+        pthread_detach(t);
+        }
+        
+    }
+}
+
 
 void manejarConexion(t_parametroEsperar parametros){
     int tipoInterfaz = recibir_operacion(parametros.socket_cliente);
@@ -80,23 +118,6 @@ void manejarConexion(t_parametroEsperar parametros){
 }
 
 
-void esperar(t_parametroEsperar parametros){
-    printf("esperar");
-    while(1){
-        parametros.socket_cliente = esperar_cliente(parametros.server_fd,parametros.logger);     
-        int resultado;
-        pthread_t t;
-        pthread_create(&t,NULL,(void*)manejarConexion,(void*)&parametros);
-        if(resultado != 0){
-            log_error(parametros.logger, "Error crear hilo");
-            return 1;
-        }
-        pthread_join(t, NULL);
-        pthread_detach(t);
-    }
-}
-
-
 int iO_GEN_SLEEP(t_parametroEsperar parametros){
     int size;
     char * buffer;
@@ -108,11 +129,11 @@ int iO_GEN_SLEEP(t_parametroEsperar parametros){
     for (int i = 0; i < uTrabajo; i++) {
         nanosleep(&tiempo, NULL);
     }
+    free(uTrabajo);
+    free(buffer);
     if(uTrabajo == NULL){
         return 1;
     }
-    free(uTrabajo);
-    free(buffer);
     return 0;
 }
 

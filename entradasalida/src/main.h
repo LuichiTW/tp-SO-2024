@@ -9,8 +9,7 @@
 #include <commons/error.h>
 #include <pthread.h>
 #include <readline/readline.h>
-#include <utils/conexiones/conexiones_servidor.c>
-#endif // !MAIN_IO
+#include <utils/conexiones/conexiones_servidor.h>
 
 struct timespec tiempo;
 
@@ -23,6 +22,9 @@ typedef struct
 	t_log *logger;
 
 } t_parametroEsperar;
+
+t_log *iniciar_logger_io(void);
+t_config *iniciar_config_io(void);
 
 int iO_GEN_SLEEP(t_parametroEsperar parametros);
 int iO_STDIN_READ(t_parametroEsperar parametros);
@@ -37,3 +39,4 @@ char** leer_array(char *buffer, int* desp);
 void manejarConexion(t_parametroEsperar parametros);
 void esperar(t_parametroEsperar parametros);
 
+#endif // !MAIN_IO

@@ -119,6 +119,50 @@ void *recibir_solicitudes(int socket_cliente) {
                 // DEBUG
                 finalizar_proceso(pid);
                 break;
+            
+            case LEER_MEMORIA:
+                char *datos_o;
+                int dir_fisica_o;
+                size_t tam_o;
+
+                // DEBUG
+                printf("Direccion:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                dir_fisica_o = strtol(input, NULL, 10);
+
+                printf("Tam:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                tam_o = (size_t) strtol(input, NULL, 10);
+                // DEBUG
+
+                leer_memoria(dir_fisica_o, tam_o);
+                break;
+
+            case ESCRIBIR_MEMORIA:
+                char *datos_i;
+                int dir_fisica_i;
+                size_t tam_i;
+
+                // DEBUG
+                printf("Direccion:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                dir_fisica_i = strtol(input, NULL, 10);
+
+                printf("Tam:\n");
+                input = readline("> ");
+                printf("%s\n", input);
+                tam_i = (size_t) strtol(input, NULL, 10);
+
+                printf("Dato:\n");
+                datos_i = readline("> ");
+                printf("%s\n", datos_i);
+                // DEBUG
+
+                escribir_memoria(dir_fisica_i, tam_i, datos_i);
+                break;
                 
             case RESIZE_PROCESO:
                 uint nuevo_tam;

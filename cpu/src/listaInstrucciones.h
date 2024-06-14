@@ -24,6 +24,8 @@ struct s_instruccion {
 
 char *obtener_n_poscion_lista(struct nodo_instruccion*, int);
 
+void eliminar_Lista_Instruccion(struct s_instruccion*);
+
 
 
 #endif // !LISTAINSTRUCCCIONES

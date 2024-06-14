@@ -2,25 +2,25 @@
 
 /*
 ? CHECK POINT 2
-Se conecta a Kernel✅ y recibe un PCB❎.
-Es capaz de conectarse a la memoria✅ y solicitar las instrucciones❎.
-Es capaz de ejecutar un ciclo básico de instrucción❎.
-    fetch❎
+!Se conecta a Kernel✅ y recibe un PCB❎.
+!Es capaz de conectarse a la memoria✅ y solicitar las instrucciones❎.
+!Es capaz de ejecutar un ciclo básico de instrucción❎.
+!    fetch❎
         ir a memoria a buscar proxima instruccion (con el PC) -> se almacena en un char
-    deocde✅
+*       sumar +1 al PC
+*   decode✅
         traducir la instruccion recibida de la memoria
             1ro separa el char recibido de memoria en un array segun la cantidd de elementos que tenga
             4to armar un struc con toda la informacion de la instruccion a ejecutar
         traducir las direcciones logicas a fisicas si es requerido
-    execute✅/❎
+*    execute✅
         teniendo el struc con toda la informacion de instruccion a ejecutar se busca la instruccion en un switch
-    check interruption❎
+!    check interruption❎
         cheuqemeamos un booleano que indicara si se recibio del kernel una instruccion, este booleano sera manimulado mediante un semaforo el cual va a estar comunicandose entre dos hilos del proceso para evisar que haya deadlock
         en caso de que haya una interrupcion, se enviara el PCB al kernel para que lo guarde y posteriormente se cargara la nueva pcb para ejecutar la interrucion
         al termino de ejecutar la interrupcion se revisara si hay otra interrucion, en caso de que haya se repetira lo anterior
         en caso de que no haya se le eniara al jernel el pcb de la interrupcion y se solicitara la proxima pcb a ejecutar
-    sumar +1 al PC
-Es capaz de resolver las operaciones: SET✅, SUM✅, SUB✅, JNZ✅ e IO_GEN_SLEEP❎.
+!Es capaz de resolver las operaciones: SET✅, SUM✅, SUB✅, JNZ✅ e IO_GEN_SLEEP❎.
 
 ? CHECK POINT 3
 Es capaz de resolver las operaciones: MOV_IN❎, MOV_OUT❎, RESIZE❎, COPY_STRING❎, IO_STDIN_READ❎, IO_STDOUT_WRITE❎.
@@ -63,9 +63,20 @@ int main() {
 	log_info(loggerPrincipal, "Listo para recibir al Kernel");
     int socket_cliente_kernel = esperar_cliente(socket_servidor_cpu, loggerPrincipal);
  */
-    struct s_instruccion *instruccionDecodificada = funDecode("JNZ AX 100");
-    funExecute(instruccionDecodificada);
+//! PRUEBA DE CICLO DE INSTRUCCION MANUAL
+    while (1)
+    {
+        char *test=funFetch(1);
+        if (strcmp(test,"0") == 0)
+        {
+            break;
+        }
+        struct s_instruccion *instruccionDecodificada = funDecode(test);
+        funExecute(instruccionDecodificada);
+        eliminar_Lista_Instruccion(instruccionDecodificada);
+        funCheckInterrupt();
+    }
+    
 
-    char *test=readline("> ");
     return 0;
 }

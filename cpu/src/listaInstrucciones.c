@@ -10,3 +10,17 @@ char *obtener_n_poscion_lista(struct nodo_instruccion *instruccion, int n){
         i++;
     }
 }
+
+void eliminar_Lista_Instruccion(struct s_instruccion *instruccion){
+    if (instruccion != NULL) {
+        struct nodo_instruccion *temp;
+        while (instruccion->variables != NULL) {
+            temp = instruccion->variables;
+            instruccion->variables = instruccion->variables->siguiente;
+            free(temp->variable);
+            free(temp);
+        }
+        free(instruccion);
+    }
+    
+}

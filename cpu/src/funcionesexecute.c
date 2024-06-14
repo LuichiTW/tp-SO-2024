@@ -2,7 +2,7 @@
 /* 
 IO_GEN_SLEEP (Interfaz, Unidades de trabajo): Esta instrucción solicita al Kernel que se envíe a una interfaz de I/O a que realice un sleep por una cantidad de unidades de trabajo.
 */
-void fSUM(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
+void fSUM(enum lista_registros_CPU regLetraA, enum lista_registros_CPU regLetraB){
     void * regA = obtenerRegistro(regLetraA);
     int tamanioA = tamanioRegistro(regLetraA);
     void * regB = obtenerRegistro(regLetraB);
@@ -33,7 +33,7 @@ void fSUM(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
         } break;
     }
 }
-void fSUB(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
+void fSUB(enum lista_registros_CPU regLetraA, enum lista_registros_CPU regLetraB){
     void * regA = obtenerRegistro(regLetraA);
     int tamanioA = tamanioRegistro(regLetraA);
     void * regB = obtenerRegistro(regLetraB);
@@ -96,3 +96,49 @@ void fJNZ(enum lista_registros_CPU registroLetra, uint32_t instruccion){
     }
     
 }
+void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Dirrecion){ //!OBLIGATORIO
+
+}
+void fMOV_OUT(enum lista_registros_CPU Dirrecion, enum lista_registros_CPU Datos){//!OBLIGATORIO
+
+}
+void fRESIZE(int tamanho){//!OBLIGATORIO
+
+}
+void fCOPY_STRING(int ramanho){//!OBLIGATORIO
+
+}
+void fWAIT(char recurso[]){
+
+}
+void fSIGNAL(char recurso[]){
+
+}
+void fIO_GEN_SLEEP(char interface[], int unidadesDeTrabajo){//!OBLIGATORIO
+
+}
+void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Dirrecion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
+
+}
+void fIO_STDOUT_WRITE(char interface[], enum lista_registros_CPU Dirrecion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
+
+}
+void fIO_FS_CREATE(char interface[], char NombreArchivo[]){
+
+}
+void fIO_FS_DELETE(char interface[], char NombreArchivo[]){
+
+}
+void fIO_FS_TRUNCATE(char interface[], char NombreArchivo[], enum lista_registros_CPU Tamanho){
+
+}
+void fIO_FS_WRITE(char interface[], char NombreArchivo[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho, enum lista_registros_CPU PunteroArchivo){
+
+}
+void fIO_FS_READ(char interface[], char NombreArchivo[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho, enum lista_registros_CPU PunteroArchivo){
+
+}
+void fEXIT(){
+
+}
+

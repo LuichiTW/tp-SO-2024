@@ -17,7 +17,7 @@
 extern t_log *loggerPrincipal;
 extern registros_cpu regcpu;
 
-char funFetch(int);
+char *funFetch(int);
 
 
 #endif // !FETCH

@@ -1,9 +1,8 @@
 #include "funcionesexecute.h"
-/* SET (Registro, Valor): Asigna al registro el valor pasado como parámetro.
-JNZ (Registro, Instrucción): Si el valor del registro es distinto de cero, actualiza el program counter al número de instrucción pasada por parámetro.
+/* 
 IO_GEN_SLEEP (Interfaz, Unidades de trabajo): Esta instrucción solicita al Kernel que se envíe a una interfaz de I/O a que realice un sleep por una cantidad de unidades de trabajo.
 */
-void SUM(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
+void fSUM(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
     void * regA = obtenerRegistro(regLetraA);
     int tamanioA = tamanioRegistro(regLetraA);
     void * regB = obtenerRegistro(regLetraB);
@@ -34,7 +33,7 @@ void SUM(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
         } break;
     }
 }
-void SUB(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
+void fSUB(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
     void * regA = obtenerRegistro(regLetraA);
     int tamanioA = tamanioRegistro(regLetraA);
     void * regB = obtenerRegistro(regLetraB);
@@ -65,7 +64,7 @@ void SUB(lista_registros_CPU regLetraA, lista_registros_CPU regLetraB){
         } break;
     }
 }
-void SET(enum lista_registros_CPU regLetraA, int valor){
+void fSET(enum lista_registros_CPU regLetraA, int valor){
     void* regA = obtenerRegistro(regLetraA);
     int tamanioA = tamanioRegistro(regLetraA);
     
@@ -85,4 +84,15 @@ void SET(enum lista_registros_CPU regLetraA, int valor){
         //segun el tamanio del segundo registro
         *(uint32_t*)regA=valor; break;
     }
+}
+void fJNZ(enum lista_registros_CPU registroLetra, uint32_t instruccion){
+    void * reg = obtenerRegistro(registroLetra);
+    if (*(int*)reg != 0) {
+        regcpu.PC = instruccion;
+        return;
+    } else {
+        log_error(loggerPrincipal,"Error al hacer salto de instruccion, la variable es igual a 0");
+        return;
+    }
+    
 }

@@ -12,11 +12,12 @@
 #include <readline/readline.h>
 
 
-//REGISTROS REALES QUE TIENE EL CPU
+//REGISTROS QUE TIENE EL CPU
 typedef struct {
     uint8_t AX, BX, CX, DX;
     uint32_t EAX, EBX, ECX, EDX, SI, DI, PC;
 } registros_cpu;
+
 
 extern registros_cpu regcpu;
 //CANTIDAD DE REGISTROS Q TIENE EL CPU

@@ -113,6 +113,7 @@ t_pcb *recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel
         exit(EXIT_FAILURE);
     }
     log_info(loggerPrincipal, "Se recibio el PCB correctamente");
+    return pcb;
     }
 
    

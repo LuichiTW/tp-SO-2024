@@ -12,7 +12,14 @@
 typedef enum
 {
 	MENSAJE,
-	PAQUETE
+	PAQUETE,
+	MEM_ENVIAR_INSTRUCCION,
+    MEM_CREAR_PROCESO,
+    MEM_FINALIZAR_PROCESO,
+    MEM_ACCESO_TABLA_PAGINAS,
+    MEM_RESIZE_PROCESO,
+    MEM_LEER_MEMORIA,
+    MEM_ESCRIBIR_MEMORIA
 } op_code;
 
 typedef struct
@@ -88,5 +95,6 @@ void liberar_conexion(int socket_cliente);
  */
 void eliminar_paquete(t_paquete *paquete);
 
+void enviar_peticion(t_paquete *paquete, int socket_cliente, op_code código);
 
 #endif // !CONEXIONES_CLIENTE

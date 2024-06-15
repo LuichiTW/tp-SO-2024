@@ -7,12 +7,15 @@ typedef struct
         int Quantum; // Unidad de tiempo utilizada para el algoritmo VRR
         //necesito el tipo de dato de los registros que vienen del cpu
     }pcb;
-
 typedef struct 
-{
-    pcb PCBS;
-    struct NodoColaPCBS*sig;
-}NodoColaPCBS;
+    {
+        pcb PCBS;
+        struct NodoColaPCBS*sig;
+    }NodoColaPCBS;
+
+    NodoColaPCBS*primero,*ultimo;
+    primero=ultimo=NULL;
+
 
 int main() {
     //Iniciar logger del kernel y su config
@@ -48,11 +51,11 @@ int main() {
     //se tendria que liberar el especio de memoria usado por los elementos
 
     //CONSOLA INTERACTIVA
-    iniciar_consola_interactiva(logger,conexion_cpu);
+    iniciar_consola_interactiva(logger,conexion_cpu,conexion_memoria);
     return 0;
 }
 
-void iniciar_consola_interactiva(t_log*logger,int conexion_cpu)
+void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memoria
 {
     printf("Bienvenido a la Consola Interactiva de Kernel. Ingrese una funcion:\n"
     " -   EJECUTAR_SCRIPT\n"
@@ -63,10 +66,10 @@ void iniciar_consola_interactiva(t_log*logger,int conexion_cpu)
     " -   MULTIPROGRAMACION\n"
     " -   PROCESO_ESTADO\n"
     "\n");
-    char* leido;
-    leido = readline("> ");
+    char leido[40];
+    printf(">");
+    gets(leido);
     bool validacion_leido;
-
     while (strcmp(leido,"\0") != 0)
     {
         validacion_leido= validacion_de_instruccion_de_consola(leido, logger);
@@ -74,20 +77,26 @@ void iniciar_consola_interactiva(t_log*logger,int conexion_cpu)
         {
             log_error (logger,"Comando de CONSOLA no reconocido, por favor ingrese un comando de nuevo");
             free(leido);
-            leido = readline(">");
+            gets(leido);
             continue; //Saltar y continuar con el resto de la iteracion
         }
         atender_instruccion_valida(leido, logger, conexion_cpu);
-        free(leido);
-        leido = readline("> ");
+        gets(leido);
     }
     free(leido);
 }
 
-void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu)
+void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int conexion_memoria)
 {
-    //VERIFICACION DE QUE COMANDO SE ESTA LLAMANDO
+    //CONTADOR DE PIDs
+    int PID=0;
+    //RETIRAR COMANDO DEL STRING
     char* comando_consola = strtok(leido, " ");
+    //SACAR SCRIPT
+    char* path_script = strtok (NULL," ");
+    printf("%s",path_script);
+    //
+
     int opcion_valida=0;
     if (strcmp(comando_consola,"EJECUTAR_SCRIPT")==0)
         opcion_valida=1;
@@ -109,12 +118,31 @@ void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu)
     switch (opcion_valida)
     {
     case 1: //EJECUTAR_SCRIPT
-        pid_pcb++;
-        char*pid_pcb_char;
-        sprintf(pid_pcb_char,"%d",pid_pcb);
-        enviar_mensaje(pid_pcb_char,conexion_cpu);
+        int cont=0;
+        char linea[30];
+        FILE*script;
+        script=fopen(path_script,"r");
+        fgets(linea,30,script);
+        while (!feof(script))
+        {
+            //Pasarlo a char* si quiero saber que dice
+            char* comando = strtok(linea, " ");
+            if (strcmp(comando,"INICIAR_PROCESO"))
+            {
+                PID++;
+                log_info(logger,"Se crea el proceso <%d> en NEW",PID);
+                char* path = strtok(NULL, " ");
+                iniciar_proceso(path,PID,conexion_cpu);
+                enviar_mensaje("Crea un proceso cuyas operaciones se encuentran en",conexion_memoria);
+                enviar_mensaje(path,conexion_memoria);
+            }
+            fgets(linea,30,script);
+        }
+        fclose(script);
         break;
     case 2: //INICIAR_PROCESO
+        PID++;
+        iniciar_proceso(path_script,PID,conexion_cpu);
         break;
     case 3: //FINALIZAR_PROCESO
         break;
@@ -156,4 +184,47 @@ bool validacion_de_instruccion_de_consola(char* leido, t_log*logger)
         opcion_valida=false;
     }
     return opcion_valida;
+}
+
+void iniciar_proceso(char*path,int PID,int conexion_cpu){
+    pcb proceso;
+    //---Sacar quantum del archivo config
+    t_config *config = config_create("../kernel.config");
+    int quantum = config_get_int_value(config,"QUANTUM");
+    //---
+    proceso.PID=PID;
+    proceso.PC=(PID++);
+    proceso.Quantum=quantum;
+    encolarColaNEW(proceso);
+    enviar_mensaje("Enviando nuevo PCB a CPU...",conexion_cpu);
+    //POR EL MOMENTO SE ENVIARA EL PID DEL PROCESO
+    enviar_mensaje(PID,conexion_cpu);
+    enviar_pcb(proceso,conexion_cpu);
+}
+
+void enviar_pcb(pcb proceso, int conexion_cpu){
+    printf("");
+}
+
+void encolarColaNEW(pcb ProcesoNuevo)
+{   
+    //ENCOLAR PROCESOS
+
+    NodoColaPCBS*nuevo;
+    nuevo=malloc(sizeof(NodoColaPCBS));
+
+    nuevo->PCBS.PID=ProcesoNuevo.PID;
+    nuevo->PCBS.PC=ProcesoNuevo.PC;
+    nuevo->PCBS.Quantum=ProcesoNuevo.Quantum;
+
+    nuevo->sig=NULL;
+    if (ultimo!=NULL)
+    {
+        ultimo->sig=nuevo;
+    }
+    else
+    {
+        primero=nuevo;
+    }
+    ultimo=nuevo;
 }

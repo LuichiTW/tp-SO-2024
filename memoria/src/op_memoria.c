@@ -195,6 +195,19 @@ void resize_proceso(int pid, uint nuevo_tam) {
 }
 
 
+void leer_memoria(int dir_fisica, size_t tamanio) {
+    char *valor;
+    valor = malloc(tamanio);
+    memcpy(valor, (mem_usuario + dir_fisica), tamanio);
+
+    printf("%s\n", valor);
+}
+
+void escribir_memoria(int dir_fisica, size_t tamanio, void *valor) {
+    memcpy((mem_usuario + dir_fisica), valor, tamanio);
+}
+
+
 int iceildiv (int dividend, int divisor) {
     return dividend / divisor + (dividend % divisor != 0);
 }

@@ -19,6 +19,9 @@ char **leer_script(const char*);
 void acceso_tabla_paginas(int, int);
 void resize_proceso(int, uint);
 
+void leer_memoria(int, size_t);
+void escribir_memoria(int, size_t, void*);
+
 int iceildiv(int, int);
 
 #endif

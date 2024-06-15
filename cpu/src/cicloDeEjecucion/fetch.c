@@ -6,6 +6,7 @@ char *funFetch(int socketMemoria){
     //!-------------------------------
 
     uint32_t numero = regcpu.PC;
+    /*
     // Serializar el tipo de operación, tamaño del dato y el número
     int tipo_operacion = PROXIMAINSTRUCCION;
     int tamano_dato = sizeof(uint32_t);
@@ -21,8 +22,17 @@ char *funFetch(int socketMemoria){
     memcpy(buffer + offset, &tamano_dato, sizeof(tamano_dato));
     offset += sizeof(tamano_dato);
     memcpy(buffer + offset, &numero, sizeof(numero));
+    */
+    
+    t_paquete* paquete crear_paquete();
+    agregar_a_paquete(t_paquete* paquete, numero, sizeof(uint32_t));
+    serializar_paquete(t_paquete* paquete, sizeof(uint32_t) + 2*sizeof(int));
+    enviar_paquete(t_paquete* paquete, socketMemoria);
+    free(paquete);
 
-    //!FALTA ENVIAR EL BUFFER A MEMORIA Y ESPERAR A QUE LLEGUE LA RESPUESTA CON EL CHAR PARA HACER EL RETURN
+    t_list* datos = recibir_paquete(socketMemoria);
+    char* instruccion = list_get(datos, 0);
+    free(datos);
 
     regcpu.PC++;
     return instruccion;

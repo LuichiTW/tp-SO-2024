@@ -12,7 +12,15 @@
 #include <commons/string.h>
 
 extern t_log *loggerPrincipal;
+extern sem_t s_interrupcion;
+extern t_pcb *pcb;
 
-void funCheckInterrupt();
+typedef struct
+{
+	t_pcb *pcb;
+	int socket_cliente_kernel_interrupt;
+} t_parametroCheckInterrupt;
+
+void funCheckInterrupt(t_pcb *pcb, int socket_cliente_kernel_interrupt);
 
 #endif // !INTERRUPT

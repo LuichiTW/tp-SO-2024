@@ -11,7 +11,7 @@
 *   decode✅
 *    execute✅
 !    check interruption❎
-        cheuqemeamos un booleano que indicara si se recibio del kernel una instruccion, este booleano sera manimulado mediante un semaforo el cual va a estar comunicandose entre dos hilos del proceso para evisar que haya deadlock
+        chequeamos un booleano que indicara si se recibio del kernel una instruccion, este booleano sera manipulado mediante un semaforo el cual va a estar comunicandose entre los hilos del proceso para evitar que haya deadlock
         en caso de que haya una interrupcion, se enviara el PCB al kernel para que lo guarde y posteriormente se cargara la nueva pcb para ejecutar la interrucion
         al termino de ejecutar la interrupcion se revisara si hay otra interrucion, en caso de que haya se repetira lo anterior
         en caso de que no haya se le eniara al jernel el pcb de la interrupcion y se solicitara la proxima pcb a ejecutar
@@ -47,6 +47,11 @@ Lectura/Escritura Memoria❎: PID: <PID> - Acción: <LEER / ESCRIBIR> - Direcci�
 registros_cpu regcpu;
 //log global del CPU
 t_log *loggerPrincipal;
+
+void recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt);
+sem_t s_interrupcion;
+t_pcb *pcb;
+
 int main() {
     loggerPrincipal = log_create("cpu.log", "cpu", true, LOG_LEVEL_INFO);
 	log_info(loggerPrincipal, "Iniciando CPU...");
@@ -59,7 +64,7 @@ int main() {
 
 
 //! se omite la conexiones entre modulos para hacer pruebas independientemente en el modulo
-/*     
+  
     //* CLIENTE------------------------------------------>
     char *puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
     char *ip_memoria = config_get_string_value(config, "IP_MEMORIA");
@@ -75,9 +80,14 @@ int main() {
     int socket_servidor_cpu_interrupt = iniciar_servidor(puerto_dispatch);
 	log_info(loggerPrincipal, "Listo para recibir al Kernel en interrupt");
     int socket_cliente_kernel_interrupt = esperar_cliente(socket_servidor_cpu_interrupt, loggerPrincipal);
- */
+
+
+    sem_init(&interrupcion, 0, 0);
+
+    recibir_pcb(socket_cliente_kernel_dispatch, socket_cliente_kernel_interrupt);
 
 //! PRUEBA DE CICLO DE INSTRUCCION MANUAL
+ /*
     while (1) {
         char *test = funFetch(1);
         if (strcmp(test,"0") == 0) {
@@ -86,9 +96,23 @@ int main() {
         struct s_instruccion *instruccionDecodificada = funDecode(test);
         funExecute(instruccionDecodificada);
         eliminar_Lista_Instruccion(instruccionDecodificada);
-        funCheckInterrupt();
+        funCheckInterrupt(pcb, socket_cliente_kernel_interrupt);
     }
-    
 
+ */
     return 0;
 }
+
+
+void recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt){
+    //recibir PCB
+    t_pcb *pcb = malloc(sizeof(t_pcb));
+    int bytesRecibidos = recv(socket_cliente_kernel_dispatch, pcb, sizeof(t_pcb), 0);
+    if (bytesRecibidos <= 0) {
+        log_error(loggerPrincipal, "No se pudo recibir el PCB");
+        exit(EXIT_FAILURE);
+    }
+    log_info(loggerPrincipal, "Se recibio el PCB correctamente");
+    }
+
+   

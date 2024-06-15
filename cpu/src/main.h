@@ -9,6 +9,8 @@
 #include <commons/log.h>
 #include <commons/error.h>
 #include <readline/readline.h>
+#include <pthread.h>
+#include <semaphore.h>
 
 #include "registros.h"
 #include "cicloDeEjecucion/decode.h"
@@ -17,5 +19,12 @@
 #include "cicloDeEjecucion/fetch.h"
 #include "cicloDeEjecucion/checkInterrupt.h"
 
+typedef struct
+    {
+        int PID;     // Identificador del proceso
+        int PC;      // Contador de Programa
+        int Quantum; // Unidad de tiempo utilizada para el algoritmo VRR
+        
+    }t_pcb;
 
 #endif // !MAIN_CPU

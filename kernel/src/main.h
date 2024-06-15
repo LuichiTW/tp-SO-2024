@@ -18,5 +18,6 @@ int pid_pcb=0;
 void atender_instruccion_valida(char* leido,t_log*logger,int);
 void iniciar_consola_interactiva(t_log* logger,int);
 bool validacion_de_instruccion_de_consola(char* leido, t_log* logger);
+//void encolarColaNEW(pcb);
 
 #endif // !MAIN_KERNEL

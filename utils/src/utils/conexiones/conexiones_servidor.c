@@ -10,6 +10,11 @@ int iniciar_servidor(char* puerto){
     hints.ai_flags = AI_PASSIVE;
     getaddrinfo(NULL, puerto, &hints, &serverinfo);
     socket_servidor = socket(serverinfo->ai_family,serverinfo->ai_socktype,serverinfo->ai_protocol);
+    if(socket_servidor == -1){
+        freeaddrinfo(serverinfo);
+        perror("Error al crear el socket");
+        exit(EXIT_FAILURE);
+    }
     bind(socket_servidor, serverinfo->ai_addr, serverinfo->ai_addrlen);
     freeaddrinfo(serverinfo);
     listen(socket_servidor, SOMAXCONN);
@@ -17,6 +22,9 @@ int iniciar_servidor(char* puerto){
 }
 int esperar_cliente(int socket_servidor, t_log *logger){
     int socket_cliente = accept(socket_servidor, NULL, NULL);
+    if(socket_cliente == -1){
+        return -1;
+    }
     log_info(logger, "Se conecto un Cliente.");
     recibir_operacion(socket_cliente);
     recibir_mensaje(socket_cliente, logger);

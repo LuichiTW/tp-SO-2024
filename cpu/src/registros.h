@@ -27,6 +27,27 @@ typedef enum lista_registros_CPU{
     PC, SI, DI,
 } lista_registros_CPU;
 
+typedef enum{
+    PROXIMAINSTRUCCION, //la memoria me devuelve un char con la proxima instruccion a ejecutar
+    RESIZE, //reducir o aumentarel tamaño del proceso
+    MOV_IN, //la memoria me devuelve un char con lo que habia en la direccion logica
+    MOV_OUT, //le envio a memoria un char y lo escribe en la direccion fisica enviada
+} op_codigo_conexion_memoria;
+
+typedef enum{
+    EXIT, //FIN DE UN PROCESO POR INSTRUCCION O POR ERROR
+    WAIT, 
+    SIGNAL,
+    IOGENSLEEP,
+    IOSTDINREAD,
+    IOSTDOUTWRITE,
+    IOFSCREATE,
+    IOFSDELETE,
+    IOFSTRUNCATE,
+    IOFSWRITE,
+    IOFSREAD,
+} op_codigo_conexion_kernel;
+
 int tamanioRegistro(lista_registros_CPU);
 void* obtenerRegistro(lista_registros_CPU);
 

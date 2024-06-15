@@ -7,14 +7,6 @@ void fSUM(enum lista_registros_CPU regLetraA, enum lista_registros_CPU regLetraB
     int tamanioA = tamanioRegistro(regLetraA);
     void * regB = obtenerRegistro(regLetraB);
     int tamanioB = tamanioRegistro(regLetraB);
-    
-    if (regA==NULL || regB==NULL){
-        //logger error
-        // log_error(loggerPrincipal, "Uno de los registros del execute SUM no son validos");
-        //enviar error al kernel
-        //suspender proceso
-        return;
-    }
     //segun el tamanio del primer registro
     switch (tamanioA){
     case 1:
@@ -38,14 +30,6 @@ void fSUB(enum lista_registros_CPU regLetraA, enum lista_registros_CPU regLetraB
     int tamanioA = tamanioRegistro(regLetraA);
     void * regB = obtenerRegistro(regLetraB);
     int tamanioB = tamanioRegistro(regLetraB);
-    
-    if (regA==NULL || regB==NULL){
-        //logger error
-        // log_error(loggerPrincipal, "Uno de los registros del execute SUB no son validos");
-        //enviar error al kernel
-        //suspender proceso
-        return;
-    }
     //segun el tamanio del primer registro
     switch (tamanioA){
     case 1:
@@ -67,14 +51,6 @@ void fSUB(enum lista_registros_CPU regLetraA, enum lista_registros_CPU regLetraB
 void fSET(enum lista_registros_CPU regLetraA, int valor){
     void* regA = obtenerRegistro(regLetraA);
     int tamanioA = tamanioRegistro(regLetraA);
-    
-    if (regA==NULL){
-        //logger error
-        // log_error(loggerPrincipal, "El registro del execute SET no es valido");
-        //enviar error al kernel
-        //suspender proceso
-        return;
-    }
     //segun el tamanio del primer registro
     switch (tamanioA){
     case 1:
@@ -94,7 +70,6 @@ void fJNZ(enum lista_registros_CPU registroLetra, uint32_t instruccion){
         log_error(loggerPrincipal,"Error al hacer salto de instruccion, la variable es igual a 0");
         return;
     }
-    
 }
 void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Dirrecion){ //!OBLIGATORIO
 

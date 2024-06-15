@@ -13,7 +13,6 @@
 #include <readline/readline.h>
 #include <commons/string.h>
 
-
 extern t_log *loggerPrincipal;
 extern registros_cpu regcpu;
 

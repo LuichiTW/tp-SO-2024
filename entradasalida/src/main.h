@@ -10,6 +10,9 @@
 #include <pthread.h>
 #include <readline/readline.h>
 #include <utils/conexiones/conexiones_servidor.h>
+#include <commons/string.h>
+
+#include "interfaz.h"
 
 struct timespec tiempo;
 
@@ -20,11 +23,14 @@ typedef struct
 	int server_fd;
     int socket_cliente;
 	t_log *logger;
-
 } t_parametroEsperar;
 
-t_log *iniciar_logger_io(void);
-t_config *iniciar_config_io(void);
+enum tipo_interfaz_instruccion
+{
+    IO_GEN_SLEEP,
+    IO_STDIN_READ,
+    IO_STDOUT_WRITE
+};
 
 int iO_GEN_SLEEP(t_parametroEsperar parametros);
 int iO_STDIN_READ(t_parametroEsperar parametros);

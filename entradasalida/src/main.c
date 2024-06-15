@@ -1,27 +1,29 @@
 #include "main.h"
 
-int main() {
+int main(){
     t_log *logger = iniciar_logger_io();
 
     //cargar config
-    t_config *config = iniciar_config_io();
-
-    char *tipo_interfaz = config_get_string_value(config,"TIPO_INTERFAZ");
-    int tiempo_unidad_trabajo = config_get_int_value(config,"TIEMPO_UNIDAD_TRABAJO");
-    char *path_base_dialfs = config_get_string_value(config,"PATH_BASE_DIALFS");
-    int block_size = config_get_int_value(config,"BLOCK_SIZE");
-    int block_count = config_get_int_value(config,"BLOCK_COUNT");
-    int retraso_compactacion = config_get_int_value(config,"RETRASO_COMPACTACION");
+    t_interfaz *interfaces = crear_interfaces();
+    
+    iniciar_config_io(interfaces);
+    
+    t_config *config = config_create("./io.config");
+    if(config == NULL){
+        perror("Error al iniciar config");
+        exit(EXIT_FAILURE);
+    }
     //memoria
     char *ip_memoria = config_get_string_value(config, "IP_MEMORIA");
     char *puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
     //kernel
     char *ip_kernel = config_get_string_value(config, "IP_KERNEL");
     char *puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
+
     
 
     //cargar parametros para cargar al hilo
-    tiempo.tv_sec = tiempo_unidad_trabajo;
+    //tiempo.tv_sec = tiempo_unidad_trabajo;
     
     t_parametroEsperar parametros;
 
@@ -52,30 +54,12 @@ int main() {
     ///////////////////////////////////////////////////////////////////
 }
 
-t_log *iniciar_logger_io(void){
-    
-    t_log *logger = log_create("io.log", "io", true, LOG_LEVEL_INFO);
-    log_info(logger, "Iniciando I/O...");
-    if(logger == NULL){
-        perror("Error al iniciar logger");
-        exit(EXIT_FAILURE);
-    }
-    return logger;
-}
-
-t_config *iniciar_config_io(void){
-    t_config *config = config_create("./io.config");
-    if(config == NULL){
-        perror("Error al iniciar config");
-        exit(EXIT_FAILURE);
-    }
-    return config;
-}
 
 void esperar(t_parametroEsperar parametros){
     
+
     while(1){
-        parametros.socket_cliente = esperar_cliente(parametros.server_fd,parametros.logger);     
+        parametros.socket_cliente = esperar_cliente(parametros.server_fd,parametros.logger);
         int resultado;
 
         if(parametros.socket_cliente != -1){
@@ -83,7 +67,7 @@ void esperar(t_parametroEsperar parametros){
         pthread_create(&t,NULL,(void*)manejarConexion,(void*)&parametros);
         if(resultado != 0){
             log_error(parametros.logger, "Error crear hilo");
-            return 1;
+            //return 1;
         }
         pthread_join(t, NULL);
         pthread_detach(t);
@@ -98,13 +82,13 @@ void manejarConexion(t_parametroEsperar parametros){
     int resultado;
 
     switch(tipoInterfaz){
-        case 0: //IO_GEN_SLEEP
+        case IO_GEN_SLEEP: 
         resultado = iO_GEN_SLEEP(parametros);
         break;
-        case 1: //IO_STDIN_READ
+        case IO_STDIN_READ: 
         resultado =iO_STDIN_READ(parametros);
         break;
-        case 2: //IO_STDOUT_WRITE
+        case IO_STDOUT_WRITE: 
         resultado = iO_STDOUT_WRITE(parametros);
         break;
         default:
@@ -129,7 +113,7 @@ int iO_GEN_SLEEP(t_parametroEsperar parametros){
     for (int i = 0; i < uTrabajo; i++) {
         nanosleep(&tiempo, NULL);
     }
-    free(uTrabajo);
+    
     free(buffer);
     if(uTrabajo == NULL){
         return 1;

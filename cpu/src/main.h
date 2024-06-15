@@ -27,4 +27,6 @@ typedef struct
         
     }t_pcb;
 
+t_pcb *recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt);
+
 #endif // !MAIN_CPU

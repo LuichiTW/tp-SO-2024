@@ -82,9 +82,9 @@ int main() {
     int socket_cliente_kernel_interrupt = esperar_cliente(socket_servidor_cpu_interrupt, loggerPrincipal);
 
 
-    sem_init(&interrupcion, 0, 0);
+    sem_init(&s_interrupcion, 0, 0);
 
-    recibir_pcb(socket_cliente_kernel_dispatch, socket_cliente_kernel_interrupt);
+    pcb = recibir_pcb(socket_cliente_kernel_dispatch, socket_cliente_kernel_interrupt);
 
 //! PRUEBA DE CICLO DE INSTRUCCION MANUAL
  /*
@@ -104,7 +104,7 @@ int main() {
 }
 
 
-void recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt){
+t_pcb *recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt){
     //recibir PCB
     t_pcb *pcb = malloc(sizeof(t_pcb));
     int bytesRecibidos = recv(socket_cliente_kernel_dispatch, pcb, sizeof(t_pcb), 0);

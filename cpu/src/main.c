@@ -48,19 +48,14 @@ registros_cpu regcpu;
 //log global del CPU
 t_log *loggerPrincipal;
 
-void recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt);
+//void recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt);
 sem_t s_interrupcion;
 t_pcb *pcb;
 
 int main() {
     loggerPrincipal = log_create("cpu.log", "cpu", true, LOG_LEVEL_INFO);
 	log_info(loggerPrincipal, "Iniciando CPU...");
-    t_config *config = config_create("./cpu.config");
-    if (config == NULL)
-    {
-        log_error(loggerPrincipal, "No se leyo el archivo de configuracion");
-        exit(EXIT_FAILURE);
-    }
+    cargar_config();
 
 
 //! se omite la conexiones entre modulos para hacer pruebas independientemente en el modulo

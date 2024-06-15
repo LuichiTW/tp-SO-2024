@@ -11,6 +11,7 @@
 #include <readline/readline.h>
 
 #include "registros.h"
+#include "config.h"
 
 // #include "main.h"
 extern t_log *loggerPrincipal;

@@ -18,6 +18,7 @@
 #include "listaInstrucciones.h"
 #include "cicloDeEjecucion/fetch.h"
 #include "cicloDeEjecucion/checkInterrupt.h"
+#include "config.h"
 
 typedef struct
     {
@@ -26,6 +27,8 @@ typedef struct
         int Quantum; // Unidad de tiempo utilizada para el algoritmo VRR
         
     }t_pcb;
+
+extern t_pcb *pcb;
 
 t_pcb *recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt);
 

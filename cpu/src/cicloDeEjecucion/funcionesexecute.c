@@ -71,16 +71,21 @@ void fJNZ(enum lista_registros_CPU registroLetra, uint32_t instruccion){
         return;
     }
 }
-void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Dirrecion){ //!OBLIGATORIO
-
+void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Direccion){ //!OBLIGATORIO
+    
 }
-void fMOV_OUT(enum lista_registros_CPU Dirrecion, enum lista_registros_CPU Datos){//!OBLIGATORIO
+void fMOV_OUT(enum lista_registros_CPU Direccion, enum lista_registros_CPU Datos){//!OBLIGATORIO
 
 }
 void fRESIZE(int tamanho){//!OBLIGATORIO
+    t_paquete *paquete = crear_paquete();
 
+    agregar_a_paquete(paquete, pcb->PID, sizeof(int));
+    agregar_a_paquete(paquete, tamanho, sizeof(int));
+
+    enviar_peticion(paquete, config_cpu.puerto_memoria, MEM_RESIZE_PROCESO);
 }
-void fCOPY_STRING(int ramanho){//!OBLIGATORIO
+void fCOPY_STRING(int tamanho){//!OBLIGATORIO
 
 }
 void fWAIT(char recurso[]){

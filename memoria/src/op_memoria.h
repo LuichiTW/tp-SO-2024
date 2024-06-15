@@ -13,7 +13,7 @@
 #include "memoria.h"
 
 void enviar_instruccion(int, uint);
-void crear_proceso(int, const char*);
+int crear_proceso(int, const char*);
 void finalizar_proceso(int);
 char **leer_script(const char*);
 void acceso_tabla_paginas(int, int);

@@ -19,175 +19,116 @@ int main() {
     procesos_actuales = list_create();
     tablas_paginas = list_create();
 
-    //mem_hexdump(mem_usuario, config_memoria.tam_memoria);
-
+    // ? Por ahora no veo motivos para crear el hilo
     // Crea un hilo que se encargue de esperar clientes para gestionar sus conexiones.
+    //// pthread_t thread_receptor;
+    //// pthread_create(&thread_receptor, NULL, (void*)recibir_conexiones, (void*)&socket_server);
+    //// pthread_detach(thread_receptor);
 
-    // DEBUG (descomentar)
-    /*
-    pthread_t thread_receptor;
-    pthread_create(&thread_receptor, NULL, recibir_conexiones, (void*)socket_server);
-    pthread_detach(thread_receptor);
-    */
+    while (true) {
+        t_log *logger = alt_memlogger();
+        int socket_cliente = esperar_cliente(socket_server, logger);
 
-   // DEBUG
-   recibir_solicitudes(1);
-   // DEBUG
-    while (true) {}    
+        // Cuando un cliente se conecta, crea un hilo para atender sus peticiones.
+        pthread_t thread_conexion;
+        pthread_create(&thread_conexion, NULL, (void*)recibir_solicitudes, (void*)&socket_cliente);
+        pthread_detach(thread_conexion);
+        
+        log_destroy(logger);
+    }  
     
-    //list_destroy_and_destroy_elements(procesos_actuales);
+    ////list_destroy_and_destroy_elements(procesos_actuales);
     config_destroy(config_memoria.config);
     return 0;
 }
 
 
+void recibir_solicitudes(int socket_cliente) {
+    int op = recibir_operacion(socket_cliente);
 
-void *recibir_conexiones(int socket_server) {
-    t_log *logger = crear_memlogger();
-    
-    // Espera constantemente a que se conecte un cliente.
-    while (true) {
-        int socket_cliente = esperar_cliente(socket_server, logger);
+    t_list *datos;
+    datos = recibir_paquete(socket_cliente);
 
-        // Cuando un cliente se conecta, crea un hilo para atender sus peticiones.
-        pthread_t thread_conexion;
-        pthread_create(&thread_conexion, NULL, recibir_solicitudes, (void*)socket_cliente);
-        pthread_detach(thread_conexion);
-    }
-
-    return NULL;
-}
-
-void *recibir_solicitudes(int socket_cliente) {
-    while (true) {
-        //int op = recibir_operacion(socket_cliente);
-
-        // DEBUG (todo lo relacionado con readline)
-
-        char* input;
-        input = readline("> ");
-
-        printf("Codigo de operacion:\n");
-        int op = strtol(input, NULL, 10);
-        printf("%i\n", op);
-
-        int pid;
-
-        switch (op) {
-            case CREAR_PROCESO:
+    switch (op) {
+        case CREAR_PROCESO:
+            {
+                int pid;
                 char *scriptname;
 
-                // DEBUG
-                char *input;
-                printf("PID:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                pid = strtol(input, NULL, 10);
+                datos = recibir_paquete(socket_cliente);
 
-                printf("SCRIPT NAME:\n");
-                scriptname = readline("> ");
-                printf("%s\n", scriptname);
-                // DEBUG
+                pid = (int) list_get(datos, 0);
+                scriptname = list_get(datos, 1);
 
-                crear_proceso(pid, scriptname);
-                break;
+                // ! Devolver algo
+                int rta = crear_proceso(pid, scriptname);
+            }
+            break;
 
-            case ENVIAR_INSTRUCCION:
+        case ENVIAR_INSTRUCCION:
+            {
+                int pid;
                 uint n_instruccion;
-
-                // DEBUG
-                printf("PID:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                pid = strtol(input, NULL, 10);
-
-                printf("Num Instr:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                n_instruccion = strtol(input, NULL, 10);
-                // DEBUG
+                
+                pid = (int) list_get(datos, 0);
+                n_instruccion = (uint) list_get(datos, 1);
 
                 enviar_instruccion(pid, n_instruccion);
-                break;
+            }
+            break;
 
-            case FINALIZAR_PROCESO:
-                // DEBUG
-                printf("PID:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                pid = strtol(input, NULL, 10);
-                // DEBUG
+        case FINALIZAR_PROCESO:
+            {
+                int pid;
+
+                pid = (int) list_get(datos, 0);
+
                 finalizar_proceso(pid);
-                break;
+            }
+            break;
+        
+        case LEER_MEMORIA:
+            {
+                int dir_fisica;
+                size_t tam;
+
+                dir_fisica = (int) list_get(datos, 0);
+                tam = (size_t) list_get(datos, 1);
+
+                leer_memoria(dir_fisica, tam);
+            }
+            break;
+
+        case ESCRIBIR_MEMORIA:
+            {
+                int dir_fisica;
+                size_t tam;
+                char *valor;
+
+                dir_fisica = (int) list_get(datos, 0);
+                tam = (size_t) list_get(datos, 1);
+                valor = (char*) list_get(datos, 2);
+
+                escribir_memoria(dir_fisica, tam, valor);
+            }
+            break;
             
-            case LEER_MEMORIA:
-                char *datos_o;
-                int dir_fisica_o;
-                size_t tam_o;
-
-                // DEBUG
-                printf("Direccion:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                dir_fisica_o = strtol(input, NULL, 10);
-
-                printf("Tam:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                tam_o = (size_t) strtol(input, NULL, 10);
-                // DEBUG
-
-                leer_memoria(dir_fisica_o, tam_o);
-                break;
-
-            case ESCRIBIR_MEMORIA:
-                char *datos_i;
-                int dir_fisica_i;
-                size_t tam_i;
-
-                // DEBUG
-                printf("Direccion:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                dir_fisica_i = strtol(input, NULL, 10);
-
-                printf("Tam:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                tam_i = (size_t) strtol(input, NULL, 10);
-
-                printf("Dato:\n");
-                datos_i = readline("> ");
-                printf("%s\n", datos_i);
-                // DEBUG
-
-                escribir_memoria(dir_fisica_i, tam_i, datos_i);
-                break;
-                
-            case RESIZE_PROCESO:
+        case RESIZE_PROCESO:
+            {
+                int pid;
                 uint nuevo_tam;
 
-                // DEBUG
-                printf("PID:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                pid = strtol(input, NULL, 10);
-
-                printf("Nuevo tam:\n");
-                input = readline("> ");
-                printf("%s\n", input);
-                nuevo_tam = strtol(input, NULL, 10);
-                // DEBUG
+                pid = (int) list_get(datos, 0);
+                nuevo_tam = (uint) list_get(datos, 1);
 
                 resize_proceso(pid, nuevo_tam);
-                break;
-
-            default:
-                break;
-        }
-
-        print_frames_ocupados(0);
+            }
+            break;
+        default:
+            break;
     }
-    
-    return NULL;
+
+    list_destroy(datos);
+
+    print_frames_ocupados(0);
 }

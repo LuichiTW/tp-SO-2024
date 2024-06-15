@@ -2,8 +2,8 @@
 
 
 void enviar_instruccion(int pid, uint n_instruccion) {
-    //char* buffer;
-    //t_log *logger = alt_memlogger();
+    ////char* buffer;
+    ////t_log *logger = alt_memlogger();
 
     t_proceso *proceso;
     proceso = obtener_proceso_por_pid(pid);
@@ -23,14 +23,16 @@ void enviar_instruccion(int pid, uint n_instruccion) {
 }
 
 
-void crear_proceso(int pid, const char *scriptname) {
+int crear_proceso(int pid, const char *scriptname) {
     int len = -1;
     t_proceso *proceso = malloc(sizeof(t_proceso));
 
     // Crea la estructura de proceso, que tiene las líneas de código del script.
     proceso->instrucciones = leer_script(scriptname);
-    while (proceso->instrucciones[++len] != NULL){}
 
+    if (proceso->instrucciones == NULL) return 1; // ? No encontró el archivo
+
+    while (proceso->instrucciones[++len] != NULL){}
     proceso->pid = pid;
     proceso->cant_instrucciones = len;
 
@@ -40,7 +42,7 @@ void crear_proceso(int pid, const char *scriptname) {
     t_tabla_paginas *tabla = crear_tabla_paginas(pid);
     list_add(tablas_paginas, tabla);
 
-
+    return 0; // ? OK
 }
 
 

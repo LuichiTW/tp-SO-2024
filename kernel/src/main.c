@@ -55,7 +55,7 @@ int main() {
     return 0;
 }
 
-void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memoria
+void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memoria)
 {
     printf("Bienvenido a la Consola Interactiva de Kernel. Ingrese una funcion:\n"
     " -   EJECUTAR_SCRIPT\n"

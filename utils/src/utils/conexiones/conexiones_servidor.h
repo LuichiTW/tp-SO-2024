@@ -53,4 +53,7 @@ t_list* recibir_paquete(int);
  * @return retorna el codigo de la operacion que se va a enviar.
 */
 int recibir_operacion(int);
+
+int recibir_entero(int);
+char *recibir_msg(int socket_cliente);
 #endif

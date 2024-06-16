@@ -50,7 +50,7 @@ void recibir_solicitudes(int socket_cliente) {
     datos = recibir_paquete(socket_cliente);
 
     switch (op) {
-        case CREAR_PROCESO:
+        case MEM_CREAR_PROCESO:
             {
                 int pid;
                 char *scriptname;
@@ -65,7 +65,7 @@ void recibir_solicitudes(int socket_cliente) {
             }
             break;
 
-        case ENVIAR_INSTRUCCION:
+        case MEM_ENVIAR_INSTRUCCION:
             {
                 int pid;
                 uint n_instruccion;
@@ -77,7 +77,7 @@ void recibir_solicitudes(int socket_cliente) {
             }
             break;
 
-        case FINALIZAR_PROCESO:
+        case MEM_FINALIZAR_PROCESO:
             {
                 int pid;
 
@@ -87,7 +87,7 @@ void recibir_solicitudes(int socket_cliente) {
             }
             break;
         
-        case LEER_MEMORIA:
+        case MEM_LEER_MEMORIA:
             {
                 int dir_fisica;
                 size_t tam;
@@ -99,7 +99,7 @@ void recibir_solicitudes(int socket_cliente) {
             }
             break;
 
-        case ESCRIBIR_MEMORIA:
+        case MEM_ESCRIBIR_MEMORIA:
             {
                 int dir_fisica;
                 size_t tam;
@@ -113,7 +113,7 @@ void recibir_solicitudes(int socket_cliente) {
             }
             break;
             
-        case RESIZE_PROCESO:
+        case MEM_RESIZE_PROCESO:
             {
                 int pid;
                 uint nuevo_tam;
@@ -124,6 +124,16 @@ void recibir_solicitudes(int socket_cliente) {
                 resize_proceso(pid, nuevo_tam);
             }
             break;
+        case MEM_ACCESO_TABLA_PAGINAS:
+            {
+                int pid;
+                int pagina;
+
+                pid = (int) list_get(datos, 0);
+                pagina = (int) list_get(datos, 1);
+
+                acceso_tabla_paginas(pid, pagina);
+            }
         default:
             break;
     }

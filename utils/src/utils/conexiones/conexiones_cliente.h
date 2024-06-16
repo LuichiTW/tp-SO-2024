@@ -95,6 +95,6 @@ void liberar_conexion(int socket_cliente);
  */
 void eliminar_paquete(t_paquete *paquete);
 
-void enviar_peticion(t_paquete *paquete, int socket_cliente, op_code código);
+void enviar_peticion(t_paquete *paquete, int socket_cliente, op_code codigo);
 
 #endif // !CONEXIONES_CLIENTE

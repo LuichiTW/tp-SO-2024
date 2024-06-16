@@ -12,12 +12,12 @@
 
 #include "memoria.h"
 
-void enviar_instruccion(int, uint);
+char *enviar_instruccion(int, uint);
 int crear_proceso(int, const char*);
 void finalizar_proceso(int);
 char **leer_script(const char*);
-void acceso_tabla_paginas(int, int);
-void resize_proceso(int, uint);
+int acceso_tabla_paginas(int, int);
+int resize_proceso(int, uint);
 
 void leer_memoria(int, size_t);
 void escribir_memoria(int, size_t, void*);

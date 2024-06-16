@@ -1,10 +1,7 @@
 #include "op_memoria.h"
 
 
-void enviar_instruccion(int pid, uint n_instruccion) {
-    ////char* buffer;
-    ////t_log *logger = alt_memlogger();
-
+char *enviar_instruccion(int pid, uint n_instruccion) {
     t_proceso *proceso;
     proceso = obtener_proceso_por_pid(pid);
 
@@ -14,12 +11,7 @@ void enviar_instruccion(int pid, uint n_instruccion) {
         // ! Se pasó del número
     }
 
-    // DEBUG
-
-    printf("%s\n", lista_instrucciones[n_instruccion]);
-
-    // DEBUG
-    
+    return lista_instrucciones[n_instruccion];
 }
 
 
@@ -105,7 +97,7 @@ char **leer_script(const char *filename) {
 }
 
 
-void acceso_tabla_paginas(int pid, int pagina_buscada) {
+int acceso_tabla_paginas(int pid, int pagina_buscada) {
     t_tabla_paginas *tabla;
     t_pagina *pagina;
     
@@ -123,14 +115,12 @@ void acceso_tabla_paginas(int pid, int pagina_buscada) {
     log_info(logger, "PID: %i - Pagina: %i - Marco: %i", pid, pagina_buscada, pagina->frame);
     log_destroy(logger);
 
-    // DEBUG
-    printf("Frame: %i\n", pagina->frame);
-    // DEBUG
+    return pagina->frame;
 
 }
 
 
-void resize_proceso(int pid, uint nuevo_tam) {
+int resize_proceso(int pid, uint nuevo_tam) {
     int cant_paginas_nueva = iceildiv(nuevo_tam, config_memoria.tam_pagina);
     int cant_paginas_actual;
     int cant_paginas_agregar;
@@ -141,7 +131,7 @@ void resize_proceso(int pid, uint nuevo_tam) {
     tabla_paginas = obtener_tabla_por_pid(pid);
 
     if (tabla_paginas == NULL) {
-        // ! No se encontró la tabla
+        return 2; // ! No se encontró la tabla
     }
     cant_paginas_actual = tabla_paginas->cant;
 
@@ -149,18 +139,18 @@ void resize_proceso(int pid, uint nuevo_tam) {
     cant_paginas_agregar = cant_paginas_nueva - cant_paginas_actual;
 
     if (cant_paginas_agregar == 0) {
-        // ! Retorna sin hacer nada
+        return 0;
     }
 
     if (cant_paginas_agregar > 0) {
         if (cant_frames_libres() < cant_paginas_agregar) {
-            // ! Out of memory
+            return 1;
         }
 
         for (int i = 0; i < cant_paginas_agregar; i++) {
             int frame = prox_frame_libre();
             if (frame == -1) {
-                // ! Out of memory (al cual no debería haber llegado pero igual)
+                return 1;
             }
             
             // Reserva memoria para la nueva página y le asigna los valores.
@@ -193,6 +183,7 @@ void resize_proceso(int pid, uint nuevo_tam) {
         log_info(logger, "PID: %i - Tamaño Actual: %i - Tamaño a Reducir: %i", pid, cant_paginas_actual*config_memoria.tam_pagina, cant_paginas_nueva*config_memoria.tam_pagina);
         log_destroy(logger);
     }
+    return 0;
 
 }
 

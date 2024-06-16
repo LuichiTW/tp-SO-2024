@@ -57,11 +57,11 @@ void recibir_solicitudes(int socket_cliente) {
 
                 datos = recibir_paquete(socket_cliente);
 
-                pid = (int) list_get(datos, 0);
+                pid = *((int*) list_get(datos, 0));
                 scriptname = list_get(datos, 1);
 
                 // ! Devolver algo
-                int rta = crear_proceso(pid, scriptname);
+                crear_proceso(pid, scriptname);
             }
             break;
 
@@ -70,10 +70,12 @@ void recibir_solicitudes(int socket_cliente) {
                 int pid;
                 uint n_instruccion;
                 
-                pid = (int) list_get(datos, 0);
-                n_instruccion = (uint) list_get(datos, 1);
+                pid = *((int*) list_get(datos, 0));
+                n_instruccion = *((uint*) list_get(datos, 1));
 
-                enviar_instruccion(pid, n_instruccion);
+                char *rta = enviar_instruccion(pid, n_instruccion);
+
+                enviar_mensaje(rta, socket_cliente);
             }
             break;
 
@@ -81,7 +83,7 @@ void recibir_solicitudes(int socket_cliente) {
             {
                 int pid;
 
-                pid = (int) list_get(datos, 0);
+                pid = *((int*) list_get(datos, 0));
 
                 finalizar_proceso(pid);
             }
@@ -92,8 +94,8 @@ void recibir_solicitudes(int socket_cliente) {
                 int dir_fisica;
                 size_t tam;
 
-                dir_fisica = (int) list_get(datos, 0);
-                tam = (size_t) list_get(datos, 1);
+                dir_fisica = *((int*) list_get(datos, 0));
+                tam = *((size_t*) list_get(datos, 1));
 
                 leer_memoria(dir_fisica, tam);
             }
@@ -105,8 +107,8 @@ void recibir_solicitudes(int socket_cliente) {
                 size_t tam;
                 char *valor;
 
-                dir_fisica = (int) list_get(datos, 0);
-                tam = (size_t) list_get(datos, 1);
+                dir_fisica = *((int*) list_get(datos, 0));
+                tam = *((size_t*) list_get(datos, 1));
                 valor = (char*) list_get(datos, 2);
 
                 escribir_memoria(dir_fisica, tam, valor);
@@ -118,10 +120,11 @@ void recibir_solicitudes(int socket_cliente) {
                 int pid;
                 uint nuevo_tam;
 
-                pid = (int) list_get(datos, 0);
-                nuevo_tam = (uint) list_get(datos, 1);
+                pid = *((int*) list_get(datos, 0));
+                nuevo_tam = *((uint*) list_get(datos, 1));
 
-                resize_proceso(pid, nuevo_tam);
+                int rta = resize_proceso(pid, nuevo_tam);
+                enviar_entero(rta, socket_cliente);
             }
             break;
         case MEM_ACCESO_TABLA_PAGINAS:
@@ -129,10 +132,11 @@ void recibir_solicitudes(int socket_cliente) {
                 int pid;
                 int pagina;
 
-                pid = (int) list_get(datos, 0);
-                pagina = (int) list_get(datos, 1);
+                pid = *((int*) list_get(datos, 0));
+                pagina = *((int*) list_get(datos, 1));
 
-                acceso_tabla_paginas(pid, pagina);
+                int rta = acceso_tabla_paginas(pid, pagina);
+                enviar_entero(rta, socket_cliente);
             }
         default:
             break;

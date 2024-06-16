@@ -2,7 +2,7 @@
 
 char *funFetch(int socketMemoria){
     //!PRUEBA DE FUNCIONAMIENTO MANUAL
-    char *instruccion = readline("> ");
+    //char *instruccion = readline("> ");
     //!-------------------------------
 
     uint32_t numero = regcpu.PC;
@@ -24,10 +24,10 @@ char *funFetch(int socketMemoria){
     memcpy(buffer + offset, &numero, sizeof(numero));
     */
     
-    t_paquete* paquete crear_paquete();
-    agregar_a_paquete(t_paquete* paquete, numero, sizeof(uint32_t));
-    serializar_paquete(t_paquete* paquete, sizeof(uint32_t) + 2*sizeof(int));
-    enviar_paquete(t_paquete* paquete, socketMemoria);
+    t_paquete* paquete = crear_paquete();
+    agregar_a_paquete(paquete, numero, sizeof(uint32_t));
+    serializar_paquete(paquete, sizeof(uint32_t) + 2*sizeof(int));
+    enviar_paquete(paquete, socketMemoria);
     free(paquete);
 
     t_list* datos = recibir_paquete(socketMemoria);

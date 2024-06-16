@@ -48,7 +48,7 @@ registros_cpu regcpu;
 //log global del CPU
 t_log *loggerPrincipal;
 
-//void recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt);
+
 sem_t s_interrupcion;
 t_pcb *pcb;
 

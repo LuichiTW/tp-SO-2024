@@ -50,7 +50,6 @@ t_log *loggerPrincipal;
 
 
 sem_t s_interrupcion;
-t_pcb *pcb;
 
 int main() {
     loggerPrincipal = log_create("cpu.log", "cpu", true, LOG_LEVEL_INFO);
@@ -60,26 +59,12 @@ int main() {
 
 //! se omite la conexiones entre modulos para hacer pruebas independientemente en el modulo
   
-    //* CLIENTE------------------------------------------>
-    char *puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-    char *ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-    int conexion_memoria = crear_conexion(ip_memoria,puerto_memoria,"Hola soy el CPU");
-    //*SERVIDOR------------------------------------------>
-        //*DISPATCH
-	char *puerto_dispatch = config_get_string_value(config, "PUERTO_ESCUCHA_DISPATCH");
-    int socket_servidor_cpu_dispatch = iniciar_servidor(puerto_dispatch);
-	log_info(loggerPrincipal, "Listo para recibir al Kernel en dispatch");
-    int socket_cliente_kernel_dispatch = esperar_cliente(socket_servidor_cpu_dispatch, loggerPrincipal);
-        //*INTERRUPT
-    char *puerto_interrupt = config_get_string_value(config, "PUERTO_ESCUCHA_INTERRUPT");
-    int socket_servidor_cpu_interrupt = iniciar_servidor(puerto_dispatch);
-	log_info(loggerPrincipal, "Listo para recibir al Kernel en interrupt");
-    int socket_cliente_kernel_interrupt = esperar_cliente(socket_servidor_cpu_interrupt, loggerPrincipal);
-
+    cargar_sockets(loggerPrincipal);
+    sockets_cpu.socket_cliente_kernel_interrupt = esperar_cliente(sockets_cpu.socket_servidor_cpu_interrupt, loggerPrincipal);
 
     sem_init(&s_interrupcion, 0, 0);
 
-    pcb = recibir_pcb(socket_cliente_kernel_dispatch, socket_cliente_kernel_interrupt);
+    pcb = recibir_pcb(sockets_cpu.socket_servidor_cpu_dispatch, sockets_cpu.socket_servidor_cpu_interrupt);
 
 //! PRUEBA DE CICLO DE INSTRUCCION MANUAL
  /*

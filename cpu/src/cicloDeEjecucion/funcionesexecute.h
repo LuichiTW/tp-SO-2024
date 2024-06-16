@@ -12,6 +12,9 @@
 
 #include "registros.h"
 #include "config.h"
+#include "conexiones.h"
+#include "mmu.h"
+#include "checkInterrupt.h"
 
 // #include "main.h"
 extern t_log *loggerPrincipal;

@@ -72,18 +72,54 @@ void fJNZ(enum lista_registros_CPU registroLetra, uint32_t instruccion){
     }
 }
 void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Direccion){ //!OBLIGATORIO
-    
+    t_paquete *paquete = crear_paquete();
+    int dir_fisica;
+    int tam_registro;
+    char *registro;
+
+    dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
+    tam_registro = tamanioRegistro(Datos);
+
+    agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
+    agregar_a_paquete(paquete, &tam_registro, sizeof(tam_registro));
+
+    enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_LEER_MEMORIA);
+    eliminar_paquete(paquete);
+
+    char *valor = recibir_msg(sockets_cpu.socket_memoria);
+    registro = (char*) obtenerRegistro(Datos);
+
+    strncpy(registro, valor, tam_registro);
+    free(valor);
 }
 void fMOV_OUT(enum lista_registros_CPU Direccion, enum lista_registros_CPU Datos){//!OBLIGATORIO
+    t_paquete *paquete = crear_paquete();
+    int dir_fisica;
+    int tam_registro;
+    char *registro;
 
+    dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
+    tam_registro = tamanioRegistro(Datos);
+    registro = (char*) obtenerRegistro(Datos);
+
+    agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
+    agregar_a_paquete(paquete, &tam_registro, sizeof(tam_registro));
+    agregar_a_paquete(paquete, &registro, tam_registro);
+
+    enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ESCRIBIR_MEMORIA);
 }
 void fRESIZE(int tamanho){//!OBLIGATORIO
     t_paquete *paquete = crear_paquete();
 
-    agregar_a_paquete(paquete, pcb->PID, sizeof(int));
-    agregar_a_paquete(paquete, tamanho, sizeof(int));
+    agregar_a_paquete(paquete, &(pcb->PID), sizeof(int));
+    agregar_a_paquete(paquete, &tamanho, sizeof(int));
 
-    enviar_peticion(paquete, config_cpu.puerto_memoria, MEM_RESIZE_PROCESO);
+    enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_RESIZE_PROCESO);
+    eliminar_paquete(paquete);
+    int rta = recibir_entero(sockets_cpu.socket_memoria);
+    if (rta == 1) { // Out of memory sería
+        // TODO enviar a kernel o lo que sea
+    }
 }
 void fCOPY_STRING(int tamanho){//!OBLIGATORIO
 

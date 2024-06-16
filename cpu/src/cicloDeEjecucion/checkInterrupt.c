@@ -1,6 +1,6 @@
 #include "checkInterrupt.h"
 
-
+t_pcb *pcb;
 
 void funCheckInterrupt(t_pcb *pcb, int socket_cliente_kernel_interrupt){
     

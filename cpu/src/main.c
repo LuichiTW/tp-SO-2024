@@ -2,8 +2,8 @@
 
 /*
 ? CHECK POINT 2
-!Se conecta a Kernel✅ y recibe un PCB❎.
-!Es capaz de conectarse a la memoria✅ y solicitar las instrucciones❎.
+!Se conecta a Kernel✅ y recibe un PCB✅.
+!Es capaz de conectarse a la memoria✅ y solicitar las instrucciones✅.
 !Es capaz de ejecutar un ciclo básico de instrucción❎✅✅❎.
 !    fetch❎
         ir a memoria a buscar proxima instruccion (con el PC) -> se almacena en un char
@@ -24,9 +24,9 @@
 
 ? CHECK POINT 3
 !Es capaz de resolver las operaciones:
-!MOV_IN❎
-!MOV_OUT❎
-!RESIZE❎
+!MOV_IN✅
+!MOV_OUT✅
+!RESIZE✅
 !COPY_STRING❎
 !IO_STDIN_READ❎
 !IO_STDOUT_WRITE❎

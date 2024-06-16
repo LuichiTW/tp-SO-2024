@@ -122,7 +122,34 @@ void fRESIZE(int tamanho){//!OBLIGATORIO
     }
 }
 void fCOPY_STRING(int tamanho){//!OBLIGATORIO
+    t_paquete *paquete = crear_paquete();
+    int di_dir_logica = *((int*) obtenerRegistro(DI));
+    int di_dir_fisica;
+    int si_dir_logica = *((int*) obtenerRegistro(SI));
+    int si_dir_fisica;
+    int si_tam_registro;
 
+    char *str;
+
+    di_dir_fisica = obtener_direccion_fisica(separar_dir_logica(di_dir_logica));
+    
+    agregar_a_paquete(paquete, &di_dir_fisica, sizeof(di_dir_fisica));
+    agregar_a_paquete(paquete, &tamanho, sizeof(tamanho));
+
+    enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_LEER_MEMORIA);
+    eliminar_paquete(paquete);
+
+    str = recibir_msg(sockets_cpu.socket_memoria);
+
+    si_dir_fisica = obtener_direccion_fisica(separar_dir_logica(si_dir_logica));
+    si_tam_registro = tamanioRegistro(SI);
+
+    paquete = crear_paquete();
+    agregar_a_paquete(paquete, &si_dir_fisica, sizeof(si_dir_fisica));
+    agregar_a_paquete(paquete, &si_tam_registro, sizeof(si_tam_registro));
+    agregar_a_paquete(paquete, str, tamanho);
+
+    enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ESCRIBIR_MEMORIA);
 }
 void fWAIT(char recurso[]){
 

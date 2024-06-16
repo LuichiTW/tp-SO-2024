@@ -49,6 +49,11 @@ void recibir_solicitudes(int socket_cliente) {
     t_list *datos;
     datos = recibir_paquete(socket_cliente);
 
+    struct timespec delay;
+    delay.tv_sec = 0;
+    delay.tv_nsec = config_memoria.retardo_respuesta * 1000000; // pasado a nanosegundos
+    nanosleep(&delay, NULL);
+
     switch (op) {
         case MEM_CREAR_PROCESO:
             {

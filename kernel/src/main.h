@@ -12,14 +12,30 @@
 #include <pthread.h>
 #include <string.h>
 
-struct NodoColaPCBS*ListaFIFO=NULL;
-int pid_pcb=0;
+typedef struct
+    {
+        int PID;     // Identificador del proceso
+        int PC;      // Contador de Programa
+        int Quantum; // Unidad de tiempo utilizada para el algoritmo VRR
+        //necesito el tipo de dato de los registros que vienen del cpu
+    }pcb;
+typedef struct 
+    {
+        pcb PCBS;
+        struct NodoColaPCBS*sig;
+    }NodoColaPCBS;
 
-void atender_instruccion_valida(char* leido,t_log*logger,int);
-void iniciar_consola_interactiva(t_log* logger,int);
+typedef struct 
+{
+    NodoColaPCBS*primero;
+    NodoColaPCBS*ultimo;
+}Cola;
+
+void atender_instruccion_valida(char* leido,t_log*logger,int,int c,Cola*colaNEW);
+void iniciar_consola_interactiva(t_log* logger,int,int a,Cola*colaNEW);
 bool validacion_de_instruccion_de_consola(char* leido, t_log* logger);
-void iniciar_proceso(char*path,int PID,int conexion_cpu,int conexion_memoria);
+void iniciar_proceso(char*path,int PID,int conexion_cpu,int conexion_memoria,Cola*colaNEW);
 void enviar_pcb(pcb proceso,int conexion_cpu);
-//void encolarColaNEW(pcb);
+void encolarColaNEW(pcb,Cola*colaNEW);
 
 #endif // !MAIN_KERNEL

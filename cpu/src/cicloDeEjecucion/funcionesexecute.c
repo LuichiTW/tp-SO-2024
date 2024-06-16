@@ -165,11 +165,35 @@ void fIO_GEN_SLEEP(char interface[], int unidadesDeTrabajo){//!OBLIGATORIO
 
     enviar_paquete(paquete, sockets_cpu.socket_kernel);
 }
-void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Dirrecion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
+void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
+    t_paquete *paquete;
+    int dir_fisica;
+    int tam_lectura;
+    
+    dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
+    tam_lectura = *((int*) obtenerRegistro(Tamanho));
 
+    agregar_a_paquete(paquete, interface, string_length(interface));
+    agregar_a_paquete(paquete, &tam_lectura, sizeof(tam_lectura));
+    agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
+
+    enviar_peticion(paquete, sockets_cpu.socket_servidor_cpu_dispatch, KER_STDIN_READ);
+    eliminar_paquete(paquete);
 }
-void fIO_STDOUT_WRITE(char interface[], enum lista_registros_CPU Dirrecion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
+void fIO_STDOUT_WRITE(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
+    t_paquete *paquete;
+    int dir_fisica;
+    int tam_escritura;
 
+    dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
+    tam_escritura = *((int*) obtenerRegistro(Tamanho));
+
+    agregar_a_paquete(paquete, interface, string_length(interface));
+    agregar_a_paquete(paquete, &tam_escritura, sizeof(tam_escritura));
+    agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
+
+    enviar_peticion(paquete, sockets_cpu.socket_servidor_cpu_dispatch, KER_STDOUT_WRITE);
+    eliminar_paquete(paquete);
 }
 void fIO_FS_CREATE(char interface[], char NombreArchivo[]){
 

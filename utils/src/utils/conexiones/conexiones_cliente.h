@@ -97,4 +97,6 @@ void eliminar_paquete(t_paquete *paquete);
 
 void enviar_peticion(t_paquete *paquete, int socket_cliente, op_code codigo);
 
+void enviar_entero(int valor, int socket_cliente);
+
 #endif // !CONEXIONES_CLIENTE

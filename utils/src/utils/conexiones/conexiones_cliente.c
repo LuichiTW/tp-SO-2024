@@ -81,7 +81,11 @@ void liberar_conexion(int socket_cliente){
 	close(socket_cliente);
 }
 
-void envia_peticion(t_paquete *paquete, int socket_cliente, op_code codigo) {
+void enviar_peticion(t_paquete *paquete, int socket_cliente, op_code codigo) {
 	paquete->codigo_operacion = codigo;
 	enviar_paquete(paquete, socket_cliente);
+}
+
+void enviar_entero(int valor, int socket_cliente) {
+	enviar_mensaje((char*) &valor, socket_cliente);
 }

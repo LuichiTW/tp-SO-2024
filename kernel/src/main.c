@@ -21,7 +21,7 @@ int main() {
     //Iniciar logger del kernel y su config
     t_log *logger = log_create("kernel.log", "kernel", true, LOG_LEVEL_INFO);
     log_info(logger, "Iniciando kernel...");
-    t_config *config = config_create("../kernel.config");
+    t_config *config = config_create("./kernel.config");
     if (config == NULL) {
         log_error(logger, "No se leyo el archivo de configuracion");
         exit(EXIT_FAILURE);
@@ -50,7 +50,7 @@ int main() {
     //se tendria que liberar el especio de memoria usado por los elementos
 
     //CONSOLA INTERACTIVA
-    iniciar_consola_interactiva(logger,conexion_cpu,conexion_memoria,colaNEW,colaREADY);
+    iniciar_consola_interactiva(logger,conexion_cpu,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
     return 0;
 }
 
@@ -79,7 +79,7 @@ void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memo
             gets(leido);
             continue; //Saltar y continuar con el resto de la iteracion
         }
-        atender_instruccion_valida(leido, logger, conexion_cpu, conexion_memoria,colaNEW,colaREADY);
+        atender_instruccion_valida(leido, logger, conexion_cpu, conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
         gets(leido);
     }
     free(leido);
@@ -145,7 +145,7 @@ void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int c
         if (PID<grado_multiprogramacion)
         {
             
-            encolarColaREADY(colaNEW,colaREADY);
+            encolarColaREADY(colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
         }
         
         break;
@@ -338,10 +338,9 @@ void encolarColaRR(Cola*colaREADY,Cola*colaRR)
 void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
 {   
     NodoColaPCBS*puntero;
-    puntero=colaNEW->primero;
+    puntero=colaREADY->primero; //REVISAR SI SE ARREGLO EL ERROR DE FORMA CORRECTA -------------------------->>>>>>>>>>>
 
-    while (puntero!=NULL)
-    {
+    while (puntero!=NULL) {
         NodoColaPCBS*nuevo;
         nuevo=malloc(sizeof(NodoColaPCBS));
         nuevo->PCBS.PID=puntero->PCBS.PID;

@@ -58,7 +58,7 @@ typedef struct t_interfaz t_interfaz;
 struct t_interfaz
 {
     char * nombre;
-    char * tipo_de_interfaz;
+    char * path_interfaz;
     t_interfaz * siguiente;
 };
 
@@ -66,7 +66,7 @@ enum tipo_interfaz {GENERICA, STDIN, STDOUT, DIALFS};
 
 typedef struct
 {
-  char *nombre_interfaz;
+  char *path_config_l;
   enum tipo_interfaz id;
 }t_interfaz_disponibles;
 
@@ -77,7 +77,7 @@ void *iniciar_config_io(t_interfaz *interfaces);
 t_interfaz *crear_interfaces(void);
 t_interfaz *agregar_interfaz( t_interfaz *interfaces, t_interfaz *nueva_interfaz);
 void recorrer_lista_nombres_tipos(t_interfaz *interfaces);
-bool es_tipo_interfaz(char *tipo_interfaz);
-int id_tipo_interfaz(char *tipo_interfaz);
+bool es_path_config(char *path_config);
+int id_path_config(char *path_config);
 
 #endif // !INTERFAZ_IO

@@ -1,10 +1,10 @@
 #include "interfaz.h"
 
-t_interfaz_disponibles interfaces_disponibles[] = {
-  { "generica", GENERICA },
-  { "stdin", STDIN },
-  { "stdout", STDOUT },
-  { "dialfs", DIALFS }
+t_interfaz_disponibles paths_disponibles[] = {
+  { "./generica.config", GENERICA },
+  { "./stdin.config", STDIN },
+  { "./stdout.config", STDOUT },
+  { "./dialfs.config", DIALFS }
 };
 
 t_config_generica config_generica;
@@ -26,27 +26,28 @@ t_log *iniciar_logger_io(void){
 
 
 void *iniciar_config_io(t_interfaz *interfaces){
-    
+    recorrer_lista_nombres_tipos(interfaces);
     t_interfaz *aux = interfaces;
     t_config *config;
     while (aux != NULL)
     {
-        if (aux->tipo_de_interfaz == NULL) {
+        if (aux->path_interfaz == NULL) {
         perror("Error al iniciar config");
+        exit(EXIT_FAILURE);
         }
-    char *tipo_interfaz = aux->tipo_de_interfaz;
-    int id = id_tipo_interfaz(tipo_interfaz);
-    
+    char *path_config_interfaz = aux->path_interfaz;
+    printf("Path de interfaz: %s\n", path_config_interfaz);
+    int id = id_path_config(path_config_interfaz);
     switch (id){
         case GENERICA:
-        config = iniciar_config("generica");
+        config = iniciar_config(path_config_interfaz);
         config_generica.tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
         config_generica.ip_kernel = config_get_string_value(config, "IP_KERNEL");
         config_generica.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
         config_generica.tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
         break;
         case STDIN:
-        config = iniciar_config("stdin");
+        config = iniciar_config(path_config_interfaz);
         config_stdin.tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
         config_stdin.ip_memoria = config_get_string_value(config, "IP_MEMORIA");
         config_stdin.puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
@@ -54,7 +55,7 @@ void *iniciar_config_io(t_interfaz *interfaces){
         config_stdin.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
         break;
         case STDOUT:
-        config = iniciar_config("stdout");
+        config = iniciar_config(path_config_interfaz);
         config_stdout.tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
         config_stdout.ip_memoria = config_get_string_value(config, "IP_MEMORIA");
         config_stdout.puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
@@ -62,7 +63,7 @@ void *iniciar_config_io(t_interfaz *interfaces){
         config_stdout.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
         break;
         case DIALFS:
-        config = iniciar_config("dialfs");
+        config = iniciar_config(path_config_interfaz);
         config_dialfs.tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
         config_dialfs.tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
         config_dialfs.path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
@@ -74,24 +75,20 @@ void *iniciar_config_io(t_interfaz *interfaces){
         config_dialfs.ip_kernel = config_get_string_value(config, "IP_KERNEL");
         config_dialfs.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
         break;
-    
         default:
         perror("Error al iniciar config");
         exit(EXIT_FAILURE);
         break;
     }
-    
-        t_interfaz *temp = aux;
         aux = aux->siguiente;
-        free(temp);
     }
+    
     
     return config;
 }
 
-t_config *iniciar_config(char *tipo_interfaz){
-    char *path = string_from_format("./%s.config", tipo_interfaz);
-    t_config *config = config_create(path);
+t_config *iniciar_config(char *path_config){
+    t_config *config = config_create(path_config);
     if(config == NULL){
         perror("Error al iniciar config");
         exit(EXIT_FAILURE);
@@ -105,7 +102,7 @@ t_config *iniciar_config(char *tipo_interfaz){
     // crear nuevo nodo
     t_interfaz *new_node = malloc(sizeof(t_interfaz));
     new_node->nombre = strdup(nueva_interfaz->nombre);
-    new_node->tipo_de_interfaz = strdup(nueva_interfaz->tipo_de_interfaz);
+    new_node->path_interfaz = strdup(nueva_interfaz->path_interfaz);
     new_node->siguiente = NULL;
 
     // si esta vacia usarlo como primer nodo
@@ -130,21 +127,21 @@ t_config *iniciar_config(char *tipo_interfaz){
         perror("Error al alocar memoria interfaz");
         exit(EXIT_FAILURE);
      }
-    char *nuevo_io = readline("Crear io:<nombre_interfaz> <tipo_interfaz>\n");
+    char *nuevo_io = readline("Crear io:<nombre_interfaz> <path_config>\n");
     char **parametros = string_split(nuevo_io, " ");
-    if(!es_tipo_interfaz(parametros[1])){
+    if(!es_path_config(parametros[1])){
         free(nuevo_io);
         free(parametros);
-        perror("Tipo de interfaz no reconocido");
+        perror("path no valido");
         exit(EXIT_FAILURE);
     }
     char *nombre_io;
-    char *tipo_interfaz;
+    char *path_config;
     // inicializar primer interfaz
     interfaces->nombre = parametros[0];
-    interfaces->tipo_de_interfaz = parametros[1];
+    interfaces->path_interfaz = parametros[1];
     interfaces->siguiente = NULL;
-    if (interfaces->nombre == NULL || interfaces->tipo_de_interfaz == NULL){
+    if (interfaces->nombre == NULL || interfaces->path_interfaz == NULL){
         perror("Error al ingresar parametros");
         exit(EXIT_FAILURE);
     
@@ -152,7 +149,7 @@ t_config *iniciar_config(char *tipo_interfaz){
     while (!string_is_empty(nuevo_io))
     {   
         free(parametros);
-        nuevo_io = readline("Crear io:<nombre_interfaz> <tipo_interfaz>\n");
+        nuevo_io = readline("Crear io:<nombre_interfaz> <path_config>\n");
 
         if(string_is_empty(nuevo_io)){
         free(nuevo_io);
@@ -162,23 +159,23 @@ t_config *iniciar_config(char *tipo_interfaz){
 
         parametros = string_split(nuevo_io, " ");
         nombre_io = parametros[0];
-        tipo_interfaz = parametros[1];
+        path_config = parametros[1];
 
         //verifica que los parametros no sean nulos
-        if ((tipo_interfaz == NULL || nombre_io == NULL) && !string_is_empty(nuevo_io)){
+        if ((path_config == NULL || nombre_io == NULL) && !string_is_empty(nuevo_io)){
         perror("Error al ingresar parametros");
         free(nuevo_io);
         free(parametros);
-        free(tipo_interfaz);
+        free(path_config);
         free(nombre_io);
         exit(EXIT_FAILURE);
         }
 
         //verifica que el tipo de interfaz sea valido
-        if(!es_tipo_interfaz(tipo_interfaz)){
+        if(!es_path_config(path_config)){
         free(nuevo_io);
         free(parametros);
-        free(tipo_interfaz);
+        free(path_config);
         free(nombre_io);
         perror("Tipo de interfaz no reconocido");
         exit(EXIT_FAILURE);
@@ -192,26 +189,25 @@ t_config *iniciar_config(char *tipo_interfaz){
             exit(EXIT_FAILURE);
         }
         nueva_interfaz->nombre = nombre_io;
-        nueva_interfaz->tipo_de_interfaz = tipo_interfaz;
+        nueva_interfaz->path_interfaz = path_config;
         nueva_interfaz->siguiente = NULL;
 
         //añadir a la lista
         interfaces = agregar_interfaz(interfaces, nueva_interfaz);
 
         free(nombre_io);
-        free(tipo_interfaz);
+        free(path_config);
         perror("interfaz creada con exito");
     }
     
-    recorrer_lista_nombres_tipos(interfaces);
     return interfaces;
 }
 
 
-bool es_tipo_interfaz(char *tipo_interfaz){
+bool es_path_config(char *path_config){
     for (int i = 0; i < 4; i++)
     {
-        if (strcmp(tipo_interfaz, interfaces_disponibles[i].nombre_interfaz) == 0)
+        if (strcmp(path_config, paths_disponibles[i].path_config_l) == 0)
         {
             return true;
         }
@@ -219,10 +215,10 @@ bool es_tipo_interfaz(char *tipo_interfaz){
     return false;
 }
 
-int id_tipo_interfaz(char *tipo_interfaz){
+int id_path_config(char *path_config){
     for (int i = 0; i < 4; i++)
     {
-        if (strcmp(tipo_interfaz, interfaces_disponibles[i].nombre_interfaz) == 0)
+        if (strcmp(path_config, paths_disponibles[i].path_config_l) == 0)
         {
             return i;
         }
@@ -238,12 +234,10 @@ void recorrer_lista_nombres_tipos(t_interfaz *interfaces){
         if (aux->nombre != NULL) {
             printf("Nombre: %s\n", aux->nombre);
         }
-        if (aux->tipo_de_interfaz != NULL) {
-            printf("Tipo de interfaz: %s\n", aux->tipo_de_interfaz);
+        if (aux->path_interfaz != NULL) {
+            printf("Path de interfaz: %s\n", aux->path_interfaz);
         }
-        t_interfaz *temp = aux;
         aux = aux->siguiente;
-        free(temp);
     }
 
 }

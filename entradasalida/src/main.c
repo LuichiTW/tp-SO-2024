@@ -60,15 +60,10 @@ void esperar(t_parametroEsperar parametros){
 
     while(1){
         parametros.socket_cliente = esperar_cliente(parametros.server_fd,parametros.logger);
-        int resultado;
 
         if(parametros.socket_cliente != -1){
         pthread_t t;
         pthread_create(&t,NULL,(void*)manejarConexion,(void*)&parametros);
-        if(resultado != 0){
-            log_error(parametros.logger, "Error crear hilo");
-            //return 1;
-        }
         pthread_join(t, NULL);
         pthread_detach(t);
         }
@@ -155,7 +150,7 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros){
     char* texto;
 
     buffer = recibir_buffer(&size,parametros.socket_cliente);     
-	char *direcciones[sizeof(leer_array(buffer,&desp))];     
+	char direcciones[sizeof(leer_array(buffer,&desp))];     
 	memcpy(direcciones,leer_array(buffer,&desp),sizeof(direcciones)); 
     if(direcciones == NULL){
         return 1;

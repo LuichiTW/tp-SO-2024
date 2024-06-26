@@ -2,6 +2,7 @@
 
 t_config_dialfs config_dialfs;
 
+//! implementacion aun no confirmada
 void carga_archivos_fs(void){
     FILE *bloques;
     FILE *bitmap;

@@ -15,3 +15,5 @@ void carga_archivos_fs(void);
 void levantar_bloques(void);
 
 
+
+#endifv // !FILE_SYTEM

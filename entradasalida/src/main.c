@@ -1,5 +1,6 @@
 #include "main.h"
 
+// ! considerar pasar los argumentos de creacion de interfaces por el main y no por la funcion (issue #3709)
 int main(){
     t_log *logger = iniciar_logger_io();
 
@@ -78,18 +79,30 @@ void manejarConexion(t_parametroEsperar parametros){
 
     switch(tipoInterfaz){
         case IO_GEN_SLEEP: 
+        log_info(parametros.logger, "PID: <PID> - Operacion: IO_GEN_SLEEP");
         resultado = iO_GEN_SLEEP(parametros);
         break;
         case IO_STDIN_READ: 
+        log_info(parametros.logger, "PID: <PID> - Operacion: IO_STDIN_READ");
         resultado =iO_STDIN_READ(parametros);
         break;
         case IO_STDOUT_WRITE: 
+        log_info(parametros.logger, "PID: <PID> - Operacion: IO_STDOUT_WRITE");
         resultado = iO_STDOUT_WRITE(parametros);
         break;
+        /*
+         !faltan operaciones de dialfs
+         ?IO_FS_CREATE
+         ?IO_FS_DELETE
+         ?IO_FS_TRUNCATE
+         ?IO_FS_WRITE
+         ?IO_FS_READ        
+        */
         default:
             log_error(parametros.logger, "Tipo de interfaz desconocida: %d", tipoInterfaz);
     }
     if(resultado == 0){
+        log_info(parametros.logger, "Operacion exitosa");
         enviar_mensaje("OK",parametros.conexion_kernel);
     }else{
         enviar_mensaje("ERROR",parametros.conexion_kernel);
@@ -129,7 +142,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros){
     if(direcciones == NULL){
         return 1;
     }
-
+    //! que pasa al tener varios hilos que quieran leer consola
     texto = readline("> ");
 	t_paquete *paquete = crear_paquete();
 	agregar_a_paquete (paquete, texto , strlen(texto) + 1);

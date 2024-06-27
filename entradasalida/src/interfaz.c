@@ -31,6 +31,7 @@ void *iniciar_config_io(t_interfaz *interfaces)
     recorrer_lista_nombres_tipos(interfaces);
     t_interfaz *aux = interfaces;
     t_config *config;
+    //! posible uso de config_save_in_file(t_config*, char *path); para crear el archivo de config de cada interfaz
     //! posible creacion de funciones para que no sea tan largo
     while (aux != NULL)
     {
@@ -70,6 +71,7 @@ void *iniciar_config_io(t_interfaz *interfaces)
         case DIALFS:
 
             // ! cada interfaz deberia tener su propio path de config
+            // ? se podria usar  config_set_value(t_config*, char *key, char *value);
 
             config = iniciar_config(path_config_interfaz);
             config_dialfs.tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
@@ -176,7 +178,7 @@ t_interfaz *crear_interfaces(void)
         }
 
         parametros = string_split(nuevo_io, " ");
-        nombre_io = parametros[0]; //! comprobar que el nombre sea unico
+        nombre_io = parametros[0]; // TODO: comprobar que el nombre sea unico
         path_config = parametros[1];
 
         // verifica que los parametros no sean nulos

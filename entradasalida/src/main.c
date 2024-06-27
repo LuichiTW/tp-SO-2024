@@ -57,7 +57,6 @@ int main(){
 
 
 void esperar(t_parametroEsperar parametros){
-    
 
     while(1){
         parametros.socket_cliente = esperar_cliente(parametros.server_fd,parametros.logger);
@@ -74,6 +73,10 @@ void esperar(t_parametroEsperar parametros){
 
 
 void manejarConexion(t_parametroEsperar parametros){
+    // !falta implementar el recibir_operacion
+    // ? recibir un char* y apartir de eso cambiar el tipo de operacion
+    // TODO: Separar el string en lo interfaz y su operacion
+    // TODO: Verificar si existe la interfaz a la que va a llamar
     int tipoInterfaz = recibir_operacion(parametros.socket_cliente);
     int resultado;
 

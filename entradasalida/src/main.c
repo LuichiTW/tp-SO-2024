@@ -197,6 +197,29 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros){
     return 0;
 }
 
+int iO_FS_CREATE(t_parametroEsperar parametros){
+    int size;
+    char * buffer;
+    int desp = 0;
+
+    buffer = recibir_buffer(&size,parametros.socket_cliente);
+    char* nombre_archivo = leer_string(buffer,&desp);
+
+    int i;
+	for (i = 0; i < config_dialfs.block_count; i++) {
+        if (bitarray_test_bit(bitmap, i) == 0) {
+            bitarray_set_bit(bitmap, i);
+            FILE f = fopen("RUTA " + nombre_archivo,"w");
+        }
+    }
+    if(f == NULL){
+        return 1;
+    }else{
+        fclose(f)
+        //ACTUALIZAR BITMAP
+    }
+}
+
 int leer_entero(char*buffer, int* desplazamiento)
 {
 	int ret;

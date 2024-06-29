@@ -1,6 +1,6 @@
 #include "fileSistem.h"
 
-t_config_dialfs config_dialfs;
+extern t_config_dialfs config_dialfs;
 t_bloque *bloques;
 
 //! implementacion aun no confirmada
@@ -23,6 +23,7 @@ void carga_archivos_fs(void){
     fclose(bitmap);
 }
 
+/*
 
 //asignacion contigua de bloques
 t_bloque levantar_bloques(void){
@@ -46,4 +47,5 @@ void crear_bitmap(void){
 
 
 }
+*/
 

@@ -6,10 +6,10 @@ t_interfaz_disponibles paths_disponibles[] = {
     {"./stdout.config", STDOUT},
     {"./dialfs.config", DIALFS}};
 
-extern t_config_generica config_generica;
-extern t_config_stdin config_stdin;
-extern t_config_stdout config_stdout;
-extern t_config_dialfs config_dialfs;
+t_config_generica config_generica;
+t_config_stdin config_stdin;
+t_config_stdout config_stdout;
+t_config_dialfs config_dialfs;
 
 // iniciar logger
 t_log *iniciar_logger_io(void)

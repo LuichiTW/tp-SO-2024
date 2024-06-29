@@ -33,7 +33,7 @@ enum tipo_interfaz_instruccion
     IO_STDOUT_WRITE
 };
 
-//extern t_config_dialfs config_dialfs; 
+extern t_config_dialfs config_dialfs; 
 
 int iO_GEN_SLEEP(t_parametroEsperar parametros);
 int iO_STDIN_READ(t_parametroEsperar parametros);

@@ -23,13 +23,13 @@ void carga_archivos_fs(void){
     fclose(bitmap);
 }
 
-/*
+
 
 //asignacion contigua de bloques
-t_bloque levantar_bloques(void){
+t_bloque *levantar_bloques(void){
     int bloques = open(config_dialfs.path_base_dialfs, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     
-    t_bloque bloques_mapeados;
+    t_bloque *bloques_mapeados;
 
     bloques_mapeados = mmap(NULL, config_dialfs.block_count * config_dialfs.block_size , PROT_WRITE, MAP_SHARED, bloques, 0);
     if (bloques == MAP_FAILED){
@@ -43,9 +43,9 @@ t_bloque levantar_bloques(void){
 }
 
 void crear_bitmap(void){
-    t_bitarray *bitarray = bitarray_create_with_mode(bitmap, config_dialfs.block_count, LSB_FIRST);
+    //t_bitarray *bitarray = bitarray_create_with_mode(bitmap, config_dialfs.block_count, LSB_FIRST);
 
 
 }
-*/
+
 

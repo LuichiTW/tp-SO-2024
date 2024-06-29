@@ -20,7 +20,7 @@ typedef struct t_bloque {
 
 
 void carga_archivos_fs(void);
-t_bloque levantar_bloques(void);
+t_bloque *levantar_bloques(void);
 
 
 

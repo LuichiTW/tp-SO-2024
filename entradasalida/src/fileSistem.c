@@ -52,15 +52,16 @@ void crear_bitmap(void){
 }
 
 
-void insertarAlFinal(t_bloque **cabeza, char *dato)//TODO: que la funcion use un puntero y no un array de punteros
-{    
-   while (*dato)//recorre la cadena de caracteres
+t_bloque *insertarAlFinal(t_bloque *cabeza, char *dato)
+{
+    if(*dato){
+    while (*dato)//recorre la cadena de caracteres
     {
         t_bloque *nuevoNodo = malloc(sizeof(t_bloque));
         if (nuevoNodo == NULL)
         {
             perror("Error al asignar memoria para nuevoNodo");
-            return;
+            return cabeza;
         }
         strncpy(nuevoNodo->dato, dato, 1023);
         nuevoNodo->dato[1024] = '\0'; // Asegurarse de que la cadena esté terminada
@@ -69,13 +70,13 @@ void insertarAlFinal(t_bloque **cabeza, char *dato)//TODO: que la funcion use un
         // Avanzar el puntero de dato
         dato += strlen(nuevoNodo->dato);
 
-        if (*cabeza == NULL)
+        if (cabeza == NULL)
         {
-            *cabeza = nuevoNodo;
+            cabeza = nuevoNodo;
         }
         else
         {
-            t_bloque *temp = *cabeza;
+            t_bloque *temp = cabeza;
             while (temp->siguiente != NULL)
             {
                 temp = temp->siguiente;
@@ -83,10 +84,37 @@ void insertarAlFinal(t_bloque **cabeza, char *dato)//TODO: que la funcion use un
             temp->siguiente = nuevoNodo;
         }
     }
+    }else{
+        t_bloque *nuevoNodo = malloc(sizeof(t_bloque));
+        if (nuevoNodo == NULL)
+        {
+            perror("Error al asignar memoria para nuevoNodo");
+            return cabeza;
+        }
+        strncpy(nuevoNodo->dato, dato, 1023);
+        nuevoNodo->dato[1024] = '\0'; // Asegurarse de que la cadena esté terminada
+        nuevoNodo->siguiente = NULL;
+
+        if (cabeza == NULL)
+        {
+            cabeza = nuevoNodo;
+        }
+        else
+        {
+            t_bloque *temp = cabeza;
+            while (temp->siguiente != NULL)
+            {
+                temp = temp->siguiente;
+            }
+            temp->siguiente = nuevoNodo;
+        }
+    
+    }
+    return cabeza;    
 }
 
 
-void guardarListaEnArchivo(t_bloque **cabeza, char *nombreArchivo)//TODO: que la funcion use un puntero y no un array de punteros
+void guardarListaEnArchivo(t_bloque *cabeza, const char *nombreArchivo)
 {
     FILE *archivo = fopen(nombreArchivo, "wb");
     if (archivo == NULL)
@@ -95,7 +123,7 @@ void guardarListaEnArchivo(t_bloque **cabeza, char *nombreArchivo)//TODO: que la
         return;
     }
 
-    t_bloque *temp = *cabeza;
+    t_bloque *temp = cabeza;
     while (temp != NULL)
     {
         // Primero, guarda la longitud de la cadena

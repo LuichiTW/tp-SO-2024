@@ -331,15 +331,24 @@ void encolarColaRR(Cola*colaREADY,Cola*colaRR)
     //ENVIAR CONTEXTO DE EJECUCION
 
     t_temporal* cronometro = temporal_create();
-    int quantum_total;
-    //ESPERO MENSAJE DE CPU
+    int quantum_total = puntero->PCBS.Quantum;
+
+    //ESPERO MENSAJE DE CPU Y PARO EL CRONOMETRO
 
     temporal_stop(cronometro);
     int64_t tiempo = temporal_gettime(cronometro);
 
     if (tiempo>quantum_total)
     {
-        /* code */
+        //SE INTERRUMPE POR QUANTUM Y LO ENCOLA AL FINAL
+        encolarAlFinal(colaRR);
+    }
+    else
+    {
+        if (/*VERIFICAR SI LA INTERRUPCION ES POR I/O*/)
+        {
+            encolarAlFinal(colaRR);
+        }
     }
 }
 
@@ -370,4 +379,39 @@ void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
         printf("");
         printf("VRR");
     }
+}
+
+void encolarAlFinal(Cola*cola)
+{
+    NodoColaPCBS*puntero;
+    puntero=cola->primero;
+
+    while (puntero!=NULL)
+    {
+        NodoColaPCBS*nuevo;
+        nuevo=malloc(sizeof(NodoColaPCBS));
+        nuevo->PCBS.PID=puntero->PCBS.PID;
+        nuevo->PCBS.PC=puntero->PCBS.PC;
+        nuevo->PCBS.Quantum=puntero->PCBS.Quantum;
+        nuevo->sig=NULL;
+
+        if (cola->ultimo!=NULL)
+        {
+            cola->ultimo->sig=nuevo;
+        }
+        else
+        {
+            cola->primero=nuevo;
+        }
+        cola->ultimo=nuevo;
+        puntero=puntero->sig;
+    }
+
+    //ELIMINAR EL PCB DEL PRIMER LUGAR
+    
+    NodoColaPCBS*nuevo_primero;
+    NodoColaPCBS*eliminar;
+    eliminar=cola->primero;
+    cola->primero=cola->primero->sig;
+    free(eliminar);
 }

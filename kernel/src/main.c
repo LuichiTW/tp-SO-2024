@@ -1,4 +1,4 @@
-#include "main.h"
+#include <main.h>
 
 int main() {
 
@@ -18,39 +18,38 @@ int main() {
     Cola*colaVRR=(Cola*)malloc(sizeof(Cola));
     colaVRR->primero=colaVRR->ultimo=NULL;
 
-    //Iniciar logger del kernel y su config
+    // INICIAR LOGGER DEL KERNEL Y SU CONFIG
     t_log *logger = log_create("kernel.log", "kernel", true, LOG_LEVEL_INFO);
     log_info(logger, "Iniciando kernel...");
-    t_config *config = config_create("./kernel.config");
+    t_config *config = config_create("../kernel.config");
     if (config == NULL) {
         log_error(logger, "No se leyo el archivo de configuracion");
         exit(EXIT_FAILURE);
     }
 
-    //iniciar el cliente del kernel
-    //memoria
+    // CONECTAR COMO CLIENTE
+
+    // MEMORIA
     char *puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
     char *ip_memoria = config_get_string_value(config, "IP_MEMORIA");
     int conexion_memoria = crear_conexion(ip_memoria, puerto_memoria, "Hola soy el kernel");
     
-    //cpu
+    // CPU
     char *puerto_cpu = config_get_string_value(config, "PUERTO_CPU_DISPATCH");
     char *ip_cpu = config_get_string_value(config, "IP_CPU");
     int conexion_cpu = crear_conexion(ip_cpu, puerto_cpu, "Hola soy el kernel");
 
-    //iniciar el servidor del kernel
+    // INICIAR SERVIDOR PARA 
 
-    //int conexion_io;
 	char *puerto = config_get_string_value(config, "PUERTO_ESCUCHA");
     int socket_servidor_kernel = iniciar_servidor(puerto);
 	log_info(logger, "Listo para recibir al IO");
     int socket_cliente_io = esperar_cliente(socket_servidor_kernel, logger);
-    
-    //char* algo = readline("> "); // Deshabilitado para probar la consola
+
     //se tendria que liberar el especio de memoria usado por los elementos
 
     //CONSOLA INTERACTIVA
-    iniciar_consola_interactiva(logger,conexion_cpu,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
+    iniciar_consola_interactiva(logger,conexion_cpu,conexion_memoria,colaNEW,colaREADY);
     return 0;
 }
 
@@ -77,9 +76,9 @@ void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memo
             log_error (logger,"Comando de CONSOLA no reconocido, por favor ingrese un comando de nuevo");
             free(leido);
             gets(leido);
-            continue; //Saltar y continuar con el resto de la iteracion
+            continue;
         }
-        atender_instruccion_valida(leido, logger, conexion_cpu, conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
+        atender_instruccion_valida(leido, logger, conexion_cpu, conexion_memoria,colaNEW,colaREADY);
         gets(leido);
     }
     free(leido);
@@ -87,14 +86,10 @@ void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memo
 
 void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR)
 {
-    //CONTADOR DE PIDs
-    int PID=0;
-    //RETIRAR COMANDO DEL STRING
+    int PIDs=0;
     char* comando_consola = strtok(leido, " ");
-    //SACAR SCRIPT
-    char* path_script = strtok (NULL," ");
-    printf("%s",path_script);
-    //
+    char* path = strtok (NULL," ");
+    printf("%s",path);
 
     int opcion_valida=0;
     if (strcmp(comando_consola,"EJECUTAR_SCRIPT")==0)
@@ -119,39 +114,38 @@ void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int c
     case 1: //EJECUTAR_SCRIPT
         int cont=0;
         char linea[30];
-        //--- Sacar el grado de multiprogramacion del config
+
         t_config *config = config_create("../kernel.config");
         int grado_multiprogramacion = config_get_int_value(config,"GRADO_MULTIPROGRAMACION");
-        //--- 
-        FILE*script;
-        script=fopen(path_script,"r");
-        fgets(linea,30,script);
-        while (!feof(script))
+
+        FILE*archivo_de_instrucciones;
+        archivo_de_instrucciones=fopen(path,"r");
+        fgets(linea,30,archivo_de_instrucciones);
+        while (!feof(archivo_de_instrucciones))
         {
-            //Pasarlo a char* si quiero saber que dice
-            char* comando = strtok(linea, " ");
-            if (strcmp(comando,"INICIAR_PROCESO"))
+            char* instruccion = strtok(linea, " ");
+            if (strcmp(instruccion,"INICIAR_PROCESO"))
             {
-                PID++;
-                log_info(logger,"Se crea el proceso <%d> en NEW",PID);
+                &PIDs++;
+                log_info(logger,"Se crea el proceso <%d> en NEW",PIDs);
                 char* path = strtok(NULL, " ");
-                iniciar_proceso(path,PID,conexion_cpu,conexion_memoria,colaNEW);
+                iniciar_proceso(path,PIDs,conexion_cpu,conexion_memoria,colaNEW);
                 enviar_mensaje("Crea un proceso cuyas operaciones se encuentran en",conexion_memoria);
                 enviar_mensaje(path,conexion_memoria);
             }
-            fgets(linea,30,script);
+            fgets(linea,30,archivo_de_instrucciones);
         }
-        fclose(script);
-        if (PID<grado_multiprogramacion)
+        fclose(archivo_de_instrucciones);
+        if (PIDs<grado_multiprogramacion)
         {
             
-            encolarColaREADY(colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
+            encolarColaREADY(colaNEW,colaREADY);
         }
         
         break;
     case 2: //INICIAR_PROCESO
-        PID++;
-        iniciar_proceso(path_script,PID,conexion_cpu,conexion_memoria,colaNEW);
+        PIDs++;
+        iniciar_proceso(path,PIDs,conexion_cpu,conexion_memoria,colaNEW);
         break;
     case 3: //FINALIZAR_PROCESO
         break;
@@ -197,16 +191,15 @@ bool validacion_de_instruccion_de_consola(char* leido, t_log*logger)
 
 void iniciar_proceso(char*path,int PID,int conexion_cpu,int conexion_memoria,Cola*colaNEW){
     pcb proceso;
-    //---Sacar quantum y grado de multiprogramacion del archivo config
+
     t_config *config = config_create("../kernel.config");
     int quantum = config_get_int_value(config,"QUANTUM");
-    //---
+
     proceso.PID=PID;
     proceso.PC=(PID++);
     proceso.Quantum=quantum;
     encolarColaNEW(proceso,colaNEW);
     enviar_mensaje("Enviando nuevo PCB a CPU...",conexion_cpu);
-    //POR EL MOMENTO SE ENVIARA EL PID DEL PROCESO
     enviar_mensaje(PID,conexion_cpu);
     enviar_pcb(proceso,conexion_cpu);
 }
@@ -216,8 +209,6 @@ void enviar_pcb(pcb proceso, int conexion_cpu){
 
 void encolarColaNEW(pcb ProcesoNuevo,Cola*colaNEW)
 {   
-    //ENCOLAR PROCESOS
-
     NodoColaPCBS*nuevo;
     nuevo=malloc(sizeof(NodoColaPCBS));
 
@@ -238,7 +229,7 @@ void encolarColaNEW(pcb ProcesoNuevo,Cola*colaNEW)
 
 void encolarColaREADY(Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR)
 {   
-    //ENCOLAR PROCESOS
+
     NodoColaPCBS*nuevo;
     nuevo=malloc(sizeof(NodoColaPCBS));
     NodoColaPCBS*puntero;
@@ -262,7 +253,7 @@ void encolarColaREADY(Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola
         colaREADY->ultimo=nuevo;
         puntero=puntero->sig;
     }
-    //---Sacar el algoritmo de planificacion de config
+
     t_config *config = config_create("../kernel.config");
     char* algoritmo = config_get_int_value(config,"ALGORITMO_PLANIFICACION");
     //---
@@ -280,6 +271,7 @@ void encolarColaREADY(Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola
 }
 
 void encolarColaFIFO(Cola*colaREADY,Cola*colaFIFO)
+
 {   
     //ENCOLAR PROCESOS
 
@@ -307,6 +299,7 @@ void encolarColaFIFO(Cola*colaREADY,Cola*colaFIFO)
         puntero=puntero->sig;
     }
 }
+
 void encolarColaRR(Cola*colaREADY,Cola*colaRR)
 {   
     //ENCOLAR PROCESOS
@@ -334,13 +327,29 @@ void encolarColaRR(Cola*colaREADY,Cola*colaRR)
         colaRR->ultimo=nuevo;
         puntero=puntero->sig;
     }
+
+    //ENVIAR CONTEXTO DE EJECUCION
+
+    t_temporal* cronometro = temporal_create();
+    int quantum_total;
+    //ESPERO MENSAJE DE CPU
+
+    temporal_stop(cronometro);
+    int64_t tiempo = temporal_gettime(cronometro);
+
+    if (tiempo>quantum_total)
+    {
+        /* code */
+    }
 }
+
 void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
 {   
     NodoColaPCBS*puntero;
-    puntero=colaREADY->primero; //REVISAR SI SE ARREGLO EL ERROR DE FORMA CORRECTA -------------------------->>>>>>>>>>>
+    puntero=colaNEW->primero;
 
-    while (puntero!=NULL) {
+    while (puntero!=NULL)
+    {
         NodoColaPCBS*nuevo;
         nuevo=malloc(sizeof(NodoColaPCBS));
         nuevo->PCBS.PID=puntero->PCBS.PID;

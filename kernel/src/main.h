@@ -12,6 +12,7 @@
 #include <pthread.h>
 #include <string.h>
 #include <commons/temporal.h>
+#include <commons/temporal.h>
 
 typedef struct
     {
@@ -32,8 +33,6 @@ typedef struct
     NodoColaPCBS*ultimo;
 }Cola;
 
-
-//FUNCIONES QUE AGREGO AL COMMIT
 void atender_instruccion_valida(char* leido,t_log*logger,int,int c,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR);
 void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR);
 bool validacion_de_instruccion_de_consola(char* leido, t_log* logger);

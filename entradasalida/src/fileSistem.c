@@ -3,13 +3,21 @@
 extern t_config_dialfs config_dialfs;
 t_bloque *bloques;
 
+// todo: implementar el ftruncate para que el archivo no supere el tamaño maximo
+// todo: eliminar los bloques vacios que superen el maximo de bloques
+// todo: implementar el aviso de que el archivo supera el tamaño maximo
+// todo: logs principales
+
 void compactacion(t_bloque *bloques, t_bitarray *bitmap){
     //compactar bloques
     bloques = compactar_bloque(bloques);
 
     //actualizar bloques.dat
+    guardarListaEnArchivo(bloques, "bloques.dat");
 
     //actualizar bitmap
+    actualizar_bitmap(bitmap, bloques);
+    guardar_bitmap(bitmap);
 
 }
 
@@ -33,6 +41,90 @@ void carga_archivos_fs(void){
     fclose(bitmap);
 }
 
+t_bitarray *crear_bitmap(void){
+    char *bitarray = malloc(config_dialfs.cantidad_bloques);
+    t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, config_dialfs.block_count, LSB_FIRST);
+    return nuevo_bitarray;
+}
+
+//actualiza el bitmap con los bloques
+void actualizar_bitmap(t_bitarray *bitmap, t_bloque *bloques){
+    //manejo de errores
+    if (bitmap == NULL || bloques == NULL) {
+        fprintf(stderr, "Error: bitmap o bloques es NULL\n");
+        return;
+    }
+    //recorre los bloques y actualiza el bitmap
+    t_bloque *temp = bloques;
+    int bit_index = 0;
+    while (temp != NULL)
+    {
+        if (bit_index < 0 || bit_index >= bitarray_get_max_bit(bitmap)) {
+            fprintf(stderr, "Error: índice de bit fuera de rango\n");
+            return; // Indica un error
+        }
+        if(!string_is_empty(temp->dato)){
+            bitarray_set_bit(bitmap, bit_index);
+        }else{
+            bitarray_clean_bit(bitmap, bit_index);
+        }
+
+        bit_index++;
+        temp = temp->siguiente;
+    }
+    //limpieza de bitmap para los bloques no usados
+    for (int i = bit_index; i < bitarray_get_max_bit(bitmap); i++)
+    {
+        bitarray_clean_bit(bitmap, i);
+    }
+}
+
+//guarda el bitmap en un archivo
+void guardar_bitmap(t_bitarray *bitmap){ // ! posible cambio para que use un parametro de nombre de archivo
+    FILE *archivo = fopen("bitmap.dat", "wb");
+    if (archivo == NULL)
+    {
+        perror("Error al abrir el archivo");
+        return;
+    }
+    fwrite(bitmap->bitarray, sizeof(char), bitmap->size, archivo);
+    fclose(archivo);
+}
+
+//carga el bitmap desde un archivo
+t_bitarray *cargar_bitmap(void){
+    FILE *archivo = fopen("bitmap.dat", "rb");
+    if (archivo == NULL)
+    {
+        perror("Error al abrir el archivo");
+        return NULL;
+    }
+    fseek(archivo, 0, SEEK_END);
+    long size = ftell(archivo);
+    fseek(archivo, 0, SEEK_SET);
+    char *bitarray = malloc(size);
+    if (fread(bitarray, sizeof(char), size, archivo) != size)
+    {
+        perror("Error al leer el archivo");
+        free(bitarray);
+        fclose(archivo);
+        return NULL;
+    }
+    fclose(archivo);
+    t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, size, LSB_FIRST);
+    return nuevo_bitarray;
+}
+
+
+// imprime el bitmap
+void imprimir_bitmap(t_bitarray *bitmap){
+    for (int i = 0; i < bitmap->size; i++)
+    {
+        printf("%d", bitarray_test_bit(bitmap, i));
+    }
+    printf("\n");
+}
+
 //asignacion contigua de bloques
 t_bloque *levantar_bloques(void){
     t_bloque *bloques_mapeados = leerListaDesdeArchivo("bloques.dat");//cargar bloques desde archivo
@@ -41,14 +133,6 @@ t_bloque *levantar_bloques(void){
         exit(EXIT_FAILURE);
     }
     return bloques_mapeados;
-}
-
-
-//!falta completar
-void crear_bitmap(void){
-    //t_bitarray *bitarray = bitarray_create_with_mode(bitmap, config_dialfs.block_count, LSB_FIRST);
-
-
 }
 
 
@@ -213,7 +297,7 @@ t_bloque *compactar_bloque(t_bloque *bloques){
     t_bloque *bloque_actual = bloques, *bloque_previo = NULL;
     while (bloque_actual != NULL) {
         // Verificar si el dato actual es un string vacío
-        if (bloque_actual->dato[0] == '\0') {
+        if (string_is_empty(bloque_actual->dato)) {
             t_bloque *temp = bloque_actual;
             if (bloque_previo != NULL) {
                 bloque_previo->siguiente = bloque_actual->siguiente;

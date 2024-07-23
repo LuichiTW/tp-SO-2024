@@ -26,13 +26,15 @@ void compactacion(t_bloque *bloques, t_bitarray *bitmap);
 t_bloque *compactar_bloque(t_bloque *bloques);
 void carga_archivos_fs(void);
 t_bloque *levantar_bloques(void);
-void crear_bitmap(void);
+t_bitarray *crear_bitmap(void);
+void actualizar_bitmap(t_bitarray *bitmap, t_bloque *bloques);
+void guardar_bitmap(t_bitarray *bitmap);
+t_bitarray *cargar_bitmap(void);
+void imprimir_bitmap(t_bitarray *bitmap);
 t_bloque *insertarAlFinal(t_bloque *cabeza, char *dato);
 void guardarListaEnArchivo(t_bloque *cabeza, char *nombreArchivo);
 t_bloque *leerListaDesdeArchivo(char *nombreArchivo);
 void liberarLista(t_bloque *cabeza);
-
-
 
 
 #endif // !FILE_SYTEM

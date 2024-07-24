@@ -224,7 +224,7 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
         if (bitarray_test_bit(bitmap, i) == 0)
         {
             bitarray_set_bit(bitmap, i);
-            FILE *f = fopen(nombre_archivo, "w"); // falta especificar el path del archivo
+            FILE *f = fopen(terminacion_archivo(nombre_archivo,".dat"), "w"); 
             fclose(f);
         }
     }
@@ -272,7 +272,7 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     char *nombre_archivo = leer_string(buffer, &desp);
     int tamanio = leer_entero(buffer, &desp);
 
-    truncate(nombre_archivo, tamanio); // falta especificar el path del archivo
+    truncate(terminacion_archivo(nombre_archivo,".dat"), tamanio); 
     modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
 
     nanosleep(&tiempo, NULL);
@@ -320,21 +320,21 @@ char **leer_array(char *buffer, int *desp)
 
 void crear_metadata(char *nombre_archivo, int pos)
 {
-    t_config *metadata = config_create(nombre_archivo); // HAY QUE AGREGAR .TXT
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".txt")); 
     config_set_value(metadata, "COMIENZO", string_itoa(pos));
     config_set_value(metadata, "TAMANIO", "1");
     config_destroy(metadata);
 }
 
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar){
-    t_config *metadata = config_create(nombre_archivo); // HAY QUE AGREGAR .TXT
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".txt")); 
     config_set_value(metadata, parametro, string_itoa(dato_modificar));
     config_destroy(metadata);
 }
 
 int info_archivo(char *nombre_archivo, char *parametro)
 {
-    t_config *metadata = config_create(nombre_archivo); // HAY QUE AGREGAR .TXT
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".txt")); 
     int info = config_get_int_value(metadata, parametro);
     config_destroy(metadata);
     return info;
@@ -352,6 +352,18 @@ int division_redondeada(int numerador, int denominador)
         resultado += 1;
     }
     return resultado;
+}
+
+char* terminacion_archivo(char* archivo,char* terminacion){
+    size_t nuevo_tamano = strlen(archivo) + strlen(terminacion) + 1; // +1 para el carácter nulo
+    char* nuevo_archivo = (char*)malloc(nuevo_tamano);
+  
+    
+    // Copiar el nombre del archivo original y agregar la terminación
+    strcpy(nuevo_archivo, archivo);
+    strcat(nuevo_archivo, terminacion);
+    
+    return nuevo_archivo;
 }
 
 

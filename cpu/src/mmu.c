@@ -1,8 +1,8 @@
 #include "mmu.h"
 
-uint tam_pagina = 32;
+int tam_pagina = 32;
 
-t_dir_logica separar_dir_logica(uint dir_logica) {
+t_dir_logica separar_dir_logica(int dir_logica) {
     t_dir_logica dir_separada;
 
     dir_separada.pagina = (int) floor((double)(dir_logica / tam_pagina));
@@ -11,12 +11,12 @@ t_dir_logica separar_dir_logica(uint dir_logica) {
     return dir_separada;
 }
 
-uint obtener_direccion_fisica(t_dir_logica dir_logica) {
+int obtener_direccion_fisica(t_dir_logica dir_logica) {
     int frame = obtener_frame(dir_logica.pagina);
     return frame*tam_pagina + dir_logica.desplazamiento;
 }
 
-t_list *fraccionar_dato(uint dir_logica, void *dato, int tam) {
+t_list *fraccionar_dato(int dir_logica, void *dato, int tam) {
     t_dir_logica dir_separada = separar_dir_logica(dir_logica);
 
     // TODO revisar tamaño y buscar frames para usar

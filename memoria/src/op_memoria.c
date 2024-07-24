@@ -1,7 +1,7 @@
 #include "op_memoria.h"
 
 
-char *enviar_instruccion(int pid, uint n_instruccion) {
+char *enviar_instruccion(int pid, int n_instruccion) {
     t_proceso *proceso;
     proceso = obtener_proceso_por_pid(pid);
 
@@ -120,7 +120,7 @@ int acceso_tabla_paginas(int pid, int pagina_buscada) {
 }
 
 
-int resize_proceso(int pid, uint nuevo_tam) {
+int resize_proceso(int pid, int nuevo_tam) {
     int cant_paginas_nueva = iceildiv(nuevo_tam, config_memoria.tam_pagina);
     int cant_paginas_actual;
     int cant_paginas_agregar;

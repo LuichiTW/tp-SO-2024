@@ -73,10 +73,10 @@ void recibir_solicitudes(int socket_cliente) {
         case MEM_ENVIAR_INSTRUCCION:
             {
                 int pid;
-                uint n_instruccion;
+                int n_instruccion;
                 
                 pid = *((int*) list_get(datos, 0));
-                n_instruccion = *((uint*) list_get(datos, 1));
+                n_instruccion = *((int*) list_get(datos, 1));
 
                 char *rta = enviar_instruccion(pid, n_instruccion);
 
@@ -123,10 +123,10 @@ void recibir_solicitudes(int socket_cliente) {
         case MEM_RESIZE_PROCESO:
             {
                 int pid;
-                uint nuevo_tam;
+                int nuevo_tam;
 
                 pid = *((int*) list_get(datos, 0));
-                nuevo_tam = *((uint*) list_get(datos, 1));
+                nuevo_tam = *((int*) list_get(datos, 1));
 
                 int rta = resize_proceso(pid, nuevo_tam);
                 enviar_entero(rta, socket_cliente);

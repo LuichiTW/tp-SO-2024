@@ -90,7 +90,7 @@ int prox_frame_libre() {
     return -1;
 }
 
-void print_frames_ocupados(uint longitud_linea) {
+void print_frames_ocupados(int longitud_linea) {
     if (longitud_linea == 0) {
         longitud_linea = 16;
     }

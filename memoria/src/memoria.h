@@ -25,7 +25,7 @@ typedef struct {
 typedef struct {
     int pid;
     t_list *paginas;
-    uint cant;
+    int cant;
 } t_tabla_paginas;
 
 typedef struct {
@@ -64,7 +64,7 @@ t_tabla_paginas *crear_tabla_paginas(int);
 u_int cant_frames_libres();
 // Retorna el índice del primer frame libre en el bitarray, o -1 si no hay.
 int prox_frame_libre();
-void print_frames_ocupados(uint);
+void print_frames_ocupados(int);
 
 t_tabla_paginas *obtener_tabla_por_pid(int);
 t_proceso *obtener_proceso_por_pid(int);

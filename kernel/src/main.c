@@ -49,7 +49,7 @@ int main() {
     //se tendria que liberar el especio de memoria usado por los elementos
 
     //CONSOLA INTERACTIVA
-    iniciar_consola_interactiva(logger,conexion_cpu,conexion_memoria,colaNEW,colaREADY);
+    iniciar_consola_interactiva(logger,conexion_cpu,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
     return 0;
 }
 
@@ -78,7 +78,7 @@ void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memo
             gets(leido);
             continue;
         }
-        atender_instruccion_valida(leido, logger, conexion_cpu, conexion_memoria,colaNEW,colaREADY);
+        atender_instruccion_valida(leido, logger, conexion_cpu, conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
         gets(leido);
     }
     free(leido);
@@ -126,7 +126,7 @@ void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int c
             char* instruccion = strtok(linea, " ");
             if (strcmp(instruccion,"INICIAR_PROCESO"))
             {
-                &PIDs++;
+                PIDs++;
                 log_info(logger,"Se crea el proceso <%d> en NEW",PIDs);
                 char* path = strtok(NULL, " ");
                 iniciar_proceso(path,PIDs,conexion_cpu,conexion_memoria,colaNEW);
@@ -139,7 +139,7 @@ void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int c
         if (PIDs<grado_multiprogramacion)
         {
             
-            encolarColaREADY(colaNEW,colaREADY);
+            encolarColaREADY(colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
         }
         
         break;
@@ -200,7 +200,7 @@ void iniciar_proceso(char*path,int PID,int conexion_cpu,int conexion_memoria,Col
     proceso.Quantum=quantum;
     encolarColaNEW(proceso,colaNEW);
     enviar_mensaje("Enviando nuevo PCB a CPU...",conexion_cpu);
-    enviar_mensaje(PID,conexion_cpu);
+    //enviar_mensaje(PID,conexion_cpu);
     enviar_pcb(proceso,conexion_cpu);
 }
 
@@ -218,7 +218,7 @@ void encolarColaNEW(pcb ProcesoNuevo,Cola*colaNEW)
     nuevo->sig=NULL;
     if (colaNEW->ultimo!=NULL)
     {
-        colaNEW->ultimo->sig=nuevo;
+        colaNEW->ultimo=nuevo;
     }
     else
     {
@@ -338,24 +338,28 @@ void encolarColaRR(Cola*colaREADY,Cola*colaRR)
     temporal_stop(cronometro);
     int64_t tiempo = temporal_gettime(cronometro);
 
-    if (tiempo>quantum_total)
+    if (tiempo==quantum_total)
     {
         //SE INTERRUMPE POR QUANTUM Y LO ENCOLA AL FINAL
         encolarAlFinal(colaRR);
     }
-    else
+    /*else
     {
-        if (/*VERIFICAR SI LA INTERRUPCION ES POR I/O*/)
+        if (VERIFICAR SI LA INTERRUPCION ES POR I/O)
         {
             encolarAlFinal(colaRR);
         }
-    }
+    }*/
 }
 
 void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
 {   
+    // COLA AUXILIAR
+    Cola*colaVRRAux=(Cola*)malloc(sizeof(Cola));
+    colaVRRAux->primero=colaVRRAux->ultimo=NULL;
+
     NodoColaPCBS*puntero;
-    puntero=colaNEW->primero;
+    puntero=colaVRRAux->primero;
 
     while (puntero!=NULL)
     {
@@ -366,19 +370,79 @@ void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
         nuevo->PCBS.Quantum=puntero->PCBS.Quantum;
         nuevo->sig=NULL;
 
-        if (colaVRR->ultimo!=NULL)
+        if (colaVRRAux->ultimo!=NULL)
         {
-            colaVRR->ultimo->sig=nuevo;
+            colaVRRAux->ultimo->sig=nuevo;
         }
         else
         {
-            colaVRR->primero=nuevo;
+            colaVRRAux->primero=nuevo;
         }
-        colaVRR->ultimo=nuevo;
+        colaVRRAux->ultimo=nuevo;
         puntero=puntero->sig;
-        printf("");
-        printf("VRR");
     }
+
+    //ENVIAR CONTEXTO DE EJECUCION
+
+    t_temporal* cronometro = temporal_create();
+    int quantum_total = puntero->PCBS.Quantum;
+
+    //ESPERO MENSAJE DE CPU Y PARO EL CRONOMETRO
+
+    temporal_stop(cronometro);
+    int64_t tiempo = temporal_gettime(cronometro);
+
+    if (tiempo==quantum_total)
+    {
+        //SE INTERRUMPE POR QUANTUM Y LO ENCOLA AL FINAL
+        encolarAlFinal(colaVRR);
+    }
+    /*else
+    {
+
+        if (VERIFICAR SI LA INTERRUPCION ES POR I/O)
+        {
+            encolarAlFinal(colaVRR);
+        }
+        else
+        {
+            if (tiempo<quantum_total)
+            {
+                //PASAR EL PCB DEL PRIMER LUGAR DE LA COLA VRR A VRR Auxiliar
+                
+                NodoColaPCBS*pasarAux;
+                pasarAux=colaVRR->primero;
+                colaVRR->primero=colaVRR>primero->sig;
+                pcb pasaColaAux;
+                pasaColaAux.PC = pasarAux->PCBS.PC;
+                pasaColaAux.PID = pasarAux->PCBS.PID;
+                pasaColaAux.Quantum = (pasarAux->PCBS.Quantum)-tiempo;
+
+                encolarColaVRRAux(pasaColaAux,colaVRRAux);
+            }
+        }
+    }
+    */
+}
+
+void encolarColaVRRAux(pcb ProcesoNuevo,Cola*colaVRRAux)
+{   
+    NodoColaPCBS*nuevo;
+    nuevo=malloc(sizeof(NodoColaPCBS));
+
+    nuevo->PCBS.PID=ProcesoNuevo.PID;
+    nuevo->PCBS.PC=ProcesoNuevo.PC;
+    nuevo->PCBS.Quantum=ProcesoNuevo.Quantum;
+    nuevo->sig=NULL;
+    if (colaVRRAux->ultimo!=NULL)
+    {
+        colaVRRAux->ultimo->sig=nuevo;
+    }
+    else
+    {
+        colaVRRAux->primero=nuevo;
+    }
+    colaVRRAux->ultimo=nuevo;
 }
 
 void encolarAlFinal(Cola*cola)

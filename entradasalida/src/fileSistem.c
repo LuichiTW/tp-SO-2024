@@ -42,7 +42,7 @@ void carga_archivos_fs(void){
 }
 
 t_bitarray *crear_bitmap(void){
-    char *bitarray = malloc(config_dialfs.block_count);
+    char *bitarray = malloc(config_dialfs.cantidad_bloques);
     t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, config_dialfs.block_count, LSB_FIRST);
     return nuevo_bitarray;
 }
@@ -198,7 +198,7 @@ t_bloque *insertarAlFinal(t_bloque *cabeza, char *dato)
 }
 
 
-void guardarListaEnArchivo(t_bloque *cabeza,char *nombreArchivo)
+void guardarListaEnArchivo(t_bloque *cabeza, const char *nombreArchivo)
 {
     FILE *archivo = fopen(nombreArchivo, "wb");
     if (archivo == NULL)

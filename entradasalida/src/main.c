@@ -96,14 +96,26 @@ void manejarConexion(t_parametroEsperar parametros)
         log_info(parametros.logger, "PID: <PID> - Operacion: IO_STDOUT_WRITE");
         resultado = iO_STDOUT_WRITE(parametros);
         break;
-    /*
-     !faltan operaciones de dialfs
-     ?IO_FS_CREATE
-     ?IO_FS_DELETE
-     ?IO_FS_TRUNCATE
-     ?IO_FS_WRITE
-     ?IO_FS_READ
-    */
+    case IO_FS_CREATE:
+        log_info(parametros.logger, "PID: <PID> - Operacion: IO_FS_CREATE");
+        resultado = iO_FS_CREATE(parametros);
+        break;
+    case IO_FS_DELETE:
+        log_info(parametros.logger, "PID: <PID> - Operacion: IO_FS_DELETE");
+        resultado = iO_FS_DELETE(parametros);
+        break;
+    case IO_FS_TRUNCATE:
+        log_info(parametros.logger, "PID: <PID> - Operacion: IO_FS_TRUNCATE");
+        resultado = iO_FS_TRUNCATE(parametros); 
+        break;
+    case IO_FS_WRITE:
+        log_info(parametros.logger, "PID: <PID> - Operacion: IO_FS_WRITE");
+        resultado = iO_FS_WRITE(parametros);
+        break;
+    case IO_FS_READ:
+        log_info(parametros.logger, "PID: <PID> - Operacion: IO_FS_READ");
+        resultado = iO_FS_READ(parametros);
+        break;
     default:
         log_error(parametros.logger, "Tipo de interfaz desconocida: %d", tipoInterfaz);
     }
@@ -216,19 +228,19 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     char *nombre_archivo = leer_string(buffer, &desp);
-    // FILE* bitmap_f = fopen("", "w"); //ruta bitmap
+    FILE* bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); //ruta bitmap
 
     int i;
     for (i = 0; i < config_dialfs.block_count; i++)
     {
-        if (bitarray_test_bit(bitmap, i) == 0)
+        if (bitarray_test_bit(bitmap_f, i) == 0)
         {
-            bitarray_set_bit(bitmap, i);
-            FILE *f = fopen(terminacion_archivo(nombre_archivo,".dat"), "w"); 
+            bitarray_set_bit(bitmap_f, i);
+            FILE *f = fopen(terminacion_archivo(nombre_archivo,".txt"), "w"); 
             fclose(f);
         }
     }
-
+    fclose(bitmap_f)
     nanosleep(&tiempo, NULL);
     free(buffer);
     free(nombre_archivo);
@@ -249,13 +261,15 @@ int iO_FS_DELETE(t_parametroEsperar parametros)
     int comienzo_archivo = info_archivo(nombre_archivo, "COMIENZO");
     int tamanio_archivo = info_archivo(nombre_archivo, "TAMANIO");
 
+    FILE* bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); //ruta bitmap
+
     int i;
     for (i = comienzo_archivo; i < division_redondeada(tamanio_archivo, config_dialfs.block_size); i++)
     { // desde el bloque inicial limpia los bits del bitmap hasta que alcance todos los bloques que ocupa el archivo
-        bitarray_clean_bit(bitmap, i);
+        bitarray_clean_bit(bitmap_f, i);
     }
-
-    remove(nombre_archivo); // AGREGAR .TXT
+    fclose(bitmap_f);
+    remove(terminacion_archivo(nombre_archivo,".txt")); 
     nanosleep(&tiempo, NULL);
     free(buffer);
     free(nombre_archivo);
@@ -272,7 +286,7 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     char *nombre_archivo = leer_string(buffer, &desp);
     int tamanio = leer_entero(buffer, &desp);
 
-    truncate(terminacion_archivo(nombre_archivo,".dat"), tamanio); 
+    truncate(terminacion_archivo(nombre_archivo,".txt"), tamanio); //HAY QUE VER TRUNCATE
     modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
 
     nanosleep(&tiempo, NULL);
@@ -354,11 +368,9 @@ int division_redondeada(int numerador, int denominador)
     return resultado;
 }
 
-char* terminacion_archivo(char* archivo,char* terminacion){
+char terminacion_archivo(char* archivo,char* terminacion){
     size_t nuevo_tamano = strlen(archivo) + strlen(terminacion) + 1; // +1 para el carácter nulo
     char* nuevo_archivo = (char*)malloc(nuevo_tamano);
-  
-    
     // Copiar el nombre del archivo original y agregar la terminación
     strcpy(nuevo_archivo, archivo);
     strcat(nuevo_archivo, terminacion);

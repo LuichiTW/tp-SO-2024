@@ -26,12 +26,17 @@ typedef struct
 	t_log *logger;
 } t_parametroEsperar;
 
-enum tipo_interfaz_instruccion
+/*enum tipo_interfaz_instruccion
 {
     IO_GEN_SLEEP,
     IO_STDIN_READ,
-    IO_STDOUT_WRITE
-};
+    IO_STDOUT_WRITE,
+    IO_FS_CREATE,
+    IO_FS_DELETE,
+    IO_FS_TRUNCATE,
+    IO_FS_WRITE,
+    IO_FS_READ
+};*/
 
 extern t_config_dialfs config_dialfs; 
 
@@ -55,5 +60,6 @@ void crear_metadata(char *nombre_archivo, int pos);
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar);
 int info_archivo(char *nombre_archivo, char *parametro);
 int division_redondeada(int numerador, int denominador);
+char terminacion_archivo(char* archivo,char* terminacion);
 
 #endif // !MAIN_IO

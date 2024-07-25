@@ -4,20 +4,21 @@ char* PLACEHOLDER_PATH_SCRIPT = "prueba.txt";
 
 int main() {
 
-    t_log *logger = crear_memlogger();
+    t_log *logger = alt_memlogger();
 	log_info(logger, "Iniciando Memoria...");
 
     cargar_config();
     iniciar_mem_usuario();
     
-    char puerto[5];
-    sprintf(puerto, "%d", config_memoria.puerto_escucha);
-    int socket_server = iniciar_servidor(puerto);
+    int socket_server = iniciar_servidor(string_itoa(config_memoria.puerto_escucha));
 
     log_info(logger, "Memoria lista para recibir conexiones");
 
     procesos_actuales = list_create();
     tablas_paginas = list_create();
+
+    // DEBUG
+    crear_proceso(1, "prueba.txt");
 
     // ? Por ahora no veo motivos para crear el hilo
     // Crea un hilo que se encargue de esperar clientes para gestionar sus conexiones.
@@ -27,7 +28,10 @@ int main() {
 
     while (true) {
         t_log *logger = alt_memlogger();
-        int socket_cliente = esperar_cliente(socket_server, logger);
+        // TODO mandarle a la funcion handshake el modulo
+        
+        int socket_cliente = esperar_cliente2(socket_server, logger);
+        hacer_handshake(socket_cliente);
 
         // Cuando un cliente se conecta, crea un hilo para atender sus peticiones.
         pthread_t thread_conexion;
@@ -43,16 +47,16 @@ int main() {
 }
 
 
-void recibir_solicitudes(int socket_cliente) {
+void recibir_solicitudes(int *socket_cliente_dir) {
+    int socket_cliente = *socket_cliente_dir;
+    while (true) {
     int op = recibir_operacion(socket_cliente);
+
+    t_log *logger = alt_memlogger();
+    log_info(logger, "op_code: %i\n", op);
 
     t_list *datos;
     datos = recibir_paquete(socket_cliente);
-
-    struct timespec delay;
-    delay.tv_sec = 0;
-    delay.tv_nsec = config_memoria.retardo_respuesta * 1000000; // pasado a nanosegundos
-    nanosleep(&delay, NULL);
 
     switch (op) {
         case MEM_CREAR_PROCESO:
@@ -73,12 +77,14 @@ void recibir_solicitudes(int socket_cliente) {
         case MEM_ENVIAR_INSTRUCCION:
             {
                 int pid;
-                uint n_instruccion;
+                int n_instruccion;
                 
                 pid = *((int*) list_get(datos, 0));
-                n_instruccion = *((uint*) list_get(datos, 1));
+                n_instruccion = *((int*) list_get(datos, 1));
 
                 char *rta = enviar_instruccion(pid, n_instruccion);
+
+                delay(config_memoria.retardo_respuesta);
 
                 enviar_mensaje(rta, socket_cliente);
             }
@@ -123,10 +129,10 @@ void recibir_solicitudes(int socket_cliente) {
         case MEM_RESIZE_PROCESO:
             {
                 int pid;
-                uint nuevo_tam;
+                int nuevo_tam;
 
                 pid = *((int*) list_get(datos, 0));
-                nuevo_tam = *((uint*) list_get(datos, 1));
+                nuevo_tam = *((int*) list_get(datos, 1));
 
                 int rta = resize_proceso(pid, nuevo_tam);
                 enviar_entero(rta, socket_cliente);
@@ -150,4 +156,30 @@ void recibir_solicitudes(int socket_cliente) {
     list_destroy(datos);
 
     print_frames_ocupados(0);
+    }
+}
+
+
+void hacer_handshake(int socket_cliente) {
+    recibir_operacion(socket_cliente);
+    char *modulo_str = recibir_msg(socket_cliente);
+    int i_modulo = atoi(modulo_str);
+
+    switch (i_modulo) {
+        case MOD_KERNEL:
+            break;
+        case MOD_CPU:
+            // Responde a CPU con el tamaño de página
+            enviar_mensaje(string_itoa(config_memoria.tam_pagina), socket_cliente);
+            break;
+        case MOD_IO:
+            break;
+    }
+}
+
+
+void delay(int milisegundos) {
+    t_temporal *t = temporal_create();
+    while(temporal_gettime(t) < milisegundos) {}
+    temporal_destroy(t);
 }

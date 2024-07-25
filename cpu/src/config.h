@@ -15,6 +15,8 @@ struct config_cpu {
     t_config *config_original;
 };
 
+extern int tam_pagina;
+
 extern struct config_cpu config_cpu;
 
 void cargar_config(void);

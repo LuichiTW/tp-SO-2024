@@ -1,6 +1,7 @@
 #include "config.h"
 
 struct config_cpu config_cpu;
+int tam_pagina;
 
 void cargar_config() {
     t_config *config = config_create("cpu.config");

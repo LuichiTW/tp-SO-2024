@@ -8,6 +8,14 @@
 #include <netdb.h>
 #include <string.h>
 #include <commons/log.h>
+#include <commons/string.h>
+
+typedef enum {
+	MOD_KERNEL,
+	MOD_CPU,
+	MOD_MEMORIA,
+	MOD_IO
+} modulos;
 
 typedef enum
 {
@@ -108,5 +116,10 @@ void eliminar_paquete(t_paquete *paquete);
 void enviar_peticion(t_paquete *paquete, int socket_cliente, op_code codigo);
 
 void enviar_entero(int valor, int socket_cliente);
+
+/**
+ * Similar a crear_conexion, pero no envía un mensaje (para tener control sobre el handshake).
+*/
+int crear_conexion2(char *ip, char* puerto);
 
 #endif // !CONEXIONES_CLIENTE

@@ -14,6 +14,6 @@ struct sockets_cpu {
 
 extern struct sockets_cpu sockets_cpu;
 
-void cargar_sockets(t_log *loggerPrincipal);
+void cargar_sockets();
 
 #endif

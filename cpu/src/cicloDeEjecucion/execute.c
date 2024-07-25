@@ -110,7 +110,6 @@ void funExecute(struct s_instruccion *instruccion){
         fEXIT();
         break;
     }
-    
 }
 
 int decodificarRegistro(char variable[]){

@@ -163,7 +163,7 @@ void fIO_GEN_SLEEP(char interface[], int unidadesDeTrabajo){//!OBLIGATORIO
     agregar_a_paquete(paquete, interface, strlen(interface)+1);
     agregar_a_paquete(paquete, unidad_trabajo, strlen(unidad_trabajo)+1);
 
-    enviar_paquete(paquete, sockets_cpu.socket_kernel);
+    enviar_paquete(paquete, sockets_cpu.socket_servidor_cpu_dispatch);
 }
 void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
     t_paquete *paquete;

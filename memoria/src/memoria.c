@@ -128,5 +128,5 @@ t_log *crear_memlogger() {
 }
 
 t_log *alt_memlogger() {
-    return log_create("memoria_extra.log", "memoria", true, LOG_LEVEL_INFO);
+    return log_create("memoria_extra.log", "memoria extra", true, LOG_LEVEL_INFO);
 }

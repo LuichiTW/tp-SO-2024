@@ -8,6 +8,7 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/error.h>
+#include <commons/string.h>
 #include <readline/readline.h>
 #include <pthread.h>
 #include <semaphore.h>

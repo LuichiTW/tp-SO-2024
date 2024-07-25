@@ -52,40 +52,59 @@ t_log *loggerPrincipal;
 sem_t s_interrupcion;
 
 int main() {
-    loggerPrincipal = log_create("cpu.log", "cpu", true, LOG_LEVEL_INFO);
-	log_info(loggerPrincipal, "Iniciando CPU...");
+    t_log *logger = log_create("cpu.log", "cpu", true, LOG_LEVEL_INFO);
+    t_log *alt_logger = log_create("cpu_extra.log", "cpu extra", true, LOG_LEVEL_INFO);
+
+	log_info(alt_logger, "Iniciando CPU...");
     cargar_config();
+    cargar_sockets();
 
+    // ? Ignorando el código que conecta con kernel para debug
+    ////sockets_cpu.socket_cliente_kernel_interrupt = esperar_cliente(sockets_cpu.socket_servidor_cpu_interrupt, loggerPrincipal);
 
-//! se omite la conexiones entre modulos para hacer pruebas independientemente en el modulo
-  
-    cargar_sockets(loggerPrincipal);
-    sockets_cpu.socket_cliente_kernel_interrupt = esperar_cliente(sockets_cpu.socket_servidor_cpu_interrupt, loggerPrincipal);
+    ////sem_init(&s_interrupcion, 0, 0);
 
-    sem_init(&s_interrupcion, 0, 0);
+    ////pcb = recibir_pcb(sockets_cpu.socket_servidor_cpu_dispatch, sockets_cpu.socket_servidor_cpu_interrupt);
 
-    pcb = recibir_pcb(sockets_cpu.socket_servidor_cpu_dispatch, sockets_cpu.socket_servidor_cpu_interrupt);
-
-//! PRUEBA DE CICLO DE INSTRUCCION MANUAL
- /*
+    // Ciclo de instrucción
     while (1) {
-        char *test = funFetch(1);
-        if (strcmp(test,"0") == 0) {
-            break;
-        }
-        struct s_instruccion *instruccionDecodificada = funDecode(test);
-        funExecute(instruccionDecodificada);
-        eliminar_Lista_Instruccion(instruccionDecodificada);
-        funCheckInterrupt(pcb, socket_cliente_kernel_interrupt);
-    }
+        // Fetch
+        log_info(alt_logger, "- Ciclo de instrución iniciado -");
+        char *instruccionStr = funFetch(sockets_cpu.socket_memoria);
 
- */
+        // Decode
+        struct s_instruccion *instruccionDecodificada = funDecode(instruccionStr);
+
+        // Execute
+        funExecute(instruccionDecodificada);
+
+        // Log de instrucción ejecutada
+        char **instYParametros = string_n_split(instruccionStr, 2, " ");
+        char *params;
+        if (string_array_size(instYParametros) < 2) {
+            params = "";
+        }
+        else {
+            params = instYParametros[1];
+        }
+        log_info(logger, "PID: %i - Ejecutando: %s - %s", 1, instYParametros[0], params);
+
+        // Check interrupt
+        ////funCheckInterrupt(pcb, socket_cliente_kernel_interrupt);
+
+        // Limpieza de memoria
+        free(instruccionStr);
+        eliminar_Lista_Instruccion(instruccionDecodificada);
+    }
+    log_destroy(logger);
+    log_destroy(alt_logger);
+
     return 0;
 }
 
 
 t_pcb *recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt){
-    //recibir PCB
+    // Recibir PCB
     t_pcb *pcb = malloc(sizeof(t_pcb));
     int bytesRecibidos = recv(socket_cliente_kernel_dispatch, pcb, sizeof(t_pcb), 0);
     if (bytesRecibidos <= 0) {

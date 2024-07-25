@@ -87,5 +87,25 @@ void enviar_peticion(t_paquete *paquete, int socket_cliente, op_code codigo) {
 }
 
 void enviar_entero(int valor, int socket_cliente) {
-	enviar_mensaje((char*) &valor, socket_cliente);
+	char *msg = string_itoa(valor);
+	enviar_mensaje(msg, socket_cliente);
+}
+
+
+int crear_conexion2(char *ip, char* puerto){
+	struct addrinfo hints;
+	struct addrinfo *server_info;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+	getaddrinfo(ip, puerto, &hints, &server_info);
+	int socket_cliente = socket(server_info->ai_family,server_info->ai_socktype,server_info->ai_protocol);
+	int error= connect(socket_cliente,server_info->ai_addr,server_info->ai_addrlen);
+	freeaddrinfo(server_info);
+	if(error == -1){
+		perror("Error al conectarse");
+		exit(EXIT_FAILURE);
+	}
+	return socket_cliente;
 }

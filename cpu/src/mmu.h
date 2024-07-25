@@ -9,14 +9,12 @@
 #include "cicloDeEjecucion/checkInterrupt.h"
 
 typedef struct {
-    uint pagina;
-    uint desplazamiento;
+    int pagina;
+    int desplazamiento;
 } t_dir_logica;
 
-extern uint tam_pagina;
-
-t_dir_logica separar_dir_logica(uint dir_logica);
-uint obtener_direccion_fisica(t_dir_logica dir_logica);
+t_dir_logica separar_dir_logica(int dir_logica);
+int obtener_direccion_fisica(t_dir_logica dir_logica);
 int obtener_frame(int pagina);
 
 #endif

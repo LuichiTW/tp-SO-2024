@@ -84,3 +84,13 @@ char *recibir_msg(int socket_cliente) {
 	char* buffer = recibir_buffer(&size, socket_cliente);
     return buffer;
 }
+
+
+int esperar_cliente2(int socket_servidor, t_log *logger){
+    int socket_cliente = accept(socket_servidor, NULL, NULL);
+    if(socket_cliente == -1){
+        return -1;
+    }
+    log_info(logger, "Se conecto un Cliente.");
+    return socket_cliente;
+}

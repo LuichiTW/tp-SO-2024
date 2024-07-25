@@ -4,6 +4,7 @@ IO_GEN_SLEEP (Interfaz, Unidades de trabajo): Esta instrucción solicita al Kern
 */
 
 // TODO enviar a kernel out of memory (RESIZE)
+// TODO testear bien COPY_STRING (usando IO)
 
 void fSUM(enum lista_registros_CPU regLetraA, enum lista_registros_CPU regLetraB){
     void * regA = obtenerRegistro(regLetraA);
@@ -131,7 +132,7 @@ void fRESIZE(int tamanho){
         // TODO enviar a kernel o lo que sea
     }
 }
-void fCOPY_STRING(int tamanho){//!OBLIGATORIO
+void fCOPY_STRING(int tamanho){
     t_paquete *paquete = crear_paquete();
     int di_dir_logica = *((int*) obtenerRegistro(DI));
     int di_dir_fisica;
@@ -149,6 +150,7 @@ void fCOPY_STRING(int tamanho){//!OBLIGATORIO
     enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_LEER_MEMORIA);
     eliminar_paquete(paquete);
 
+    recibir_operacion(sockets_cpu.socket_memoria);
     str = recibir_msg(sockets_cpu.socket_memoria);
 
     si_dir_fisica = obtener_direccion_fisica(separar_dir_logica(si_dir_logica));
@@ -160,6 +162,11 @@ void fCOPY_STRING(int tamanho){//!OBLIGATORIO
     agregar_a_paquete(paquete, str, tamanho);
 
     enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ESCRIBIR_MEMORIA);
+    eliminar_paquete(paquete);
+    free(str);
+
+    recibir_operacion(sockets_cpu.socket_memoria);
+    recibir_msg(sockets_cpu.socket_memoria);
 }
 void fWAIT(char recurso[]){
 
@@ -183,6 +190,8 @@ void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Direccion, enum l
     dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
     tam_lectura = *((int*) obtenerRegistro(Tamanho));
 
+    paquete = crear_paquete();
+
     agregar_a_paquete(paquete, interface, string_length(interface));
     agregar_a_paquete(paquete, &tam_lectura, sizeof(tam_lectura));
     agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
@@ -198,6 +207,8 @@ void fIO_STDOUT_WRITE(char interface[], enum lista_registros_CPU Direccion, enum
     dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
     tam_escritura = *((int*) obtenerRegistro(Tamanho));
 
+    paquete = crear_paquete();
+    
     agregar_a_paquete(paquete, interface, string_length(interface));
     agregar_a_paquete(paquete, &tam_escritura, sizeof(tam_escritura));
     agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));

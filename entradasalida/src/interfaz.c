@@ -1,16 +1,5 @@
 #include "interfaz.h"
 
-t_interfaz_disponibles paths_disponibles[] = {
-    {"./generica.config", GENERICA},
-    {"./stdin.config", STDIN},
-    {"./stdout.config", STDOUT},
-    {"./dialfs.config", DIALFS}};
-
-t_config_generica config_generica;
-t_config_stdin config_stdin;
-t_config_stdout config_stdout;
-t_config_dialfs config_dialfs;
-
 // iniciar logger
 t_log *iniciar_logger_io(void)
 {
@@ -25,77 +14,6 @@ t_log *iniciar_logger_io(void)
     return logger;
 }
 
-// con una lista de interfaces, recorre la lista y carga los datos de cada interfaz
-void *iniciar_config_io(t_interfaz *interfaces)
-{
-    recorrer_lista_nombres_tipos(interfaces);
-    t_interfaz *aux = interfaces;
-    t_config *config;
-    //! posible uso de config_save_in_file(t_config*, char *path); para crear el archivo de config de cada interfaz
-    //! posible creacion de funciones para que no sea tan largo
-    while (aux != NULL)
-    {
-        if (aux->path_interfaz == NULL)
-        {
-            perror("Error al iniciar config");
-            exit(EXIT_FAILURE);
-        }
-        char *path_config_interfaz = aux->path_interfaz;
-        printf("Path de interfaz: %s\n", path_config_interfaz);
-        int id = id_path_config(path_config_interfaz);
-        switch (id)
-        {
-        case GENERICA:
-            config = iniciar_config(path_config_interfaz);
-            config_generica.tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
-            config_generica.ip_kernel = config_get_string_value(config, "IP_KERNEL");
-            config_generica.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
-            config_generica.tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
-            break;
-        case STDIN:
-            config = iniciar_config(path_config_interfaz);
-            config_stdin.tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
-            config_stdin.ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-            config_stdin.puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-            config_stdin.ip_kernel = config_get_string_value(config, "IP_KERNEL");
-            config_stdin.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
-            break;
-        case STDOUT:
-            config = iniciar_config(path_config_interfaz);
-            config_stdout.tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
-            config_stdout.ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-            config_stdout.puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-            config_stdout.ip_kernel = config_get_string_value(config, "IP_KERNEL");
-            config_stdout.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
-            break;
-        case DIALFS:
-
-            // ! cada interfaz deberia tener su propio path de config
-            // ? se podria usar  config_set_value(t_config*, char *key, char *value);
-
-            config = iniciar_config(path_config_interfaz);
-            config_dialfs.tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
-            config_dialfs.tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
-            config_dialfs.path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
-            config_dialfs.block_size = config_get_int_value(config, "BLOCK_SIZE");
-            config_dialfs.block_count = config_get_int_value(config, "BLOCK_COUNT");
-            config_dialfs.retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
-            config_dialfs.ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-            config_dialfs.puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-            config_dialfs.ip_kernel = config_get_string_value(config, "IP_KERNEL");
-            config_dialfs.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
-            break;
-        default:
-            perror("Error al iniciar config");
-            exit(EXIT_FAILURE);
-            break;
-        }
-        aux = aux->siguiente;
-    }
-
-    return config;
-}
-
 // inicia la configuracion de un archivo de config
 t_config *iniciar_config(char *path_config)
 {
@@ -108,178 +26,275 @@ t_config *iniciar_config(char *path_config)
     return config;
 }
 
-t_interfaz *agregar_interfaz(t_interfaz *interfaces, t_interfaz *nueva_interfaz)
-{
-    t_interfaz *aux = interfaces;
-
-    // crear nuevo nodo
-    t_interfaz *new_node = malloc(sizeof(t_interfaz));
-    new_node->nombre = strdup(nueva_interfaz->nombre);
-    new_node->path_interfaz = strdup(nueva_interfaz->path_interfaz);
-    new_node->siguiente = NULL;
-
-    // si esta vacia usarlo como primer nodo
-    if (aux == NULL)
-    {
-        return new_node;
-    }
-
-    // moverse al final de la lista
-    while (aux->siguiente != NULL)
-    {
-        aux = aux->siguiente;
-    }
-
-    // agregar el nuevo nodo al final de la lista
-    aux->siguiente = new_node;
-
-    return interfaces;
-}
-
-// crea una lista de interfaces con sus respectivos path de config hasta que se ingrese un string vacio
-t_interfaz *crear_interfaces(void)
-{
-    t_interfaz *interfaces = malloc(sizeof(t_interfaz));
-    if (interfaces == NULL)
-    {
-        perror("Error al alocar memoria interfaz");
+void cargar_config_interfaz(t_config config){
+    char *tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
+    if (tipo_interfaz == NULL) {
+        perror("Error al obtener el valor de TIPO_INTERFAZ");
         exit(EXIT_FAILURE);
     }
-    char *nuevo_io = readline("Crear io:<nombre_interfaz> <path_config>\n");
-    char **parametros = string_split(nuevo_io, " ");
-    if (!es_path_config(parametros[1]))
-    {
-        free(nuevo_io);
-        free(parametros);
-        perror("path no valido");
+    if (strcmp(tipo_interfaz, "GENERICA") == 0) {
+        log_info(logger, "Interfaz generica");
+        //cargar config de interfaz generica
+    } else if (strcmp(tipo_interfaz, "STDIN") == 0) {
+        log_info(logger, "Interfaz STDIN");
+        //cargar config de interfaz stdin
+    } else if (strcmp(tipo_interfaz, "STDOUT") == 0) {
+        log_info(logger, "Interfaz STDOUT");
+        //cargar config de interfaz stdout
+    } else if (strcmp(tipo_interfaz, "DIALFS") == 0) {
+        log_info(logger, "Interfaz DIALFS");
+        //cargar config de interfaz dialfs
+    } else {
+        perror("Error al obtener el valor de TIPO_INTERFAZ");
         exit(EXIT_FAILURE);
     }
-    char *nombre_io;
-    char *path_config;
-    // inicializar primer interfaz
-    interfaces->nombre = parametros[0];
-    interfaces->path_interfaz = parametros[1];
-    interfaces->siguiente = NULL;
-    if (interfaces->nombre == NULL || interfaces->path_interfaz == NULL)
-    {
-        perror("Error al ingresar parametros");
-        exit(EXIT_FAILURE);
-    }
-    while (!string_is_empty(nuevo_io))
-    {
-        free(parametros);
-        nuevo_io = readline("Crear io:<nombre_interfaz> <path_config>\n");
-
-        if (string_is_empty(nuevo_io))
-        {
-            free(nuevo_io);
-            perror("saliendo del creador de interfaces");
-            break;
-        }
-
-        parametros = string_split(nuevo_io, " ");
-        nombre_io = parametros[0]; // TODO: comprobar que el nombre sea unico
-        path_config = parametros[1];
-
-        // verifica que los parametros no sean nulos
-        if ((path_config == NULL || nombre_io == NULL) && !string_is_empty(nuevo_io))
-        {
-            perror("Error al ingresar parametros");
-            free(nuevo_io);
-            free(parametros);
-            free(path_config);
-            free(nombre_io);
-            exit(EXIT_FAILURE);
-        }
-
-        // verifica que el tipo de interfaz sea valido
-        if (!es_path_config(path_config))
-        {
-            free(nuevo_io);
-            free(parametros);
-            free(path_config);
-            free(nombre_io);
-            perror("Tipo de interfaz no reconocido");
-            exit(EXIT_FAILURE);
-        }
-
-        // agregar nueva interfaz, cargando los datos
-        t_interfaz *nueva_interfaz = malloc(sizeof(t_interfaz));
-        if (nueva_interfaz == NULL)
-        {
-            perror("Error al alocar memoria interfaz");
-            exit(EXIT_FAILURE);
-        }
-        nueva_interfaz->nombre = nombre_io;
-        nueva_interfaz->path_interfaz = path_config;
-        nueva_interfaz->siguiente = NULL;
-
-        // añadir a la lista
-        interfaces = agregar_interfaz(interfaces, nueva_interfaz);
-
-        free(nombre_io);
-        free(path_config);
-        perror("interfaz creada con exito");
-    }
-
-    return interfaces;
+    
 }
 
-// verifica si el path de config es valido
-bool es_path_config(char *path_config)
+int iO_GEN_SLEEP(t_parametroEsperar parametros)
 {
-    for (int i = 0; i < 4; i++)
+    int size;
+    char *buffer;
+    int desp = 0;
+
+    buffer = recibir_buffer(&size, parametros.socket_cliente);
+
+    int uTrabajo = leer_entero(buffer, &desp);
+    for (int i = 0; i < uTrabajo; i++)
     {
-        if (strcmp(path_config, paths_disponibles[i].path_config_l) == 0)
-        {
-            return true;
-        }
+        nanosleep(&tiempo, NULL);
     }
-    return false;
+
+    free(buffer);
+    if (uTrabajo == NULL)
+    {
+        return 1;
+    }
+    return 0;
 }
 
-// retorna el id del path de config
-int id_path_config(char *path_config)
+int iO_STDIN_READ(t_parametroEsperar parametros)
 {
-    for (int i = 0; i < 4; i++)
+    int size;
+    char *buffer;
+    int desp = 0;
+    char *texto;
+
+    buffer = recibir_buffer(&size, parametros.socket_cliente);
+    char direcciones[sizeof(leer_array(buffer, &desp))];
+    memcpy(direcciones, leer_array(buffer, &desp), sizeof(direcciones));
+
+    if (direcciones == NULL)
     {
-        if (strcmp(path_config, paths_disponibles[i].path_config_l) == 0)
-        {
-            return i;
-        }
+        return 1;
     }
-    return -1;
+    //! que pasa al tener varios hilos que quieran leer consola
+    texto = readline("> ");
+    t_paquete *paquete = crear_paquete();
+    agregar_a_paquete(paquete, texto, strlen(texto) + 1);
+    agregar_a_paquete(paquete, direcciones, sizeof(direcciones) + 1);
+
+    enviar_paquete(paquete, parametros.conexion_memoria);
+
+    free(texto);
+    free(buffer);
+    return 0;
 }
 
-//  recorre la lista de interfaces y muestra los nombres y sus path
-void recorrer_lista_nombres_tipos(t_interfaz *interfaces)
+int iO_STDOUT_WRITE(t_parametroEsperar parametros)
 {
-    t_interfaz *aux = interfaces;
-    while (aux != NULL)
+    int size;
+    char *buffer;
+    int desp = 0;
+    char *texto;
+
+    buffer = recibir_buffer(&size, parametros.socket_cliente);
+    char direcciones[sizeof(leer_array(buffer, &desp))];
+    memcpy(direcciones, leer_array(buffer, &desp), sizeof(direcciones));
+    if (direcciones == NULL)
     {
-        if (aux->nombre != NULL)
-        {
-            printf("Nombre: %s\n", aux->nombre);
-        }
-        if (aux->path_interfaz != NULL)
-        {
-            printf("Path de interfaz: %s\n", aux->path_interfaz);
-        }
-        aux = aux->siguiente;
+        return 1;
     }
+    t_paquete *paquete = crear_paquete();
+    agregar_a_paquete(paquete, direcciones, sizeof(direcciones) + 1);
+    enviar_paquete(paquete, parametros.conexion_memoria);
+
+    int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
+    buffer = recibir_buffer(&size, socketCliente);
+    char *direccionesT[sizeof(leer_array(buffer, &desp))];
+    memcpy(direccionesT, leer_array(buffer, &desp), sizeof(direccionesT));
+    if (direccionesT == NULL)
+    {
+        return 1;
+    }
+    size_t num_direcciones = sizeof(direccionesT) / sizeof(direccionesT[0]);
+
+    for (size_t i = 0; i < num_direcciones; ++i)
+    {
+        char *direccionT = (char *)direccionesT[i];
+        strncpy(texto, direccionT, &size);
+        printf("Texto leido: %s\n", texto);
+    }
+
+    free(texto);
+    free(buffer);
+    return 0;
 }
 
-/* //!AGREGAR AL FINAL PARA LIBERAR LA LISTA
-void eliminar_lista(struct Node** head) {
-struct Node* current = *head;
-struct Node* next;
+int iO_FS_CREATE(t_parametroEsperar parametros)
+{
+    int size;
+    char *buffer;
+    int desp = 0;
 
-while (current != NULL) {
-    next = current->next;
-    free(current);
-    current = next;
+    buffer = recibir_buffer(&size, parametros.socket_cliente);
+    char *nombre_archivo = leer_string(buffer, &desp);
+    FILE* bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); //ruta bitmap
+
+    int i;
+    for (i = 0; i < config_dialfs.block_count; i++)
+    {
+        if (bitarray_test_bit(bitmap_f, i) == 0)
+        {
+            bitarray_set_bit(bitmap_f, i);
+            FILE *f = fopen(terminacion_archivo(nombre_archivo,".txt"), "w"); 
+            fclose(f);
+        }
+    }
+    fclose(bitmap_f)
+    nanosleep(&tiempo, NULL);
+    free(buffer);
+    free(nombre_archivo);
+    crear_metadata(nombre_archivo, i);
+    // ACTUALIZAR BITMAP
+    return 0;
 }
 
-*head = NULL; // Marcar la lista como vacía
+int iO_FS_DELETE(t_parametroEsperar parametros)
+{
+    int size;
+    char *buffer;
+    int desp = 0;
+
+    buffer = recibir_buffer(&size, parametros.socket_cliente);
+    char *nombre_archivo = leer_string(buffer, &desp);
+
+    int comienzo_archivo = info_archivo(nombre_archivo, "COMIENZO");
+    int tamanio_archivo = info_archivo(nombre_archivo, "TAMANIO");
+
+    FILE* bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); //ruta bitmap
+
+    int i;
+    for (i = comienzo_archivo; i < division_redondeada(tamanio_archivo, config_dialfs.block_size); i++)
+    { // desde el bloque inicial limpia los bits del bitmap hasta que alcance todos los bloques que ocupa el archivo
+        bitarray_clean_bit(bitmap_f, i);
+    }
+    fclose(bitmap_f);
+    remove(terminacion_archivo(nombre_archivo,".txt")); 
+    nanosleep(&tiempo, NULL);
+    free(buffer);
+    free(nombre_archivo);
+    return 0;
 }
-*/
+
+int iO_FS_TRUNCATE(t_parametroEsperar parametros)
+{
+    int size;
+    char *buffer;
+    int desp = 0;
+
+    buffer = recibir_buffer(&size, parametros.socket_cliente);
+    char *nombre_archivo = leer_string(buffer, &desp);
+    int tamanio = leer_entero(buffer, &desp);
+
+    truncate(terminacion_archivo(nombre_archivo,".txt"), tamanio); //HAY QUE VER TRUNCATE
+    modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
+
+    nanosleep(&tiempo, NULL);
+    free(buffer);
+    free(nombre_archivo);
+    return 0;
+}
+
+int leer_entero(char *buffer, int *desplazamiento)
+{
+    int ret;
+    memcpy(&ret, buffer + (*desplazamiento), sizeof(int));
+    (*desplazamiento) += sizeof(int);
+    return ret;
+}
+
+int leer_64(char *buffer, int *desplazamiento)
+{
+    int ret;
+    memcpy(&ret, buffer + (*desplazamiento), sizeof(int));
+    (*desplazamiento) += sizeof(uint64_t);
+    return ret;
+}
+
+char *leer_string(char *buffer, int *desplazamiento)
+{
+    int tamanio = leer_entero(buffer, desplazamiento);
+    char *valor = malloc(tamanio);
+    memcpy(valor, buffer + (*desplazamiento), tamanio);
+    (*desplazamiento) += tamanio;
+    return valor;
+}
+
+char **leer_array(char *buffer, int *desp)
+{
+    int len = leer_entero(buffer, desp);
+    char **arr = malloc((len + 1) * sizeof(char *));
+    for (int i = 0; i < len; i++)
+    {
+        arr[i] = leer_string(buffer, desp);
+    }
+    arr[len] = NULL;
+    return arr;
+}
+
+void crear_metadata(char *nombre_archivo, int pos)
+{
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".txt")); 
+    config_set_value(metadata, "COMIENZO", string_itoa(pos));
+    config_set_value(metadata, "TAMANIO", "1");
+    config_destroy(metadata);
+}
+
+void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar){
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".txt")); 
+    config_set_value(metadata, parametro, string_itoa(dato_modificar));
+    config_destroy(metadata);
+}
+
+int info_archivo(char *nombre_archivo, char *parametro)
+{
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".txt")); 
+    int info = config_get_int_value(metadata, parametro);
+    config_destroy(metadata);
+    return info;
+}
+int division_redondeada(int numerador, int denominador)
+{
+    if (denominador == 0)
+    {
+        printf("Error: División por cero\n");
+        return -1;
+    }
+    int resultado = numerador / denominador;
+    if (numerador % denominador != 0)
+    {
+        resultado += 1;
+    }
+    return resultado;
+}
+
+char terminacion_archivo(char* archivo,char* terminacion){
+    size_t nuevo_tamano = strlen(archivo) + strlen(terminacion) + 1; // +1 para el carácter nulo
+    char* nuevo_archivo = (char*)malloc(nuevo_tamano);
+    // Copiar el nombre del archivo original y agregar la terminación
+    strcpy(nuevo_archivo, archivo);
+    strcat(nuevo_archivo, terminacion);
+    
+    return nuevo_archivo;
+}

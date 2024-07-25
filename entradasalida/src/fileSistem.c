@@ -1,6 +1,6 @@
 #include "fileSistem.h"
 
-extern t_config_dialfs config_dialfs;
+extern t_config config_dialfs; // ! modificar funciones que usen este parametro para que usen el obterner del archivo config
 t_bloque *bloques;
 
 // todo: implementar el ftruncate para que el archivo no supere el tamaño maximo

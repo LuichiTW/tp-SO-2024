@@ -12,72 +12,46 @@
 #include <utils/conexiones/conexiones_servidor.h>
 #include <commons/string.h>
 
-
 typedef struct
 {
-	char * tipo_interfaz;
-	int tiempo_unidad_trabajo;
-    char *ip_kernel;
-    char *puerto_kernel;
-} t_config_generica;
-
-typedef struct
-{
-	char * tipo_interfaz;
-    char *ip_memoria;
-    char *puerto_memoria;
-    char *ip_kernel;
-    char *puerto_kernel;
-} t_config_stdin;
-
-typedef struct
-{
-	char * tipo_interfaz;
-    char *ip_memoria;
-    char *puerto_memoria;
-    char *ip_kernel;
-    char *puerto_kernel;
-} t_config_stdout;
-
-typedef struct
-{
-	char * tipo_interfaz;
-	int tiempo_unidad_trabajo;
-	char *path_base_dialfs;
-	int block_size;
-    int block_count;
-    int retraso_compactacion;
-    char *ip_memoria;
-    char *puerto_memoria;
-    char *ip_kernel;
-    char *puerto_kernel;
-} t_config_dialfs;
-
-typedef struct t_interfaz t_interfaz;
-
-struct t_interfaz
-{
-    char * nombre;
-    char * path_interfaz;
-    t_interfaz * siguiente;
-};
+	int conexion_memoria;
+	int conexion_kernel;
+	int server_fd;
+    int socket_cliente;
+	t_log *logger;
+} t_parametroEsperar;
 
 enum tipo_interfaz {GENERICA, STDIN, STDOUT, DIALFS};
 
-typedef struct
-{
-  char *path_config_l;
-  enum tipo_interfaz id;
-}t_interfaz_disponibles;
+extern t_log *logger;
 
+struct timespec tiempo;
 
+//inicio programa
 t_log *iniciar_logger_io(void);
 t_config *iniciar_config(char *tipo_interfaz);
-void *iniciar_config_io(t_interfaz *interfaces);
-t_interfaz *crear_interfaces(void);
-t_interfaz *agregar_interfaz( t_interfaz *interfaces, t_interfaz *nueva_interfaz);
-void recorrer_lista_nombres_tipos(t_interfaz *interfaces);
-bool es_path_config(char *path_config);
-int id_path_config(char *path_config);
+void cargar_config_interfaz(t_config config);
+
+//instrucciones interfaz
+int iO_GEN_SLEEP(t_parametroEsperar parametros);
+int iO_STDIN_READ(t_parametroEsperar parametros);
+int iO_STDOUT_WRITE(t_parametroEsperar parametros);
+int iO_FS_CREATE(t_parametroEsperar parametros);
+int iO_FS_DELETE(t_parametroEsperar parametros);
+int iO_FS_TRUNCATE(t_parametroEsperar parametros);
+
+//auxiliares
+int leer_entero(char*buffer, int* desplazamiento);
+int leer_64(char*buffer, int* desplazamiento);
+
+char* leer_string(char* buffer, int* desplazamiento);
+char** leer_array(char *buffer, int* desp);
+
+void crear_metadata(char *nombre_archivo, int pos);
+void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar);
+int info_archivo(char *nombre_archivo, char *parametro);
+int division_redondeada(int numerador, int denominador);
+char terminacion_archivo(char* archivo,char* terminacion);
+
 
 #endif // !INTERFAZ_IO

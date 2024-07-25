@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
+#include <commons/string.h>
 /**
  * @fn iniciar_servidor
  * @brief Inicia el servidor con un puerto determinado

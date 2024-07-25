@@ -34,7 +34,7 @@ t_list *fraccionar_dato(int dir_logica, void *dato, int tam) {
 int obtener_frame(int pagina) {
     t_paquete *paquete = crear_paquete();
 
-    agregar_a_paquete(paquete, &(pcb->PID), sizeof(int));
+    agregar_a_paquete(paquete, &(pcb.pid), sizeof(int));
     agregar_a_paquete(paquete, &pagina, sizeof(int));
 
     enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ACCESO_TABLA_PAGINAS);

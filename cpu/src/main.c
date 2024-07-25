@@ -66,6 +66,8 @@ int main() {
 
     ////pcb = recibir_pcb(sockets_cpu.socket_servidor_cpu_dispatch, sockets_cpu.socket_servidor_cpu_interrupt);
 
+    pcb = recibir_pcb(1, 1);
+
     // Ciclo de instrucción
     while (1) {
         // Fetch
@@ -101,18 +103,5 @@ int main() {
 
     return 0;
 }
-
-
-t_pcb *recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt){
-    // Recibir PCB
-    t_pcb *pcb = malloc(sizeof(t_pcb));
-    int bytesRecibidos = recv(socket_cliente_kernel_dispatch, pcb, sizeof(t_pcb), 0);
-    if (bytesRecibidos <= 0) {
-        log_error(loggerPrincipal, "No se pudo recibir el PCB");
-        exit(EXIT_FAILURE);
-    }
-    log_info(loggerPrincipal, "Se recibio el PCB correctamente");
-    return pcb;
-    }
 
    

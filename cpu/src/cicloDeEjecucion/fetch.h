@@ -12,6 +12,7 @@
 #include <commons/error.h>
 #include <readline/readline.h>
 #include <commons/string.h>
+#include "../pcb.h"
 
 extern t_log *loggerPrincipal;
 extern registros_cpu regcpu;

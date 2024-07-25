@@ -2,6 +2,9 @@
 /* 
 IO_GEN_SLEEP (Interfaz, Unidades de trabajo): Esta instrucción solicita al Kernel que se envíe a una interfaz de I/O a que realice un sleep por una cantidad de unidades de trabajo.
 */
+
+// TODO enviar a kernel out of memory (RESIZE)
+
 void fSUM(enum lista_registros_CPU regLetraA, enum lista_registros_CPU regLetraB){
     void * regA = obtenerRegistro(regLetraA);
     int tamanioA = tamanioRegistro(regLetraA);
@@ -66,10 +69,10 @@ void fJNZ(enum lista_registros_CPU registroLetra, uint32_t instruccion){
     if (*(int*)reg != 0) {
         regcpu.PC = instruccion;
         return;
-    } else {
+    } /* else {
         log_error(loggerPrincipal,"Error al hacer salto de instruccion, la variable es igual a 0");
         return;
-    }
+    } */
 }
 void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Direccion){ //!OBLIGATORIO
     t_paquete *paquete = crear_paquete();
@@ -108,14 +111,15 @@ void fMOV_OUT(enum lista_registros_CPU Direccion, enum lista_registros_CPU Datos
 
     enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ESCRIBIR_MEMORIA);
 }
-void fRESIZE(int tamanho){//!OBLIGATORIO
+void fRESIZE(int tamanho){
+
     t_paquete *paquete = crear_paquete();
-
-    agregar_a_paquete(paquete, &(pcb->PID), sizeof(int));
+    agregar_a_paquete(paquete, &(pcb.pid), sizeof(int));
     agregar_a_paquete(paquete, &tamanho, sizeof(int));
-
     enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_RESIZE_PROCESO);
     eliminar_paquete(paquete);
+
+    recibir_operacion(sockets_cpu.socket_memoria);
     int rta = recibir_entero(sockets_cpu.socket_memoria);
     if (rta == 1) { // Out of memory sería
         // TODO enviar a kernel o lo que sea

@@ -18,11 +18,9 @@
 #include "cicloDeEjecucion/execute.h"
 #include "listaInstrucciones.h"
 #include "cicloDeEjecucion/fetch.h"
-#include "cicloDeEjecucion/checkInterrupt.h"
+//#include "cicloDeEjecucion/checkInterrupt.h"
 #include "config.h"
 #include "conexiones.h"
-
-
-t_pcb *recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt);
+#include "pcb.h"
 
 #endif // !MAIN_CPU

@@ -4,7 +4,7 @@ char *funFetch(int socketMemoria){
     // ! Valores hardcodeados
 
     uint32_t numero = regcpu.PC;
-    int pid = 1;
+    int pid = pcb.pid;
 
     // ! --------------------
     
@@ -12,12 +12,10 @@ char *funFetch(int socketMemoria){
     agregar_a_paquete(paquete, &pid, sizeof(uint32_t));
     agregar_a_paquete(paquete, &numero, sizeof(uint32_t));
     enviar_peticion(paquete, socketMemoria, MEM_ENVIAR_INSTRUCCION);
-    free(paquete);
+    eliminar_paquete(paquete);
 
-    //t_log *alt_logger = log_create("cpu_extra.log", "cpu", true, LOG_LEVEL_INFO);
     t_log *logger = log_create("cpu.log", "cpu", true, LOG_LEVEL_INFO);
-    /* int op =  */recibir_operacion(socketMemoria);
-    //log_info(alt_logger, "op: %i", op);
+    recibir_operacion(socketMemoria);
 
     char *instruccion = recibir_msg(socketMemoria);
     log_info(logger, "PID: %i - FETCH - Program Counter: %i", pid, numero);

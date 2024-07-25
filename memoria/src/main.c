@@ -135,6 +135,8 @@ void recibir_solicitudes(int *socket_cliente_dir) {
                 nuevo_tam = *((int*) list_get(datos, 1));
 
                 int rta = resize_proceso(pid, nuevo_tam);
+
+                delay(config_memoria.retardo_respuesta);
                 enviar_entero(rta, socket_cliente);
             }
             break;

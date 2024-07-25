@@ -11,17 +11,10 @@
 #include <readline/readline.h>
 #include <commons/string.h>
 #include <semaphore.h>
+#include "../pcb.h"
 
 extern t_log *loggerPrincipal;
 extern sem_t s_interrupcion;
-
-typedef struct
-    {
-        int PID;     // Identificador del proceso
-        int PC;      // Contador de Programa
-        int Quantum; // Unidad de tiempo utilizada para el algoritmo VRR
-        
-    }t_pcb;
 
 
 typedef struct
@@ -31,7 +24,7 @@ typedef struct
 } t_parametroCheckInterrupt;
 
 
-extern t_pcb *pcb;
+//extern t_pcb *pcb;
 
 void funCheckInterrupt(t_pcb *pcb, int socket_cliente_kernel_interrupt);
 void checkInterrupt(t_parametroCheckInterrupt *parametros);

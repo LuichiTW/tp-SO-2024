@@ -38,6 +38,7 @@ int obtener_frame(int pagina) {
     agregar_a_paquete(paquete, &pagina, sizeof(int));
 
     enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ACCESO_TABLA_PAGINAS);
+    recibir_operacion(sockets_cpu.socket_memoria);
     int frame = recibir_entero(sockets_cpu.socket_memoria);
     return frame;
 }

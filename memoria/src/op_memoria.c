@@ -188,15 +188,15 @@ int resize_proceso(int pid, uint nuevo_tam) {
 }
 
 
-void leer_memoria(int dir_fisica, size_t tamanio) {
+char *leer_memoria(int dir_fisica, int tamanio) {
     char *valor;
     valor = malloc(tamanio);
     memcpy(valor, (mem_usuario + dir_fisica), tamanio);
 
-    printf("%s\n", valor);
+    return valor;
 }
 
-void escribir_memoria(int dir_fisica, size_t tamanio, void *valor) {
+void escribir_memoria(int dir_fisica, int tamanio, void *valor) {
     memcpy((mem_usuario + dir_fisica), valor, tamanio);
 }
 

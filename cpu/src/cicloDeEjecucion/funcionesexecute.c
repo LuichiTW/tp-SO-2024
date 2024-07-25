@@ -69,18 +69,17 @@ void fJNZ(enum lista_registros_CPU registroLetra, uint32_t instruccion){
     if (*(int*)reg != 0) {
         regcpu.PC = instruccion;
         return;
-    } /* else {
-        log_error(loggerPrincipal,"Error al hacer salto de instruccion, la variable es igual a 0");
-        return;
-    } */
+    }
 }
-void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Direccion){ //!OBLIGATORIO
+void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Direccion){
     t_paquete *paquete = crear_paquete();
     int dir_fisica;
     int tam_registro;
     char *registro;
 
-    dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
+    int dir_logica = *((int *) obtenerRegistro(Direccion));
+
+    dir_fisica = obtener_direccion_fisica(separar_dir_logica(dir_logica));
     tam_registro = tamanioRegistro(Datos);
 
     agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
@@ -89,27 +88,34 @@ void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Direccion)
     enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_LEER_MEMORIA);
     eliminar_paquete(paquete);
 
+    recibir_operacion(sockets_cpu.socket_memoria);
     char *valor = recibir_msg(sockets_cpu.socket_memoria);
     registro = (char*) obtenerRegistro(Datos);
 
     strncpy(registro, valor, tam_registro);
     free(valor);
 }
-void fMOV_OUT(enum lista_registros_CPU Direccion, enum lista_registros_CPU Datos){//!OBLIGATORIO
+void fMOV_OUT(enum lista_registros_CPU Direccion, enum lista_registros_CPU Datos){
     t_paquete *paquete = crear_paquete();
     int dir_fisica;
     int tam_registro;
     char *registro;
 
-    dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
+    int dir_logica = *((int *) obtenerRegistro(Direccion));
+
+    dir_fisica = obtener_direccion_fisica(separar_dir_logica(dir_logica));
     tam_registro = tamanioRegistro(Datos);
     registro = (char*) obtenerRegistro(Datos);
 
     agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
     agregar_a_paquete(paquete, &tam_registro, sizeof(tam_registro));
-    agregar_a_paquete(paquete, &registro, tam_registro);
+    agregar_a_paquete(paquete, registro, tam_registro);
 
     enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ESCRIBIR_MEMORIA);
+    eliminar_paquete(paquete);
+
+    recibir_operacion(sockets_cpu.socket_memoria);
+    recibir_entero(sockets_cpu.socket_memoria);
 }
 void fRESIZE(int tamanho){
 

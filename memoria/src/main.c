@@ -53,7 +53,7 @@ void recibir_solicitudes(int *socket_cliente_dir) {
     int op = recibir_operacion(socket_cliente);
 
     t_log *logger = alt_memlogger();
-    log_info(logger, "op_code: %i\n", op);
+    log_info(logger, "op_code: %i", op);
 
     t_list *datos;
     datos = recibir_paquete(socket_cliente);
@@ -87,6 +87,7 @@ void recibir_solicitudes(int *socket_cliente_dir) {
                 delay(config_memoria.retardo_respuesta);
 
                 enviar_mensaje(rta, socket_cliente);
+                free(rta);
             }
             break;
 
@@ -103,26 +104,34 @@ void recibir_solicitudes(int *socket_cliente_dir) {
         case MEM_LEER_MEMORIA:
             {
                 int dir_fisica;
-                size_t tam;
+                int tam;
 
                 dir_fisica = *((int*) list_get(datos, 0));
-                tam = *((size_t*) list_get(datos, 1));
+                tam = *((int*) list_get(datos, 1));
 
-                leer_memoria(dir_fisica, tam);
+                char *valor = leer_memoria(dir_fisica, tam);
+
+                delay(config_memoria.retardo_respuesta);
+                enviar_mensaje(valor, socket_cliente);
+                free(valor);
             }
             break;
 
         case MEM_ESCRIBIR_MEMORIA:
             {
                 int dir_fisica;
-                size_t tam;
+                int tam;
                 char *valor;
 
+
                 dir_fisica = *((int*) list_get(datos, 0));
-                tam = *((size_t*) list_get(datos, 1));
+                tam = *((int*) list_get(datos, 1));
                 valor = (char*) list_get(datos, 2);
 
                 escribir_memoria(dir_fisica, tam, valor);
+
+                delay(config_memoria.retardo_respuesta);
+                enviar_entero(0, socket_cliente);
             }
             break;
             
@@ -157,7 +166,7 @@ void recibir_solicitudes(int *socket_cliente_dir) {
 
     list_destroy(datos);
 
-    print_frames_ocupados(0);
+    //print_frames_ocupados(0);
     }
 }
 

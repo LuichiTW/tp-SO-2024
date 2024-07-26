@@ -8,6 +8,12 @@ t_bloque *bloques;
 // todo: implementar el aviso de que el archivo supera el tamaño maximo
 // todo: logs principales
 
+void rutina_archivos(void){
+    //comprueba si los archivos estan vacios
+    //si estan vacios los crea
+    //si no estan vacios los carga
+}
+
 void compactacion(t_bloque *bloques, t_bitarray *bitmap){
     //compactar bloques
     bloques = compactar_bloque(bloques);
@@ -41,9 +47,10 @@ void carga_archivos_fs(void){
     fclose(bitmap);
 }
 
-t_bitarray *crear_bitmap(void){
-    char *bitarray = malloc(config_dialfs.cantidad_bloques);
-    t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, config_dialfs.block_count, LSB_FIRST);
+t_bitarray *crear_bitmap(t_config config_dialfs){
+    int cantidad_bloques = config_get_int_value(config_dialfs, "CANTIDAD_BLOQUES");
+    char *bitarray = malloc(cantidad_bloques);
+    t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, cantidad_bloques, LSB_FIRST);
     return nuevo_bitarray;
 }
 
@@ -135,20 +142,28 @@ t_bloque *levantar_bloques(void){
     return bloques_mapeados;
 }
 
+t_bloque *crear_bloque(size_t tamano_dato) {
+    // Asignar memoria para la estructura y el tamaño del dato
+    t_bloque *nuevo_bloque = (t_bloque *)malloc(sizeof(t_bloque) + tamano_dato);
+    if (nuevo_bloque == NULL) {
+        perror("Error al asignar memoria");
+        exit(EXIT_FAILURE);
+    }
+    nuevo_bloque->longitud = tamano_dato;
+    nuevo_bloque->siguiente = NULL;
+    return nuevo_bloque;
+}
 
-t_bloque *insertarAlFinal(t_bloque *cabeza, char *dato)
+t_bloque *insertarAlFinal(t_bloque *cabeza, t_config config_dialfs, char *dato)
 {
+    int tamano_bloque = config_get_int_value(config_dialfs, "TAMANO_BLOQUE");
     if(*dato){
     while (*dato)//recorre la cadena de caracteres
     {
-        t_bloque *nuevoNodo = malloc(sizeof(t_bloque));
-        if (nuevoNodo == NULL)
-        {
-            perror("Error al asignar memoria para nuevoNodo");
-            return cabeza;
-        }
-        strncpy(nuevoNodo->dato, dato, 1023);
-        nuevoNodo->dato[1024] = '\0'; // Asegurarse de que la cadena esté terminada
+        t_bloque *nuevoNodo = crear_bloque(tamano_bloque);
+        
+        strncpy(nuevoNodo->dato, dato, tamano_bloque - 1);
+        nuevoNodo->dato[tamano_bloque] = '\0'; // Asegurarse de que la cadena esté terminada
         nuevoNodo->siguiente = NULL;
 
         // Avanzar el puntero de dato
@@ -169,14 +184,10 @@ t_bloque *insertarAlFinal(t_bloque *cabeza, char *dato)
         }
     }
     }else{
-        t_bloque *nuevoNodo = malloc(sizeof(t_bloque));
-        if (nuevoNodo == NULL)
-        {
-            perror("Error al asignar memoria para nuevoNodo");
-            return cabeza;
-        }
-        strncpy(nuevoNodo->dato, dato, 1023);
-        nuevoNodo->dato[1024] = '\0'; // Asegurarse de que la cadena esté terminada
+        t_bloque *nuevoNodo = crear_bloque(tamano_bloque);
+        
+        strncpy(nuevoNodo->dato, dato, tamano_bloque - 1);
+        nuevoNodo->dato[tamano_bloque] = '\0'; // Asegurarse de que la cadena esté terminada
         nuevoNodo->siguiente = NULL;
 
         if (cabeza == NULL)
@@ -198,7 +209,7 @@ t_bloque *insertarAlFinal(t_bloque *cabeza, char *dato)
 }
 
 
-void guardarListaEnArchivo(t_bloque *cabeza, const char *nombreArchivo)
+void guardarListaEnArchivo(t_bloque *cabeza, char *nombreArchivo)
 {
     FILE *archivo = fopen(nombreArchivo, "wb");
     if (archivo == NULL)
@@ -245,7 +256,7 @@ t_bloque *leerListaDesdeArchivo(char *nombreArchivo)
             break;
         }
 
-        t_bloque *nuevoNodo = (t_bloque *)malloc(sizeof(t_bloque));
+        t_bloque *nuevoNodo = crear_bloque(longitud);
         if (nuevoNodo == NULL)
         {
             perror("Error al asignar memoria");
@@ -254,7 +265,7 @@ t_bloque *leerListaDesdeArchivo(char *nombreArchivo)
         }
 
         //nuevoNodo->datos.dato = dato;
-        strncpy(nuevoNodo->dato, dato, 1024);
+        strncpy(nuevoNodo->dato, dato, longitud);
         nuevoNodo->siguiente = NULL;
 
         if (cabeza == NULL)

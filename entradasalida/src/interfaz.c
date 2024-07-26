@@ -161,8 +161,8 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
             fclose(f);
         }
     }
-    fclose(bitmap_f)
-    nanosleep(&tiempo, NULL);
+    fclose(bitmap_f);
+    nanosleep(&tiempo, NULL);    
     free(buffer);
     free(nombre_archivo);
     crear_metadata(nombre_archivo, i);
@@ -216,6 +216,74 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     return 0;
 }
 
+int iO_FS_READ(t_parametroEsperar parametros){
+    int size;
+    char *buffer;
+    int desp = 0;
+
+    buffer = recibir_buffer(&size, parametros.socket_cliente);
+    char *nombre_archivo = terminacion_archivo(leer_string(buffer, &desp),".txt"); //VER
+    int tamanio_a_leer = leer_entero(buffer,&desp);
+    int puntero = leer_entero(buffer,&desp);
+    char caracter;
+
+    FILE *f = fopen(nombre_archivo, "r");
+
+    if(f == NULL){
+        printf("ERROR al abrir el archivo");
+        return 1;
+    }else{
+        for(int i = puntero; i  < puntero + tamanio_a_leer; i++){
+            fseek(terminacion_archivo(nombre_archivo,".txt"),puntero,SEEK_SET);
+            caracter = fgetc(f);
+            printf("%c",caracter);
+        }
+    }
+
+    fclose(f);
+    nanosleep(&tiempo, NULL);
+    free(buffer);
+    free(nombre_archivo);
+    return 0;
+}
+
+int iO_FS_WRITE(t_parametroEsperar parametros){
+    int size;
+    char *buffer;
+    int desp = 0;
+
+    buffer = recibir_buffer(&size, parametros.socket_cliente);
+    char *nombre_archivo = terminacion_archivo(leer_string(buffer, &desp),".txt"); //VER
+    int tamanio_a_escribir = leer_entero(buffer,&desp);
+    int puntero = leer_entero(buffer,&desp);
+    char direcciones[sizeof(leer_array(buffer, &desp))];
+    memcpy(direcciones, leer_array(buffer, &desp), sizeof(direcciones));
+
+    if (direcciones == NULL)
+    {
+        return 1;
+    }
+    t_paquete *paquete = crear_paquete();
+    agregar_a_paquete(paquete, direcciones, sizeof(direcciones) + 1);
+    agregar_a_paquete(paquete, tamanio_a_escribir, __SIZEOF_INT__ + 1);
+    enviar_paquete(paquete, parametros.conexion_memoria);
+
+    int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
+    buffer = recibir_buffer(&size, socketCliente);
+    char *texto = leer_string(buffer,&desp);
+
+    FILE *f = fopen(nombre_archivo,"w");
+    fseek(terminacion_archivo(nombre_archivo,".txt"),puntero,SEEK_SET);
+    fwrite(texto,sizeof(char),strlen(texto),nombre_archivo);
+
+
+    fclose(f);
+    nanosleep(&tiempo, NULL);
+    free(buffer);
+    free(nombre_archivo);
+    return 0;
+}
+
 int leer_entero(char *buffer, int *desplazamiento)
 {
     int ret;
@@ -262,14 +330,14 @@ void crear_metadata(char *nombre_archivo, int pos)
 }
 
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar){
-    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".txt")); 
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".dat")); 
     config_set_value(metadata, parametro, string_itoa(dato_modificar));
     config_destroy(metadata);
 }
 
 int info_archivo(char *nombre_archivo, char *parametro)
 {
-    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".txt")); 
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".dat")); 
     int info = config_get_int_value(metadata, parametro);
     config_destroy(metadata);
     return info;

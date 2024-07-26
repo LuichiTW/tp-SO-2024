@@ -206,6 +206,7 @@ int iO_FS_DELETE(t_parametroEsperar parametros)
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_DELETE - Eliminar Archivo: %d",pid, nombre_archivo);
     fclose(bitmap_f);
     remove(terminacion_archivo(nombre_archivo,".txt")); 
+    remove(terminacion_archivo(nombre_archivo,"_metadata.txt"));
     nanosleep(&tiempo, NULL);
     free(buffer);
     free(nombre_archivo);
@@ -369,21 +370,21 @@ int* leer_array_entero(char* buffer, int* desp)
 
 void crear_metadata(char *nombre_archivo, int pos)
 {
-    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".txt")); 
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,"_metadata.txt")); 
     config_set_value(metadata, "COMIENZO", string_itoa(pos));
     config_set_value(metadata, "TAMANIO", "1");
     config_destroy(metadata);
 }
 
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar){
-    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".dat")); 
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,"_metadata.txt")); 
     config_set_value(metadata, parametro, string_itoa(dato_modificar));
     config_destroy(metadata);
 }
 
 int info_archivo(char *nombre_archivo, char *parametro)
 {
-    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,".dat")); 
+    t_config *metadata = config_create(terminacion_archivo(nombre_archivo,"_metadata.txt")); 
     int info = config_get_int_value(metadata, parametro);
     config_destroy(metadata);
     return info;

@@ -6,6 +6,7 @@
 #include <commons/collections/list.h>
 
 #include "conexiones.h"
+#include "pcb.h"
 #include "tlb.h"
 //#include "cicloDeEjecucion/checkInterrupt.h"
 
@@ -16,7 +17,7 @@ typedef struct {
 
 typedef struct {
     int cant_paginas;
-    int *frames;
+    int *dir_fisicas;
     int *bytes_por_pag;
 } t_lista_dir_fisicas;
 

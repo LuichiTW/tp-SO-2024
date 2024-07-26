@@ -59,6 +59,8 @@ int main() {
     cargar_config();
     cargar_sockets();
 
+    inicializar_tlb();
+
     // ? Ignorando el código que conecta con kernel para debug
     ////sockets_cpu.socket_cliente_kernel_interrupt = esperar_cliente(sockets_cpu.socket_servidor_cpu_interrupt, loggerPrincipal);
 
@@ -71,7 +73,7 @@ int main() {
     // Ciclo de instrucción
     while (1) {
         // Fetch
-        log_info(alt_logger, "- Ciclo de instrución iniciado -");
+        ////log_info(alt_logger, "- Ciclo de instrución iniciado -");
         char *instruccionStr = funFetch(sockets_cpu.socket_memoria);
 
         // Decode

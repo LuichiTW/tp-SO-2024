@@ -10,13 +10,17 @@ void inicializar_tlb() {
 
 int tlb_obtener_frame (int pid, int pagina) {
     int es_el_buscado(t_fila_tlb* fila) {
+        printf("pid: %i\n", pid);
+        printf("fila->pid: %i\n", fila->pid);
+        printf("pag: %i\n", pagina);
+        printf("fila->pag: %i\n", fila->pagina);
         return fila->pid == pid && fila->pagina == pagina;
     }
 
     t_log *logger = log_create("cpu.log", "cpu", true, LOG_LEVEL_INFO);
 
     t_fila_tlb *fila = list_find(tlb.lista, (void*) es_el_buscado);
-    if (fila == null) {
+    if (fila == NULL) {
 
         log_info(logger, "PID: %i - TLB MISS - Pagina: %i", pid, pagina);
         log_destroy(logger);
@@ -32,12 +36,12 @@ int tlb_obtener_frame (int pid, int pagina) {
 }
 
 void tlb_agregar_fila(int pid, int pagina, int frame) {
-    t_fila_tlb fila;
-    fila.pid = pid;
-    fila.pagina = pagina;
-    fila.frame = frame;
-    fila.tiempo_carga = temporal_gettime(tlb.tiempo_inicio);
-    fila.tiempo_referencia = fila.tiempo_carga;
+    t_fila_tlb *fila = malloc(sizeof(t_fila_tlb));
+    fila->pid = pid;
+    fila->pagina = pagina;
+    fila->frame = frame;
+    fila->tiempo_carga = temporal_gettime(tlb.tiempo_inicio);
+    fila->tiempo_referencia = fila->tiempo_carga;
 
     if (tlb.cant_filas < config_cpu.cantidad_entradas_tlb) {
         list_add(tlb.lista, fila);
@@ -54,7 +58,7 @@ void tlb_agregar_fila(int pid, int pagina, int frame) {
     }
 }
 
-void tlb_reemplazar_fila_FIFO(t_fila_tlb fila_nueva) {
+void tlb_reemplazar_fila_FIFO(t_fila_tlb *fila_nueva) {
     t_fila_tlb *carga_mas_antigua(t_fila_tlb* fila1, t_fila_tlb* fila2) {
         if (fila2->tiempo_carga < fila1->tiempo_carga) {
             return fila2;
@@ -67,10 +71,10 @@ void tlb_reemplazar_fila_FIFO(t_fila_tlb fila_nueva) {
     list_remove_element(tlb.lista, (void*) victima);
     free(victima);
 
-    list_add(&fila_nueva);
+    list_add(tlb.lista, fila_nueva);
 }
 
-void tlb_reemplazar_fila_LRU(t_fila_tlb fila_nueva) {
+void tlb_reemplazar_fila_LRU(t_fila_tlb *fila_nueva) {
     t_fila_tlb *referencia_mas_antigua(t_fila_tlb* fila1, t_fila_tlb* fila2) {
         if (fila2->tiempo_referencia < fila1->tiempo_referencia) {
             return fila2;
@@ -83,7 +87,7 @@ void tlb_reemplazar_fila_LRU(t_fila_tlb fila_nueva) {
     list_remove_element(tlb.lista, (void*) victima);
     free(victima);
 
-    list_add(&fila_nueva);
+    list_add(tlb.lista, fila_nueva);
 }
 
 /* void eliminar_tlb() {

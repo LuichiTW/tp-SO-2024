@@ -73,50 +73,55 @@ void fJNZ(enum lista_registros_CPU registroLetra, uint32_t instruccion){
     }
 }
 void fMOV_IN(enum lista_registros_CPU Datos, enum lista_registros_CPU Direccion){
-    t_paquete *paquete = crear_paquete();
-    int dir_fisica;
-    int tam_registro;
-    char *registro;
-
+    
+    char *registro = (char*) obtenerRegistro(Datos);
     int dir_logica = *((int *) obtenerRegistro(Direccion));
+    int tam_registro = tamanioRegistro(Datos);
+    t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, tam_registro);
 
-    dir_fisica = obtener_direccion_fisica(separar_dir_logica(dir_logica));
-    tam_registro = tamanioRegistro(Datos);
+    for (int i = 0; i < lista_dir.cant_paginas; i++) {
+        t_paquete *paquete = crear_paquete();
+        int dir_fisica = lista_dir.dir_fisicas[i];
+        int tam_dato = lista_dir.bytes_por_pag[i];
 
-    agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
-    agregar_a_paquete(paquete, &tam_registro, sizeof(tam_registro));
+        agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
+        agregar_a_paquete(paquete, &tam_dato, sizeof(tam_dato));
 
-    enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_LEER_MEMORIA);
-    eliminar_paquete(paquete);
+        enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_LEER_MEMORIA);
+        eliminar_paquete(paquete);
 
-    recibir_operacion(sockets_cpu.socket_memoria);
-    char *valor = recibir_msg(sockets_cpu.socket_memoria);
-    registro = (char*) obtenerRegistro(Datos);
+        recibir_operacion(sockets_cpu.socket_memoria);
+        char *valor = recibir_msg(sockets_cpu.socket_memoria);
 
-    strncpy(registro, valor, tam_registro);
-    free(valor);
+        memcpy(registro, valor, tam_dato);
+        registro += tam_dato;
+
+        free(valor);
+    }
 }
 void fMOV_OUT(enum lista_registros_CPU Direccion, enum lista_registros_CPU Datos){
-    t_paquete *paquete = crear_paquete();
-    int dir_fisica;
-    int tam_registro;
-    char *registro;
 
+    char *registro = (char*) obtenerRegistro(Datos);
     int dir_logica = *((int *) obtenerRegistro(Direccion));
+    int tam_registro = tamanioRegistro(Datos);
+    t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, tam_registro);
 
-    dir_fisica = obtener_direccion_fisica(separar_dir_logica(dir_logica));
-    tam_registro = tamanioRegistro(Datos);
-    registro = (char*) obtenerRegistro(Datos);
+    for (int i = 0; i < lista_dir.cant_paginas; i++) {
+        t_paquete *paquete = crear_paquete();
+        int dir_fisica = lista_dir.dir_fisicas[i];
+        int tam_dato = lista_dir.bytes_por_pag[i];
 
-    agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
-    agregar_a_paquete(paquete, &tam_registro, sizeof(tam_registro));
-    agregar_a_paquete(paquete, registro, tam_registro);
+        agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
+        agregar_a_paquete(paquete, &tam_dato, sizeof(tam_dato));
+        agregar_a_paquete(paquete, registro, tam_dato);
 
-    enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ESCRIBIR_MEMORIA);
-    eliminar_paquete(paquete);
-
-    recibir_operacion(sockets_cpu.socket_memoria);
-    recibir_entero(sockets_cpu.socket_memoria);
+        enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ESCRIBIR_MEMORIA);
+        eliminar_paquete(paquete);
+        
+        recibir_operacion(sockets_cpu.socket_memoria);
+        recibir_entero(sockets_cpu.socket_memoria);
+        registro += tam_dato;
+    }
 }
 void fRESIZE(int tamanho){
 
@@ -133,40 +138,55 @@ void fRESIZE(int tamanho){
     }
 }
 void fCOPY_STRING(int tamanho){
-    t_paquete *paquete = crear_paquete();
     int di_dir_logica = *((int*) obtenerRegistro(DI));
-    int di_dir_fisica;
     int si_dir_logica = *((int*) obtenerRegistro(SI));
-    int si_dir_fisica;
-    int si_tam_registro;
 
-    char *str;
+    char *str = string_new(); // String que copio de DI a SI
 
-    di_dir_fisica = obtener_direccion_fisica(separar_dir_logica(di_dir_logica));
+    // Obtener string
+    t_lista_dir_fisicas lista_dir_di = obtener_direcciones_fisicas(di_dir_logica, tamanho);
     
-    agregar_a_paquete(paquete, &di_dir_fisica, sizeof(di_dir_fisica));
-    agregar_a_paquete(paquete, &tamanho, sizeof(tamanho));
+    for (int i = 0; i < lista_dir_di.cant_paginas; i++) {
+        int dir_fisica = lista_dir_di.dir_fisicas[i];
+        int tam_dato = lista_dir_di.bytes_por_pag[i];
 
-    enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_LEER_MEMORIA);
-    eliminar_paquete(paquete);
+        t_paquete *paquete = crear_paquete();
+        agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
+        agregar_a_paquete(paquete, &tam_dato, sizeof(tam_dato));
 
-    recibir_operacion(sockets_cpu.socket_memoria);
-    str = recibir_msg(sockets_cpu.socket_memoria);
+        enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_LEER_MEMORIA);
+        eliminar_paquete(paquete);
 
-    si_dir_fisica = obtener_direccion_fisica(separar_dir_logica(si_dir_logica));
-    si_tam_registro = tamanioRegistro(SI);
+        recibir_operacion(sockets_cpu.socket_memoria);
+        char *str_rta = recibir_msg(sockets_cpu.socket_memoria);
+        string_append(&str, str_rta);
 
-    paquete = crear_paquete();
-    agregar_a_paquete(paquete, &si_dir_fisica, sizeof(si_dir_fisica));
-    agregar_a_paquete(paquete, &si_tam_registro, sizeof(si_tam_registro));
-    agregar_a_paquete(paquete, str, tamanho);
+        free(str_rta);
+    }
 
-    enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ESCRIBIR_MEMORIA);
-    eliminar_paquete(paquete);
+    // Escribir string
+    char *strptr = str; // Puntero que va a ir avanzando por el string para enviarlo
+    t_lista_dir_fisicas lista_dir_si = obtener_direcciones_fisicas(si_dir_logica, tamanho);
+
+    for (int i = 0; i < lista_dir_si.cant_paginas; i++) {
+        int dir_fisica = lista_dir_si.dir_fisicas[i];
+        int tam_dato = lista_dir_si.bytes_por_pag[i];
+
+        t_paquete *paquete = crear_paquete();
+        agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
+        agregar_a_paquete(paquete, &tam_dato, sizeof(tam_dato));
+        agregar_a_paquete(paquete, strptr, tam_dato);
+        
+        enviar_peticion(paquete, sockets_cpu.socket_memoria, MEM_ESCRIBIR_MEMORIA);
+        eliminar_paquete(paquete);
+
+        recibir_operacion(sockets_cpu.socket_memoria);
+        recibir_msg(sockets_cpu.socket_memoria);
+        
+        strptr += tam_dato;
+    }
+    
     free(str);
-
-    recibir_operacion(sockets_cpu.socket_memoria);
-    recibir_msg(sockets_cpu.socket_memoria);
 }
 void fWAIT(char recurso[]){
 
@@ -183,7 +203,7 @@ void fIO_GEN_SLEEP(char interface[], int unidadesDeTrabajo){//!OBLIGATORIO
     enviar_paquete(paquete, sockets_cpu.socket_servidor_cpu_dispatch);
 }
 void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
-    t_paquete *paquete;
+    /* t_paquete *paquete;
     int dir_fisica;
     int tam_lectura;
     
@@ -197,10 +217,10 @@ void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Direccion, enum l
     agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
 
     enviar_peticion(paquete, sockets_cpu.socket_servidor_cpu_dispatch, KER_STDIN_READ);
-    eliminar_paquete(paquete);
+    eliminar_paquete(paquete); */
 }
 void fIO_STDOUT_WRITE(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
-    t_paquete *paquete;
+    /* t_paquete *paquete;
     int dir_fisica;
     int tam_escritura;
 
@@ -214,7 +234,7 @@ void fIO_STDOUT_WRITE(char interface[], enum lista_registros_CPU Direccion, enum
     agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
 
     enviar_peticion(paquete, sockets_cpu.socket_servidor_cpu_dispatch, KER_STDOUT_WRITE);
-    eliminar_paquete(paquete);
+    eliminar_paquete(paquete); */
 }
 void fIO_FS_CREATE(char interface[], char NombreArchivo[]){
 

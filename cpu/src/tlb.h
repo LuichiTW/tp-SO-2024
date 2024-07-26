@@ -19,7 +19,7 @@ struct tlb {
     int cant_filas;
     t_list *lista;
     t_temporal *tiempo_inicio;
-}
+};
 
 extern struct tlb tlb;
 
@@ -31,7 +31,7 @@ int tlb_obtener_frame(int pid, int pagina);
 
 void tlb_agregar_fila(int pid, int pagina, int frame);
 
-void tlb_reemplazar_fila_FIFO(t_fila_tlb fila_nueva);
-void tlb_reemplazar_fila_LRU(t_fila_tlb fila_nueva);
+void tlb_reemplazar_fila_FIFO(t_fila_tlb *fila_nueva);
+void tlb_reemplazar_fila_LRU(t_fila_tlb *fila_nueva);
 
 #endif // TLB_H

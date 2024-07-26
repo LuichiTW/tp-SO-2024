@@ -9,33 +9,66 @@ t_dir_logica separar_dir_logica(int dir_logica) {
     return dir_separada;
 }
 
+
+
 t_lista_dir_fisicas obtener_direcciones_fisicas(int dir_logica_i, int tam_dato) {
     t_dir_logica dir_logica = separar_dir_logica(dir_logica_i);
 
     int cant_paginas = fraccionar_direccion(dir_logica, tam_dato);
     
     int bytes_por_pag[cant_paginas];
-    int frames[cant_paginas];
+    int dir_fisicas[cant_paginas];
 
-    bytes_por_pag[0] = tam_pagina - dir_logica.desplazamiento;
+    // Cuántos bytes del dato van en cada página
+
+    {
+        int res = tam_pagina - dir_logica.desplazamiento;
+        if (tam_dato < res) {
+            bytes_por_pag[0] = tam_dato;
+        }
+        else {
+            bytes_por_pag[0] = res;
+        }
+        tam_dato -= res;
+    }
+    for (int i = 1; tam_dato > 0; i++)
+    {
+        int res = tam_pagina;
+        if (tam_dato < res) {
+            bytes_por_pag[i] = tam_dato;
+        }
+        else {
+            bytes_por_pag[i] = res;
+        }
+        tam_dato -= res;
+    }
+    
+    
+
+    /* bytes_por_pag[0] = tam_pagina - dir_logica.desplazamiento;
     for (int i = 1; i < cant_paginas - 1; i++) {
         bytes_por_pag[i] = tam_pagina;
     }
-    bytes_por_pag[cant_paginas-1] = desplazamiento;
+    // Si cant_paginas = 1, cambiaría bytes_por_pag[0], que es el primero (y no debe pasar)
+    if (cant_paginas > 1) {
+        bytes_por_pag[cant_paginas-1] = dir_logica.desplazamiento;
+    } */
 
-    for (int i = 0; i < cant_paginas; i++) {
-        frames[i] = obtener_frame(i+dir_logica.pagina);
+    // Cuáles son las direcciones físicas
+    dir_fisicas[0] = obtener_frame(dir_logica.pagina) * tam_pagina + dir_logica.desplazamiento;
+    for (int i = 1; i < cant_paginas; i++) {
+        dir_fisicas[i] = obtener_frame(i+dir_logica.pagina) * tam_pagina;
     }
 
     t_lista_dir_fisicas lista_dir;
     lista_dir.cant_paginas = cant_paginas;
-    lista_dir.frames = frames;
+    lista_dir.dir_fisicas = dir_fisicas;
     lista_dir.bytes_por_pag = bytes_por_pag;
 
     return lista_dir;
-    ////int frame = obtener_frame(dir_logica.pagina);
-    ////return frame*tam_pagina + dir_logica.desplazamiento;
 }
+
+
 
 int fraccionar_direccion(t_dir_logica dir_logica, int tam_dato) {
     int cant_paginas = 0;
@@ -72,6 +105,8 @@ int obtener_frame(int pagina) {
     }
 }
 
+
+
 int pedir_frame_memoria(int pagina) {
     t_paquete *paquete = crear_paquete();
 
@@ -83,7 +118,7 @@ int pedir_frame_memoria(int pagina) {
     int frame = recibir_entero(sockets_cpu.socket_memoria);
 
     t_log *logger = log_create("cpu.log", "cpu", true, LOG_LEVEL_INFO);
-    log_info(logger, "PID: %i - OBTENER MARCO - Página: %i - Marco: %i>", pcb.pid, pagina, frame);
+    log_info(logger, "PID: %i - OBTENER MARCO - Página: %i - Marco: %i", pcb.pid, pagina, frame);
     log_destroy(logger);
 
     return frame;

@@ -13,7 +13,6 @@
 #include <string.h>
 #include <commons/temporal.h>
 #include <commons/temporal.h>
-
 typedef struct
     {
         int PID;     // Identificador del proceso
@@ -26,15 +25,14 @@ typedef struct
         pcb PCBS;
         struct NodoColaPCBS*sig;
     }NodoColaPCBS;
-
 typedef struct 
-{
-    NodoColaPCBS*primero;
-    NodoColaPCBS*ultimo;
-}Cola;
+    {
+        NodoColaPCBS*primero;
+        NodoColaPCBS*ultimo;
+    }Cola;
 
-void atender_instruccion_valida(char* leido,t_log*logger,int,int c,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR);
-void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR);
+void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu_dispatch,int conexion_cpu_interrupt,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR);
+void iniciar_consola_interactiva(t_log*logger,int conexion_cpu_dispatch,int conexion_cpu_interrupt,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR);
 bool validacion_de_instruccion_de_consola(char* leido, t_log* logger);
 void iniciar_proceso(char*path,int PID,int conexion_cpu,int conexion_memoria,Cola*colaNEW);
 void enviar_pcb(pcb proceso,int conexion_cpu);
@@ -44,4 +42,4 @@ void encolarColaFIFO(Cola*colaREADY,Cola*colaFIFO);
 void encolarColaRR(Cola*colaREADY,Cola*colaRR);
 void encolarColaVRR(Cola*colaREADY,Cola*colaVRR);
 
-#endif // !MAIN_KERNEL
+#endif // MAIN_KERNEL

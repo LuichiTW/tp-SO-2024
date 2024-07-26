@@ -1,6 +1,7 @@
 #include <main.h>
 
-int main() {
+int main() 
+{
 
     //cola NEW
     Cola*colaNEW=(Cola*)malloc(sizeof(Cola));
@@ -35,25 +36,25 @@ int main() {
     int conexion_memoria = crear_conexion(ip_memoria, puerto_memoria, "Hola soy el kernel");
     
     // CPU
-    char *puerto_cpu = config_get_string_value(config, "PUERTO_CPU_DISPATCH");
+    char *puerto_cpu_dispatch = config_get_string_value(config, "PUERTO_CPU_DISPATCH");
     char *ip_cpu = config_get_string_value(config, "IP_CPU");
-    int conexion_cpu = crear_conexion(ip_cpu, puerto_cpu, "Hola soy el kernel");
+    int conexion_cpu_dispatch = crear_conexion(ip_cpu, puerto_cpu_dispatch, "Hola soy el kernel");
 
-    // INICIAR SERVIDOR PARA 
+    char *puerto_cpu_interrupt = config_get_string_value(config, "PUERTO_CPU_INTERRUPT");
+    int conexion_cpu_interrupt = crear_conexion(ip_cpu, puerto_cpu_interrupt, "Hola soy el kernel");
+
+    // INICIAR SERVIDOR 
 
 	char *puerto = config_get_string_value(config, "PUERTO_ESCUCHA");
     int socket_servidor_kernel = iniciar_servidor(puerto);
 	log_info(logger, "Listo para recibir al IO");
     int socket_cliente_io = esperar_cliente(socket_servidor_kernel, logger);
 
-    //se tendria que liberar el especio de memoria usado por los elementos
-
-    //CONSOLA INTERACTIVA
-    iniciar_consola_interactiva(logger,conexion_cpu,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
+    iniciar_consola_interactiva(logger,conexion_cpu_dispatch,conexion_cpu_interrupt,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
     return 0;
 }
 
-void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR)
+void iniciar_consola_interactiva(t_log*logger,int conexion_cpu_dispatch,int conexion_cpu_interrupt,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR)
 {
     printf("Bienvenido a la Consola Interactiva de Kernel. Ingrese una funcion:\n"
     " -   EJECUTAR_SCRIPT\n"
@@ -78,13 +79,13 @@ void iniciar_consola_interactiva(t_log*logger,int conexion_cpu,int conexion_memo
             gets(leido);
             continue;
         }
-        atender_instruccion_valida(leido, logger, conexion_cpu, conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
+        atender_instruccion_valida(leido, logger,conexion_cpu_dispatch,conexion_cpu_interrupt,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
         gets(leido);
     }
     free(leido);
 }
 
-void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR)
+void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu_dispatch,int conexion_cpu_interrupt,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR)
 {
     int PIDs=0;
     char* comando_consola = strtok(leido, " ");
@@ -111,7 +112,7 @@ void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int c
     
     switch (opcion_valida)
     {
-    case 1: //EJECUTAR_SCRIPT
+        case 1: //EJECUTAR_SCRIPT
         int cont=0;
         char linea[30];
 
@@ -129,7 +130,7 @@ void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int c
                 PIDs++;
                 log_info(logger,"Se crea el proceso <%d> en NEW",PIDs);
                 char* path = strtok(NULL, " ");
-                iniciar_proceso(path,PIDs,conexion_cpu,conexion_memoria,colaNEW);
+                iniciar_proceso(path,PIDs,conexion_cpu_dispatch,conexion_memoria,colaNEW);
                 enviar_mensaje("Crea un proceso cuyas operaciones se encuentran en",conexion_memoria);
                 enviar_mensaje(path,conexion_memoria);
             }
@@ -143,21 +144,27 @@ void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu,int c
         }
         
         break;
-    case 2: //INICIAR_PROCESO
-        PIDs++;
-        iniciar_proceso(path,PIDs,conexion_cpu,conexion_memoria,colaNEW);
-        break;
-    case 3: //FINALIZAR_PROCESO
-        break;
-    case 4: //DETENER_PLANIFICACION
-        break;
-    case 5: //INICIAR_PLANIFICACION
-        break;
-    case 6: //MULTIPROGRAMACION
-        break;
-    case 7: //PROCESO_ESTADO
-        break;
-    default:
+        case 2: //INICIAR_PROCESO
+            PIDs++;
+            iniciar_proceso(path,PIDs,conexion_cpu_dispatch,conexion_memoria,colaNEW);
+            break;
+        case 3: //FINALIZAR_PROCESO
+            int pid = (int)strtol(path,NULL,10);
+            enviar_mensaje("FInalizar el proceso con PID que se envia a continuacion",conexion_cpu_interrupt);
+            enviar_entero(pid,conexion_cpu_interrupt);
+            log_info(logger,"FInaliza el proceso <%d> - Motivo: <SUCCESS / INVALID_RESOURCE / INVALID_WRITE>",pid);
+            break;
+        case 4: //DETENER_PLANIFICACION
+            
+            break;
+        case 5: //INICIAR_PLANIFICACION
+            break;
+        case 6: //MULTIPROGRAMACION
+            break;
+        case 7: //PROCESO_ESTADO
+            
+            break;
+        default:
         log_error(logger,"Error durante la validacion de la instruccion en la consola.");
         break;
     }
@@ -189,7 +196,8 @@ bool validacion_de_instruccion_de_consola(char* leido, t_log*logger)
     return opcion_valida;
 }
 
-void iniciar_proceso(char*path,int PID,int conexion_cpu,int conexion_memoria,Cola*colaNEW){
+void iniciar_proceso(char*path,int PID,int conexion_cpu,int conexion_memoria,Cola*colaNEW)
+{
     pcb proceso;
 
     t_config *config = config_create("../kernel.config");
@@ -200,11 +208,14 @@ void iniciar_proceso(char*path,int PID,int conexion_cpu,int conexion_memoria,Col
     proceso.Quantum=quantum;
     encolarColaNEW(proceso,colaNEW);
     enviar_mensaje("Enviando nuevo PCB a CPU...",conexion_cpu);
-    //enviar_mensaje(PID,conexion_cpu);
     enviar_pcb(proceso,conexion_cpu);
 }
 
-void enviar_pcb(pcb proceso, int conexion_cpu){
+void enviar_pcb(pcb proceso, int conexion_cpu)
+{
+    enviar_entero(proceso.PID,conexion_cpu);
+    enviar_entero(proceso.PC,conexion_cpu);
+    enviar_entero(proceso.Quantum,conexion_cpu);
 }
 
 void encolarColaNEW(pcb ProcesoNuevo,Cola*colaNEW)
@@ -244,7 +255,7 @@ void encolarColaREADY(Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola
 
         if (colaREADY->ultimo!=NULL)
         {
-            colaREADY->ultimo->sig=nuevo;
+            colaREADY->ultimo=nuevo;
         }
         else
         {
@@ -252,11 +263,12 @@ void encolarColaREADY(Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola
         }
         colaREADY->ultimo=nuevo;
         puntero=puntero->sig;
+        colaNEW->primero=puntero;
     }
 
     t_config *config = config_create("../kernel.config");
-    char* algoritmo = config_get_int_value(config,"ALGORITMO_PLANIFICACION");
-    //---
+    char* algoritmo = config_get_string_value(config,"ALGORITMO_PLANIFICACION");
+
     if (strcmp(algoritmo,"FIFO")==0)
         encolarColaFIFO(colaREADY,colaFIFO);
     else if (strcmp(algoritmo,"RR")==0)
@@ -271,7 +283,6 @@ void encolarColaREADY(Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola
 }
 
 void encolarColaFIFO(Cola*colaREADY,Cola*colaFIFO)
-
 {   
     //ENCOLAR PROCESOS
 
@@ -289,7 +300,7 @@ void encolarColaFIFO(Cola*colaREADY,Cola*colaFIFO)
 
         if (colaFIFO->ultimo!=NULL)
         {
-            colaFIFO->ultimo->sig=nuevo;
+            colaFIFO->ultimo=nuevo;
         }
         else
         {
@@ -318,7 +329,7 @@ void encolarColaRR(Cola*colaREADY,Cola*colaRR)
 
         if (colaRR->ultimo!=NULL)
         {
-            colaRR->ultimo->sig=nuevo;
+            colaRR->ultimo=nuevo;
         }
         else
         {
@@ -343,13 +354,13 @@ void encolarColaRR(Cola*colaREADY,Cola*colaRR)
         //SE INTERRUMPE POR QUANTUM Y LO ENCOLA AL FINAL
         encolarAlFinal(colaRR);
     }
-    /*else
-    {
-        if (VERIFICAR SI LA INTERRUPCION ES POR I/O)
-        {
-            encolarAlFinal(colaRR);
-        }
-    }*/
+    //else
+    //{
+    //    if (VERIFICAR SI LA INTERRUPCION ES POR I/O)
+    //    {
+    //        encolarAlFinal(colaRR);
+    //    }
+    //}
 }
 
 void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
@@ -382,6 +393,7 @@ void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
         puntero=puntero->sig;
     }
 
+    //SE DEBE DESENCOLAR UN PCB Y
     //ENVIAR CONTEXTO DE EJECUCION
 
     t_temporal* cronometro = temporal_create();
@@ -421,8 +433,8 @@ void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
                 encolarColaVRRAux(pasaColaAux,colaVRRAux);
             }
         }
-    }
-    */
+    }*/
+    
 }
 
 void encolarColaVRRAux(pcb ProcesoNuevo,Cola*colaVRRAux)

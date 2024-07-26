@@ -1,6 +1,6 @@
 #include "fileSistem.h"
 
-extern t_config config_dialfs; // ! modificar funciones que usen este parametro para que usen el obterner del archivo config
+extern t_config config_dialfs;
 t_bloque *bloques;
 
 // todo: implementar el ftruncate para que el archivo no supere el tamaño maximo
@@ -47,7 +47,7 @@ void carga_archivos_fs(void){
     fclose(bitmap);
 }
 
-t_bitarray *crear_bitmap(t_config config_dialfs){
+t_bitarray *crear_bitmap(t_config *config_dialfs){
     int cantidad_bloques = config_get_int_value(config_dialfs, "CANTIDAD_BLOQUES");
     char *bitarray = malloc(cantidad_bloques);
     t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, cantidad_bloques, LSB_FIRST);
@@ -154,7 +154,7 @@ t_bloque *crear_bloque(size_t tamano_dato) {
     return nuevo_bloque;
 }
 
-t_bloque *insertarAlFinal(t_bloque *cabeza, t_config config_dialfs, char *dato)
+t_bloque *insertarAlFinal(t_bloque *cabeza, t_config *config_dialfs, char *dato)
 {
     int tamano_bloque = config_get_int_value(config_dialfs, "TAMANO_BLOQUE");
     if(*dato){

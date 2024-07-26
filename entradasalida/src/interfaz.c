@@ -81,8 +81,8 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     char *texto;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
-    char direcciones[sizeof(leer_array(buffer, &desp))];
-    memcpy(direcciones, leer_array(buffer, &desp), sizeof(direcciones));
+    int direcciones[sizeof(leer_array_entero(buffer, &desp))];
+    memcpy(direcciones, leer_array_entero(buffer, &desp), sizeof(direcciones));
 
     if (direcciones == NULL)
     {
@@ -95,6 +95,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     agregar_a_paquete(paquete, direcciones, sizeof(direcciones) + 1);
 
     enviar_paquete(paquete, parametros.conexion_memoria);
+    eliminar_paquete(paquete);
 
     free(texto);
     free(buffer);
@@ -109,13 +110,13 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
     char *texto;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
-    char direcciones[sizeof(leer_array(buffer, &desp))];
-    memcpy(direcciones, leer_array(buffer, &desp), sizeof(direcciones));
+    int direcciones[sizeof(leer_array_entero(buffer, &desp))];
+    memcpy(direcciones, leer_array_entero(buffer, &desp), sizeof(direcciones));
     if (direcciones == NULL)
     {
         return 1;
     }
-    char *direccionesT[sizeof(direcciones)];
+    int direccionesT[sizeof(direcciones)];
     desp = 0;
     for(int i = 0;i < sizeof(direcciones)+1;i++){                     //envia a memoria cada direccion con su respectivo tamaño a leer
         t_paquete *paquete = crear_paquete();
@@ -126,6 +127,7 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
         int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
         buffer = recibir_buffer(&size, socketCliente);
         direccionesT[i] = leer_string(buffer,&desp);
+        eliminar_paquete(paquete);
     }
     if (direccionesT == NULL)
     {
@@ -154,6 +156,7 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     int desp = 0;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
+    int pid = leer_entero(buffer,&desp);
     char *nombre_archivo = leer_string(buffer, &desp);
     FILE* bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); //ruta bitmap
 
@@ -165,6 +168,7 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
             bitarray_set_bit(bitmap_f, i);
             FILE *f = fopen(terminacion_archivo(nombre_archivo,".txt"), "w"); 
             fclose(f);
+            log_info(parametros.logger, "PID: %d - Operacion: IO_FS_CREATE - Crear Archivo: %d",pid, nombre_archivo);
     }else{
         return 1;
     }
@@ -185,6 +189,7 @@ int iO_FS_DELETE(t_parametroEsperar parametros)
     int desp = 0;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
+    int pid = leer_entero(buffer,&desp);
     char *nombre_archivo = leer_string(buffer, &desp);
 
     int comienzo_archivo = info_archivo(nombre_archivo, "COMIENZO");
@@ -197,6 +202,8 @@ int iO_FS_DELETE(t_parametroEsperar parametros)
     { // desde el bloque inicial limpia los bits del bitmap hasta que alcance todos los bloques que ocupa el archivo
         bitarray_clean_bit(bitmap_f, i);
     }
+
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_DELETE - Eliminar Archivo: %d",pid, nombre_archivo);
     fclose(bitmap_f);
     remove(terminacion_archivo(nombre_archivo,".txt")); 
     nanosleep(&tiempo, NULL);
@@ -212,11 +219,14 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     int desp = 0;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
+    int pid = leer_entero(buffer,&desp);
     char *nombre_archivo = leer_string(buffer, &desp);
     int tamanio = leer_entero(buffer, &desp);
 
     truncate(terminacion_archivo(nombre_archivo,".txt"), tamanio); 
     modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
+
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_TRUNCATE- Truncar Archivo: %d",pid, nombre_archivo);
 
     nanosleep(&tiempo, NULL);
     free(buffer);
@@ -230,6 +240,7 @@ int iO_FS_READ(t_parametroEsperar parametros){
     int desp = 0;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
+    int pid = leer_entero(buffer,&desp);
     char *nombre_archivo = terminacion_archivo(leer_string(buffer, &desp),".txt"); //VER
     int tamanio_a_leer = leer_entero(buffer,&desp);
     int puntero = leer_entero(buffer,&desp);
@@ -242,11 +253,13 @@ int iO_FS_READ(t_parametroEsperar parametros){
         return 1;
     }else{
         for(int i = puntero; i  < puntero + tamanio_a_leer; i++){
-            fseek(terminacion_archivo(nombre_archivo,".txt"),puntero,SEEK_SET);
+            fseek(nombre_archivo,puntero,SEEK_SET);
             caracter = fgetc(f);
             printf("%c",caracter);
         }
     }
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_READ - Leer Archivo: %s - Tamaño a Leer: %d - Puntero Archivo: %d", 
+    pid, nombre_archivo, tamanio_a_leer, puntero); 
 
     fclose(f);
     nanosleep(&tiempo, NULL);
@@ -261,6 +274,7 @@ int iO_FS_WRITE(t_parametroEsperar parametros){
     int desp = 0;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
+    int pid = leer_entero(buffer,&desp);
     char *nombre_archivo = terminacion_archivo(leer_string(buffer, &desp),".txt"); //VER
     int tamanio_a_escribir[sizeof(leer_array_entero(buffer, &desp))];
     memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), sizeof(tamanio_a_escribir));
@@ -285,8 +299,13 @@ int iO_FS_WRITE(t_parametroEsperar parametros){
         buffer = recibir_buffer(&size, socketCliente);
         char *texto = leer_string(buffer,&desp);
         fwrite(texto,sizeof(char),strlen(texto),nombre_archivo);
-        free(paquete);
+        eliminar_paquete(paquete);
     }
+
+    int tamanio_total = suma_array(tamanio_a_escribir,sizeof(tamanio_a_escribir));
+
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_WRITE - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d", 
+    pid, nombre_archivo, tamanio_total, puntero); 
 
     fclose(f);
     nanosleep(&tiempo, NULL);

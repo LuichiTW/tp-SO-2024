@@ -39,6 +39,8 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros);
 int iO_FS_CREATE(t_parametroEsperar parametros);
 int iO_FS_DELETE(t_parametroEsperar parametros);
 int iO_FS_TRUNCATE(t_parametroEsperar parametros);
+int iO_FS_WRITE(t_parametroEsperar parametros);
+int iO_FS_READ(t_parametroEsperar parametros);
 
 //auxiliares
 int leer_entero(char*buffer, int* desplazamiento);

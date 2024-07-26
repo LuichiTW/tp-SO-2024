@@ -98,62 +98,21 @@ void manejarConexion(t_parametroEsperar parametros)
         resultado = iO_STDOUT_WRITE(parametros);
         break;
     case IO_FS_CREATE:
-        log_info(parametros.logger, "PID: <PID> - Operacion: IO_FS_CREATE");
         resultado = iO_FS_CREATE(parametros);
         break;
     case IO_FS_DELETE:
-        log_info(parametros.logger, "PID: <PID> - Operacion: IO_FS_DELETE");
         resultado = iO_FS_DELETE(parametros);
         break;
     case IO_FS_TRUNCATE:
-        log_info(parametros.logger, "PID: <PID> - Operacion: IO_FS_TRUNCATE");
         resultado = iO_FS_TRUNCATE(parametros); 
         break;
     case IO_FS_WRITE:
-        int size;
-        char *buffer;
-        int desp = 0;
-
-        buffer = recibir_buffer(&size, parametros.socket_cliente);
-        char *nombre_archivo = terminacion_archivo(leer_string(buffer, &desp),".txt"); //VER
-        int *tamanio_a_escribir[sizeof(leer_array_entero(buffer, &desp))];
-        memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), sizeof(tamanio_a_escribir));
-        int puntero = leer_entero(buffer,&desp);
-
-        int tamanio_total = suma_array(tamanio_a_escribir,sizeof(tamanio_a_escribir));
-
-        log_info(parametros.logger, "PID: %d - Operacion: IO_FS_WRITE - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d", 
-        parametros.pid, nombre_archivo, tamanio_total, puntero); //HAY QUE TENER EN CUENTA EL PID EN EL BUFFER
-
         resultado = iO_FS_WRITE(parametros);
-        free(buffer);
-        free(nombre_archivo);
-        free(tamanio_a_escribir);
-        free(puntero);
         break;
     case IO_FS_READ:
-        int size;
-        char *buffer;
-        int desp = 0;
-
-        buffer = recibir_buffer(&size, parametros.socket_cliente);
-        char *nombre_archivo = terminacion_archivo(leer_string(buffer, &desp),".txt"); //VER
-        int tamanio_a_leer = leer_entero(buffer,&desp);
-        memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), sizeof(tamanio_a_escribir));
-        int puntero = leer_entero(buffer,&desp);
-
-
-        
-        log_info(parametros.logger, "PID: %d - Operacion: IO_FS_WRITE - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d", 
-        parametros.pid, nombre_archivo, tamanio_a_leer, puntero); //HAY QUE TENER EN CUENTA EL PID EN EL BUFFER
-
         resultado = iO_FS_READ(parametros);
-        free(buffer);
-        free(nombre_archivo);
-        free(tamanio_a_leer);
-        free(puntero);
-
         break;
+
         default:
         log_error(parametros.logger, "Tipo de interfaz desconocida: %d", tipoInterfaz);
     }
@@ -167,7 +126,6 @@ void manejarConexion(t_parametroEsperar parametros)
         enviar_mensaje("ERROR", parametros.conexion_kernel);
     }
 }
-
 
 
 

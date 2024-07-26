@@ -115,14 +115,18 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
     {
         return 1;
     }
-    t_paquete *paquete = crear_paquete();
-    agregar_a_paquete(paquete, direcciones, sizeof(direcciones) + 1);
-    enviar_paquete(paquete, parametros.conexion_memoria);
+    char *direccionesT[sizeof(direcciones)];
+    desp = 0;
+    for(int i = 0;i < sizeof(direcciones)+1;i++){                     //envia a memoria cada direccion con su respectivo tamaño a leer
+        t_paquete *paquete = crear_paquete();
+        agregar_a_paquete(paquete, direcciones[i],__SIZEOF_INT__);
+        agregar_a_paquete(paquete, tamanio_a_escribir[i], __SIZEOF_INT__ );
+        enviar_paquete(paquete, parametros.conexion_memoria);
 
-    int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
-    buffer = recibir_buffer(&size, socketCliente);
-    char *direccionesT[sizeof(leer_array(buffer, &desp))];
-    memcpy(direccionesT, leer_array(buffer, &desp), sizeof(direccionesT));
+        int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
+        buffer = recibir_buffer(&size, socketCliente);
+        direccionesT[i] = leer_string(buffer,&desp);
+    }
     if (direccionesT == NULL)
     {
         return 1;
@@ -133,11 +137,13 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
     {
         char *direccionT = (char *)direccionesT[i];
         strncpy(texto, direccionT, &size);
-        printf("Texto leido: %s\n", texto);
+        printf(texto);
     }
 
     free(texto);
     free(buffer);
+    free(direcciones);
+    free(direccionesT);
     return 0;
 }
 
@@ -152,21 +158,23 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     FILE* bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); //ruta bitmap
 
     int i;
-    for (i = 0; i < config_dialfs.block_count; i++)
-    {
-        if (bitarray_test_bit(bitmap_f, i) == 0)
-        {
+    while((bitarray_test_bit(bitmap_f, i) != 0) && (i<config_dialfs.block_count)){
+        i++;
+    }
+    if (bitarray_test_bit(bitmap_f, i) == 0){
             bitarray_set_bit(bitmap_f, i);
             FILE *f = fopen(terminacion_archivo(nombre_archivo,".txt"), "w"); 
             fclose(f);
-        }
+    }else{
+        return 1;
     }
+    
+
     fclose(bitmap_f);
     nanosleep(&tiempo, NULL);    
     free(buffer);
     free(nombre_archivo);
     crear_metadata(nombre_archivo, i);
-    // ACTUALIZAR BITMAP
     return 0;
 }
 
@@ -207,7 +215,7 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     char *nombre_archivo = leer_string(buffer, &desp);
     int tamanio = leer_entero(buffer, &desp);
 
-    truncate(terminacion_archivo(nombre_archivo,".txt"), tamanio); //HAY QUE VER TRUNCATE
+    truncate(terminacion_archivo(nombre_archivo,".txt"), tamanio); 
     modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
 
     nanosleep(&tiempo, NULL);
@@ -254,33 +262,38 @@ int iO_FS_WRITE(t_parametroEsperar parametros){
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     char *nombre_archivo = terminacion_archivo(leer_string(buffer, &desp),".txt"); //VER
-    int tamanio_a_escribir = leer_entero(buffer,&desp);
+    int tamanio_a_escribir[sizeof(leer_array_entero(buffer, &desp))];
+    memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), sizeof(tamanio_a_escribir));
     int puntero = leer_entero(buffer,&desp);
-    char direcciones[sizeof(leer_array(buffer, &desp))];
-    memcpy(direcciones, leer_array(buffer, &desp), sizeof(direcciones));
+    int direcciones[sizeof(leer_array_entero(buffer, &desp))];
+    memcpy(direcciones, leer_array_entero(buffer, &desp), sizeof(direcciones));
 
     if (direcciones == NULL)
     {
         return 1;
     }
-    t_paquete *paquete = crear_paquete();
-    agregar_a_paquete(paquete, direcciones, sizeof(direcciones) + 1);
-    agregar_a_paquete(paquete, tamanio_a_escribir, __SIZEOF_INT__ + 1);
-    enviar_paquete(paquete, parametros.conexion_memoria);
-
-    int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
-    buffer = recibir_buffer(&size, socketCliente);
-    char *texto = leer_string(buffer,&desp);
-
+    desp = 0;
     FILE *f = fopen(nombre_archivo,"w");
-    fseek(terminacion_archivo(nombre_archivo,".txt"),puntero,SEEK_SET);
-    fwrite(texto,sizeof(char),strlen(texto),nombre_archivo);
+    fseek(nombre_archivo,puntero,SEEK_SET);
+    for(int i = 0;i < sizeof(direcciones)+1;i++){                     //envia a memoria cada direccion con su respectivo tamaño a leer
+        t_paquete *paquete = crear_paquete();
+        agregar_a_paquete(paquete, direcciones[i],__SIZEOF_INT__);
+        agregar_a_paquete(paquete, tamanio_a_escribir[i], __SIZEOF_INT__ );
+        enviar_paquete(paquete, parametros.conexion_memoria);
 
+        int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
+        buffer = recibir_buffer(&size, socketCliente);
+        char *texto = leer_string(buffer,&desp);
+        fwrite(texto,sizeof(char),strlen(texto),nombre_archivo);
+        free(paquete);
+    }
 
     fclose(f);
     nanosleep(&tiempo, NULL);
     free(buffer);
     free(nombre_archivo);
+    free(tamanio_a_escribir);
+    free(direcciones);
     return 0;
 }
 
@@ -319,6 +332,20 @@ char **leer_array(char *buffer, int *desp)
     }
     arr[len] = NULL;
     return arr;
+}
+
+int* leer_array_entero(char* buffer, int* desp)
+{
+	int len = leer_entero(buffer, desp);
+
+	int* arr = malloc((len+1)*sizeof(int));
+	for(int i = 0; i < len; i++)
+	{
+		arr[i] = leer_entero(buffer, desp);
+	}
+	arr[len] = -1;
+
+	return arr;
 }
 
 void crear_metadata(char *nombre_archivo, int pos)
@@ -365,4 +392,12 @@ char terminacion_archivo(char* archivo,char* terminacion){
     strcat(nuevo_archivo, terminacion);
     
     return nuevo_archivo;
+}
+
+int suma_array(int *array, int tamanio) {
+    int suma = 0;
+    for (int i = 0; i < tamanio; i++) {
+        suma += array[i];
+    }
+    return suma;
 }

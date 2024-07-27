@@ -23,7 +23,11 @@ typedef struct t_bloque
 } t_bloque;
 
 
+void rutina_archivos(void);
+int archivo_esta_vacio(char *nombre_archivo);
+
 void compactacion(t_bloque *bloques, t_bitarray *bitmap);
+
 t_bloque *compactar_bloque(t_bloque *bloques);
 void carga_archivos_fs(void);
 t_bloque *levantar_bloques(void);

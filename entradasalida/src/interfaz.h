@@ -12,6 +12,8 @@
 #include <utils/conexiones/conexiones_servidor.h>
 #include <commons/string.h>
 
+#include "fileSistem.h"
+
 typedef struct
 {
 	int conexion_memoria;

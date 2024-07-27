@@ -44,7 +44,7 @@ void manejo_config_interfaz(t_config config)
         config_interfaz.tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
 
         // crear conexiones
-        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, logger);
+        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, "conexion con IO");
         parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
     }
     else if (strcmp(tipo_interfaz, "STDIN") == 0)
@@ -57,8 +57,8 @@ void manejo_config_interfaz(t_config config)
         config_interfaz.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
 
         // crear conexiones
-        parametros.conexion_memoria = crear_conexion(config_interfaz.ip_memoria, config_interfaz.puerto_memoria, logger);
-        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, logger);
+        parametros.conexion_memoria = crear_conexion(config_interfaz.ip_memoria, config_interfaz.puerto_memoria, "conexion con IO");
+        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, "conexion con IO");
         parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
     }
     else if (strcmp(tipo_interfaz, "STDOUT") == 0)
@@ -71,8 +71,8 @@ void manejo_config_interfaz(t_config config)
         config_interfaz.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
 
         // crear conexiones
-        parametros.conexion_memoria = crear_conexion(config_interfaz.ip_memoria, config_interfaz.puerto_memoria, logger);
-        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, logger);
+        parametros.conexion_memoria = crear_conexion(config_interfaz.ip_memoria, config_interfaz.puerto_memoria, "conexion con IO");
+        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, "conexion con IO");
         parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
     }
     else if (strcmp(tipo_interfaz, "DIALFS") == 0)
@@ -90,9 +90,12 @@ void manejo_config_interfaz(t_config config)
         config_interfaz.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
 
         // crear conexiones
-        parametros.conexion_memoria = crear_conexion(config_interfaz.ip_memoria, config_interfaz.puerto_memoria, logger);
-        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, logger);
+        parametros.conexion_memoria = crear_conexion(config_interfaz.ip_memoria, config_interfaz.puerto_memoria, "conexion con IO");
+        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, "conexion con IO");
         parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
+
+        // comprobar filesystem
+        rutina_filesystem();
     }
     else
     {

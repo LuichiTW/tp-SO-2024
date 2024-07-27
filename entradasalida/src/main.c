@@ -2,66 +2,27 @@
 t_bitarray *bitmap;
 
 // considerar pasar los argumentos de creacion de interfaces por el main y no por la funcion (issue #3709)
-int main(char *nombreInterfaz, char *pathInterfaz)
+int main(char *nombreInterfaz, char *pathInterfaz) // ? como hacer que la interfaz sea unica
 {
+    //inicia logger y config
     t_log *logger = iniciar_logger_io();
 
     t_config *config = iniciar_config(pathInterfaz);
 
-    cargar_config_interfaz(config);
+    //carga los datos de la interfaz y crea las conxiones por el tipo de interfaz
+    manejo_config_interfaz(config);
 
-    /* prueba de lectura de archivo de configuracion
-    t_config *config = config_create("./io.config");
-    if (config == NULL)
-    {
-        perror("Error al iniciar config");
-        exit(EXIT_FAILURE);
-    }
-    // memoria
-    char *ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-    char *puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-    // kernel
-    char *ip_kernel = config_get_string_value(config, "IP_KERNEL");
-    char *puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
-    */
+    //espera las instrucciones de la interfaz
+    esperar(parametros);
 
-    // cargar parametros para cargar al hilo
-    // tiempo.tv_sec = tiempo_unidad_trabajo;
-
-    t_parametroEsperar parametros;
-
-    // todo la conexion a memoria y kernel va ser manejada por una funcion
-    // cliente a memoria
-    //parametros.conexion_memoria = crear_conexion(ip_memoria, puerto_memoria, "Hola soy el IO"); 
-
-    // cliente a kernel
-    //parametros.conexion_kernel = crear_conexion(ip_kernel, puerto_kernel, "Hola soy el IO");
-
-    // servidor
-    parametros.server_fd = iniciar_servidor(puerto_kernel);
-    parametros.logger = logger;
-
-    // crear hilo para manejar espera
-    // ? no se usaria si cada interfaz es una terminal diferente
-    pthread_t kernel_t;
-    int resutado = pthread_create(&kernel_t, NULL, (void *)esperar, (void *)&parametros);
-    if (resutado != 0)
-    {
-        log_error(logger, "Error crear hilo");
-        exit(EXIT_FAILURE);
-    }
-    pthread_join(kernel_t, NULL);
-    pthread_detach(kernel_t);
-
+    //finaliza logger y config
     log_destroy(logger);
     config_destroy(config);
     return 0;
-    ///////////////////////////////////////////////////////////////////
 }
 
 void esperar(t_parametroEsperar parametros)
 {
-
     while (1)
     {
         parametros.socket_cliente = esperar_cliente(parametros.server_fd, parametros.logger);

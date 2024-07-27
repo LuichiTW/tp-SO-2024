@@ -14,6 +14,9 @@
 #include <commons/bitarray.h>
 
 #include "interfaz.h"
+#include "fileSistem.h"
+
+extern t_parametroEsperar parametros;
 
 void manejarConexion(t_parametroEsperar parametros);
 void esperar(t_parametroEsperar parametros);

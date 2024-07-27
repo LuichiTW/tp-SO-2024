@@ -18,6 +18,8 @@ int main()
     //cola VRR
     Cola*colaVRR=(Cola*)malloc(sizeof(Cola));
     colaVRR->primero=colaVRR->ultimo=NULL;
+    Cola*colaEXIT=(Cola*)malloc(sizeof(Cola));
+    colaVRR->primero=colaVRR->ultimo=NULL;
 
     // INICIAR LOGGER DEL KERNEL Y SU CONFIG
     t_log *logger = log_create("kernel.log", "kernel", true, LOG_LEVEL_INFO);
@@ -50,11 +52,11 @@ int main()
 	log_info(logger, "Listo para recibir al IO");
     int socket_cliente_io = esperar_cliente(socket_servidor_kernel, logger);
 
-    iniciar_consola_interactiva(logger,conexion_cpu_dispatch,conexion_cpu_interrupt,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
+    iniciar_consola_interactiva(logger,conexion_cpu_dispatch,conexion_cpu_interrupt,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR,colaEXIT);
     return 0;
 }
 
-void iniciar_consola_interactiva(t_log*logger,int conexion_cpu_dispatch,int conexion_cpu_interrupt,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR)
+void iniciar_consola_interactiva(t_log*logger,int conexion_cpu_dispatch,int conexion_cpu_interrupt,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR,Cola*colaEXIT)
 {
     printf("Bienvenido a la Consola Interactiva de Kernel. Ingrese una funcion:\n"
     " -   EJECUTAR_SCRIPT\n"
@@ -79,18 +81,17 @@ void iniciar_consola_interactiva(t_log*logger,int conexion_cpu_dispatch,int cone
             gets(leido);
             continue;
         }
-        atender_instruccion_valida(leido, logger,conexion_cpu_dispatch,conexion_cpu_interrupt,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
+        atender_instruccion_valida(leido,logger,conexion_cpu_dispatch,conexion_cpu_interrupt,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR,colaEXIT);
         gets(leido);
     }
     free(leido);
 }
 
-void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu_dispatch,int conexion_cpu_interrupt,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR)
+void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu_dispatch,int conexion_cpu_interrupt,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR,Cola*colaEXIT)
 {
     int PIDs=0;
     char* comando_consola = strtok(leido, " ");
     char* path = strtok (NULL," ");
-    printf("%s",path);
 
     int opcion_valida=0;
     if (strcmp(comando_consola,"EJECUTAR_SCRIPT")==0)
@@ -113,56 +114,83 @@ void atender_instruccion_valida(char*leido, t_log*logger, int conexion_cpu_dispa
     switch (opcion_valida)
     {
         case 1: //EJECUTAR_SCRIPT
-        int cont=0;
-        char linea[30];
+            char linea[30];
 
-        t_config *config = config_create("../kernel.config");
-        int grado_multiprogramacion = config_get_int_value(config,"GRADO_MULTIPROGRAMACION");
+            t_config *config = config_create("../kernel.config");
+            int grado_multiprogramacion = config_get_int_value(config,"GRADO_MULTIPROGRAMACION");
 
-        FILE*archivo_de_instrucciones;
-        archivo_de_instrucciones=fopen(path,"r");
-        fgets(linea,30,archivo_de_instrucciones);
-        while (!feof(archivo_de_instrucciones))
-        {
-            char* instruccion = strtok(linea, " ");
-            if (strcmp(instruccion,"INICIAR_PROCESO"))
-            {
-                PIDs++;
-                log_info(logger,"Se crea el proceso <%d> en NEW",PIDs);
-                char* path = strtok(NULL, " ");
-                iniciar_proceso(path,PIDs,conexion_cpu_dispatch,conexion_memoria,colaNEW);
-                enviar_mensaje("Crea un proceso cuyas operaciones se encuentran en",conexion_memoria);
-                enviar_mensaje(path,conexion_memoria);
-            }
+            FILE*archivo_de_instrucciones;
+            archivo_de_instrucciones=fopen(path,"r");
             fgets(linea,30,archivo_de_instrucciones);
-        }
-        fclose(archivo_de_instrucciones);
-        if (PIDs<grado_multiprogramacion)
-        {
-            
-            encolarColaREADY(colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
-        }
-        
-        break;
+            while (!feof(archivo_de_instrucciones))
+            {
+                char* instruccion = strtok(linea, " ");
+                if (strcmp(instruccion,"INICIAR_PROCESO"))
+                {
+                    PIDs++;
+                    log_info(logger,"Se crea el proceso <%d> en NEW",PIDs);
+                    char* path = strtok(NULL, " ");
+                    iniciar_proceso(path,PIDs,conexion_cpu_dispatch,conexion_memoria,colaNEW);
+                    enviar_mensaje("Crea un proceso cuyas operaciones se encuentran en",conexion_memoria);
+                    enviar_mensaje(path,conexion_memoria);
+                }
+                fgets(linea,30,archivo_de_instrucciones);
+            }
+            fclose(archivo_de_instrucciones);
+            if (PIDs<grado_multiprogramacion)
+            {
+                
+                encolarColaREADY(colaNEW,colaREADY,colaFIFO,colaRR,colaVRR);
+            }
+            break;
         case 2: //INICIAR_PROCESO
             PIDs++;
             iniciar_proceso(path,PIDs,conexion_cpu_dispatch,conexion_memoria,colaNEW);
             break;
         case 3: //FINALIZAR_PROCESO
             int pid = (int)strtol(path,NULL,10);
-            enviar_mensaje("FInalizar el proceso con PID que se envia a continuacion",conexion_cpu_interrupt);
+            enviar_mensaje("FInalizar EL PROCESO CON PID ENVIADO A CONTINUACION",conexion_cpu_interrupt);
             enviar_entero(pid,conexion_cpu_interrupt);
-            log_info(logger,"FInaliza el proceso <%d> - Motivo: <SUCCESS / INVALID_RESOURCE / INVALID_WRITE>",pid);
+            log_info(logger,"FINALIZA EL PROCESO <%d> - Motivo: <SUCCESS / INVALID_RESOURCE / INVALID_WRITE>",pid);
             break;
         case 4: //DETENER_PLANIFICACION
-            
             break;
         case 5: //INICIAR_PLANIFICACION
             break;
         case 6: //MULTIPROGRAMACION
+            char* linea_leida;
+            FILE*archivo_config;
+            archivo_config=fopen("kernel.dat","rb+");
+            if (!archivo_config)
+            {
+                printf("No se pudo abrir el archivo");
+            }
+            fgets(linea_leida,50,archivo_config);
+            while (!feof(archivo_config))
+            {
+                if ((strcmpi(linea_leida,"GRADO_MULTIPROGRAMACION=10"))==0)
+                {
+                    readline(">");
+                    fseek(archivo_config,(-2)*sizeof(archivo_config),SEEK_CUR);
+                }
+                fgets(linea,50,archivo_config);
+            }
+            fclose(archivo_config);
             break;
         case 7: //PROCESO_ESTADO
-            
+            listarProcesos(colaNEW,"NEW",logger);
+
+            listarProcesos(colaREADY,"READY",logger);
+            char* algoritmo = config_get_string_value(config,"ALGORITMO_PLANIFICACION");
+
+            if (strcmp(algoritmo,"FIFO")==0)
+                listarProcesos(colaFIFO,"EXEC",logger);
+            else if (strcmp(algoritmo,"RR")==0)
+                listarProcesos(colaRR,"EXEC",logger);
+            else if (strcmp(algoritmo,"VRR")==0)
+                listarProcesos(colaVRR,"EXEC",logger);
+
+            listarProcesos(colaEXIT,"EXEC",logger);
             break;
         default:
         log_error(logger,"Error durante la validacion de la instruccion en la consola.");
@@ -279,7 +307,6 @@ void encolarColaREADY(Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola
     {
         printf("El algoritmo del .config no es valido");
     }
-    
 }
 
 void encolarColaFIFO(Cola*colaREADY,Cola*colaFIFO)
@@ -490,4 +517,26 @@ void encolarAlFinal(Cola*cola)
     eliminar=cola->primero;
     cola->primero=cola->primero->sig;
     free(eliminar);
+}
+
+void listarProcesos(Cola*cola,char*estado,t_log*logger)
+{
+    NodoColaPCBS*identificador;
+    identificador=cola->primero;
+    if (identificador!=NULL)
+    {
+        log_info(logger,"PROCESOS EN ESTADO %s:",estado);
+    }
+    else
+    {
+        log_info(logger,"NO HAY PROCESOS EN ESTADO %s",estado);
+    }
+    
+    
+    while (identificador!=NULL)
+    {
+        int pid = identificador->PCBS.PID;
+        log_info(logger,"PID: %d",pid);
+        identificador=identificador->sig;
+    }
 }

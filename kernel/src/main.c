@@ -1,15 +1,18 @@
 #include <main.h>
 
+// TODO Iniciar escucha io
 int main() 
 {
     cargar_config();
     levantar_conexiones();
     inicializar_colas();
 
-    iniciar_consola_interactiva(logger,conexion_cpu_dispatch,conexion_cpu_interrupt,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR,colaEXIT);
+    pthread_t thread_consola;
+    pthread_create(&thread_consola, NULL, (void*)iniciar_consola, NULL);
+    pthread_detach(thread_consola);
     return 0;
 }
-
+/*
 void iniciar_consola_interactiva(t_log*logger,int conexion_cpu_dispatch,int conexion_cpu_interrupt,int conexion_memoria,Cola*colaNEW,Cola*colaREADY,Cola*colaFIFO,Cola*colaRR,Cola*colaVRR,Cola*colaEXIT)
 {
     printf("Bienvenido a la Consola Interactiva de Kernel. Ingrese una funcion:\n"
@@ -390,7 +393,7 @@ void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
         //SE INTERRUMPE POR QUANTUM Y LO ENCOLA AL FINAL
         encolarAlFinal(colaVRR);
     }
-    /*else
+    else
     {
 
         if (VERIFICAR SI LA INTERRUPCION ES POR I/O)
@@ -414,7 +417,7 @@ void encolarColaVRR(Cola*colaREADY,Cola*colaVRR)
                 encolarColaVRRAux(pasaColaAux,colaVRRAux);
             }
         }
-    }*/
+    }
     
 }
 
@@ -493,4 +496,4 @@ void listarProcesos(Cola*cola,char*estado,t_log*logger)
         log_info(logger,"PID: %d",pid);
         identificador=identificador->sig;
     }
-}
+}*/

@@ -1,6 +1,7 @@
 #ifndef CONFIG_KERNEL_H
 #define CONFIG_KERNEL_H
 
+#include <stdlib.h>
 #include <commons/config.h>
 #include <commons/log.h>
 

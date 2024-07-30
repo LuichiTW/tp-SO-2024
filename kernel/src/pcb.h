@@ -1,6 +1,12 @@
 #ifndef PCB_H
 #define PCB_H
 
+#include <stdint.h>
+
+typedef struct {
+    uint8_t AX, BX, CX, DX;
+    uint32_t EAX, EBX, ECX, EDX;
+} t_registros_uso_general;
 
 typedef struct
 {
@@ -10,8 +16,4 @@ typedef struct
     t_registros_uso_general registros; // Estado de los registros de uso general
 } t_pcb;
 
-
-typedef struct {
-    uint8_t AX, BX, CX, DX;
-    uint32_t EAX, EBX, ECX, EDX;
-} t_registros_uso_general;
+#endif // PCB_H

@@ -12,14 +12,15 @@
 #include <commons/log.h>
 #include <commons/error.h>
 #include <readline/readline.h>
-#include <pthread.h>
 #include <string.h>
 #include <commons/temporal.h>
 #include <commons/temporal.h>
 
+#include <pthread.h>
 #include "config.h"
 #include "conexion.h"
 #include "planificador.h"
+#include "consola.h"
 
 typedef struct
 
@@ -57,7 +58,7 @@ typedef struct
 
 
 
-extern int i = 1;
+//extern int i = 1;
 
 
 

@@ -7,9 +7,8 @@
 
 struct sockets_cpu {
     int socket_memoria;
-    int socket_servidor_cpu_dispatch;
-    int socket_servidor_cpu_interrupt;
-    int socket_cliente_kernel_interrupt;
+    int socket_kernel_interrupt;
+    int socket_kernel_dispatch;
 };
 
 extern struct sockets_cpu sockets_cpu;

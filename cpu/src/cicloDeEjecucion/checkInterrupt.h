@@ -11,11 +11,13 @@
 #include <readline/readline.h>
 #include <commons/string.h>
 #include <semaphore.h>
+#include <pthread.h>
+#include "../conexiones.h"
+#include "../registros.h"
 #include "../pcb.h"
 
-extern t_log *loggerPrincipal;
 extern sem_t s_interrupcion;
-
+extern bool hay_interrupcion;
 
 typedef struct
 {
@@ -26,7 +28,11 @@ typedef struct
 
 //extern t_pcb *pcb;
 
+void crear_thread_interrupt();
+void recibir_interrupciones();
 void funCheckInterrupt(t_pcb *pcb, int socket_cliente_kernel_interrupt);
-void checkInterrupt(t_parametroCheckInterrupt *parametros);
+void devolver_contexto_ejecucion(enum motivo_desalojo motivo_desalojo);
+
+//void checkInterrupt(t_parametroCheckInterrupt *parametros);
 
 #endif // !INTERRUPT

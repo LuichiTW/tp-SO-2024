@@ -60,6 +60,7 @@ int main() {
     cargar_sockets();
 
     inicializar_tlb();
+    crear_thread_interrupt();
 
     // ? Ignorando el código que conecta con kernel para debug
     ////sockets_cpu.socket_cliente_kernel_interrupt = esperar_cliente(sockets_cpu.socket_servidor_cpu_interrupt, loggerPrincipal);
@@ -68,12 +69,17 @@ int main() {
 
     ////pcb = recibir_pcb(sockets_cpu.socket_servidor_cpu_dispatch, sockets_cpu.socket_servidor_cpu_interrupt);
 
-    pcb = recibir_pcb(1, 1);
+    recibir_pcb(1, 1);
 
     // Ciclo de instrucción
     while (1) {
+        // ? Capaz que debería hacer algo tipo:
+        /**
+         * if (!hay_proceso_corriendo) {
+         *      esperar_paquete() o algo así
+         * }
+        */ 
         // Fetch
-        ////log_info(alt_logger, "- Ciclo de instrución iniciado -");
         char *instruccionStr = funFetch(sockets_cpu.socket_memoria);
 
         // Decode
@@ -94,7 +100,7 @@ int main() {
         log_info(logger, "PID: %i - Ejecutando: %s - %s", 1, instYParametros[0], params);
 
         // Check interrupt
-        ////funCheckInterrupt(pcb, socket_cliente_kernel_interrupt);
+        ////funCheckInterrupt();
 
         // Limpieza de memoria
         free(instruccionStr);

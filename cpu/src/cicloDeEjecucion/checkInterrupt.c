@@ -1,21 +1,41 @@
 #include "checkInterrupt.h"
 
 //t_pcb *pcb;
+bool hay_interrupcion;
 
-void funCheckInterrupt(t_pcb *pcb, int socket_cliente_kernel_interrupt){
-    
-    sem_wait(&s_interrupcion);
-    pthread_t kernel_t;
-    t_parametroCheckInterrupt *parametros = malloc(sizeof(t_parametroCheckInterrupt));
-    parametros->pcb = pcb;
-    parametros->socket_cliente_kernel_interrupt = socket_cliente_kernel_interrupt;
-    pthread_create(&kernel_t, NULL, (void*)checkInterrupt,(void*)&parametros);
-    pthread_join(kernel_t, NULL);
-    pthread_detach(kernel_t);
-    sem_post(&s_interrupcion);
+void crear_thread_interrupt() {
+    pthread_t thread_interr;
+    pthread_create(&thread_interr, NULL, (void*)recibir_interrupciones, NULL);
+    pthread_detach(thread_interr);
 }
 
-void checkInterrupt(t_parametroCheckInterrupt *parametros){
+
+void recibir_interrupciones() {
+    while (true) {    
+        int op = recibir_operacion(sockets_cpu.socket_kernel_interrupt);
+        if (op == CPU_INTERRUPT) {
+            hay_interrupcion = true;
+        }
+    }
+    
+}
+
+
+void funCheckInterrupt(){
+    if (hay_interrupcion) {
+        devolver_contexto_ejecucion();
+        hay_interrupcion = false;
+    }
+}
+
+void devolver_contexto_ejecucion(enum motivo_desalojo motivo_desalojo) {
+    actualizar_pcb();
+    // Enviar a kernel el CDE y Motivo desalojo
+    // ? Esperar otro CDE de kernel?
+}
+
+
+/* void checkInterrupt(t_parametroCheckInterrupt *parametros){
     while (1)
     {   
         int op = recibir_operacion(parametros->socket_cliente_kernel_interrupt);
@@ -34,5 +54,5 @@ void checkInterrupt(t_parametroCheckInterrupt *parametros){
     }
     }
     
-}
+} */
 

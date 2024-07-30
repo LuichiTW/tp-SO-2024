@@ -10,10 +10,6 @@ void inicializar_tlb() {
 
 int tlb_obtener_frame (int pid, int pagina) {
     int es_el_buscado(t_fila_tlb* fila) {
-        printf("pid: %i\n", pid);
-        printf("fila->pid: %i\n", fila->pid);
-        printf("pag: %i\n", pagina);
-        printf("fila->pag: %i\n", fila->pagina);
         return fila->pid == pid && fila->pagina == pagina;
     }
 

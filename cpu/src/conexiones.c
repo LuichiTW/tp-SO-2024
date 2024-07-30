@@ -8,7 +8,7 @@ void cargar_sockets() {
     // Memoria (cliente)
     log_info(logger, "Conectando a memoria...");
     sockets_cpu.socket_memoria = crear_conexion2(config_cpu.ip_memoria, config_cpu.puerto_memoria);
-    log_info(logger, "Conexion creada\n");
+    log_info(logger, "Conexion creada");
 
     char modulo[5] = "    ";
     sprintf(modulo, "%d", MOD_CPU);
@@ -19,12 +19,16 @@ void cargar_sockets() {
     log_info(logger, "Tam pag: %s", tam_pagina_str);
     tam_pagina = atoi(tam_pagina_str);
 
-    //*SERVIDOR------------------------------------------>
-        //*DISPATCH
-    ////sockets_cpu.socket_servidor_cpu_dispatch = iniciar_servidor(config_cpu.puerto_escucha_dispatch);
-	////log_info(logger, "Listo para recibir al Kernel en dispatch");
-        //*INTERRUPT
-    ////sockets_cpu.socket_servidor_cpu_interrupt = iniciar_servidor(config_cpu.puerto_escucha_interrupt);
-	////log_info(logger, "Listo para recibir al Kernel en interrupt");
+    // Kernel
+    //* Dispatch
+    log_info(logger, "Conectando a Kernel en puerto Dispatch...");
+    sockets_cpu.socket_kernel_dispatch = iniciar_servidor(config_cpu.puerto_escucha_dispatch);
+	log_info(logger, "Conexión creada");
+
+    //* Interrupt
+    log_info(logger, "Conectando a Kernel en puerto Interrupt...");
+    sockets_cpu.socket_kernel_interrupt = iniciar_servidor(config_cpu.puerto_escucha_interrupt);
+	log_info(logger, "Conexión creada");
+
     log_destroy(logger);
 }

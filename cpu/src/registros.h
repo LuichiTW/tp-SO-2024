@@ -18,6 +18,10 @@ typedef struct {
     uint32_t EAX, EBX, ECX, EDX, SI, DI, PC;
 } registros_cpu;
 
+typedef struct {
+    uint8_t AX, BX, CX, DX;
+    uint32_t EAX, EBX, ECX, EDX;
+} t_registros_uso_general;
 
 extern registros_cpu regcpu;
 //CANTIDAD DE REGISTROS Q TIENE EL CPU
@@ -50,5 +54,8 @@ typedef enum{
 
 int tamanioRegistro(lista_registros_CPU);
 void* obtenerRegistro(lista_registros_CPU);
+
+registros_cpu reg_gen_to_reg_cpu(t_registros_uso_general reg_gen);
+t_registros_uso_general reg_cpu_to_reg_gen(registros_cpu reg_cpu);
 
 #endif // !REGISTROSCPU

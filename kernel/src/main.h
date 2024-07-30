@@ -3,30 +3,23 @@
 #define MAIN_KERNEL
 
 
-
+// Algunas se podrían sacar en el futuro
 #include <stdlib.h>
-
 #include <stdio.h>
-
 #include <utils/conexiones/conexiones_servidor.h>
-
 #include <utils/conexiones/conexiones_cliente.h>
-
 #include <commons/config.h>
-
 #include <commons/log.h>
-
 #include <commons/error.h>
-
 #include <readline/readline.h>
-
 #include <pthread.h>
-
 #include <string.h>
-
+#include <commons/temporal.h>
 #include <commons/temporal.h>
 
-#include <commons/temporal.h>
+#include "config.h"
+#include "conexion.h"
+#include "planificador.h"
 
 typedef struct
 

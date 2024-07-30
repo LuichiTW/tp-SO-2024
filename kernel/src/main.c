@@ -2,55 +2,9 @@
 
 int main() 
 {
-
-    //cola NEW
-    Cola*colaNEW=(Cola*)malloc(sizeof(Cola));
-    colaNEW->primero=colaNEW->ultimo=NULL;;
-    //cola READY
-    Cola*colaREADY=(Cola*)malloc(sizeof(Cola));
-    colaREADY->primero=colaREADY->ultimo=NULL;
-    //cola FIFO
-    Cola*colaFIFO=(Cola*)malloc(sizeof(Cola));
-    colaFIFO->primero=colaFIFO->ultimo=NULL;
-    //cola RR
-    Cola*colaRR=(Cola*)malloc(sizeof(Cola));
-    colaRR->primero=colaRR->ultimo=NULL;
-    //cola VRR
-    Cola*colaVRR=(Cola*)malloc(sizeof(Cola));
-    colaVRR->primero=colaVRR->ultimo=NULL;
-    Cola*colaEXIT=(Cola*)malloc(sizeof(Cola));
-    colaVRR->primero=colaVRR->ultimo=NULL;
-
-    // INICIAR LOGGER DEL KERNEL Y SU CONFIG
-    t_log *logger = log_create("kernel.log", "kernel", true, LOG_LEVEL_INFO);
-    log_info(logger, "Iniciando kernel...");
-    t_config *config = config_create("../kernel.config");
-    if (config == NULL) {
-        log_error(logger, "No se leyo el archivo de configuracion");
-        exit(EXIT_FAILURE);
-    }
-
-    // CONECTAR COMO CLIENTE
-
-    // MEMORIA
-    char *puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-    char *ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-    int conexion_memoria = crear_conexion(ip_memoria, puerto_memoria, "Hola soy el kernel");
-    
-    // CPU
-    char *puerto_cpu_dispatch = config_get_string_value(config, "PUERTO_CPU_DISPATCH");
-    char *ip_cpu = config_get_string_value(config, "IP_CPU");
-    int conexion_cpu_dispatch = crear_conexion(ip_cpu, puerto_cpu_dispatch, "Hola soy el kernel");
-
-    char *puerto_cpu_interrupt = config_get_string_value(config, "PUERTO_CPU_INTERRUPT");
-    int conexion_cpu_interrupt = crear_conexion(ip_cpu, puerto_cpu_interrupt, "Hola soy el kernel");
-
-    // INICIAR SERVIDOR 
-
-	char *puerto = config_get_string_value(config, "PUERTO_ESCUCHA");
-    int socket_servidor_kernel = iniciar_servidor(puerto);
-	log_info(logger, "Listo para recibir al IO");
-    int socket_cliente_io = esperar_cliente(socket_servidor_kernel, logger);
+    cargar_config();
+    levantar_conexiones();
+    inicializar_colas();
 
     iniciar_consola_interactiva(logger,conexion_cpu_dispatch,conexion_cpu_interrupt,conexion_memoria,colaNEW,colaREADY,colaFIFO,colaRR,colaVRR,colaEXIT);
     return 0;

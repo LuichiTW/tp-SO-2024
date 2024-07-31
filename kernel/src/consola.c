@@ -2,6 +2,7 @@
 
 void iniciar_consola() {
     t_log *alt_logger = log_create("kernel_alt.log", "kernel", true, LOG_LEVEL_INFO);
+    log_debug(alt_logger, "Consola interactiva iniciada.");
     
     while (true) {
 
@@ -78,7 +79,19 @@ void c_ejecutar_script(char *path) {
 
 }
 void c_iniciar_proceso(char *path) {
+    t_pcb *pcb = crear_proceso();
 
+    t_paquete *paquete = crear_paquete();
+    agregar_a_paquete(paquete, &(pcb->pid), sizeof(pcb->pid));
+    agregar_a_paquete(paquete, path, string_length(path));
+    enviar_peticion(paquete, sockets.memoria, MEM_CREAR_PROCESO);
+    eliminar_paquete(paquete);
+
+    recibir_operacion(sockets.memoria);
+    recibir_entero(sockets.memoria);
+
+    queue_push(cola_new, pcb);
+    planificar();
 }
 void c_finalizar_proceso(int pid) {
 

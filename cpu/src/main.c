@@ -69,16 +69,13 @@ int main() {
 
     ////pcb = recibir_pcb(sockets_cpu.socket_servidor_cpu_dispatch, sockets_cpu.socket_servidor_cpu_interrupt);
 
-    recibir_pcb(1, 1);
-
     // Ciclo de instrucción
     while (1) {
-        // ? Capaz que debería hacer algo tipo:
-        /**
-         * if (!hay_proceso_corriendo) {
-         *      esperar_paquete() o algo así
-         * }
-        */ 
+        // Si no tiene un proceso ejecutando, espera a recibir uno de Kernel.
+        if (!proceso_ejecutando) {
+            recibir_pcb();
+        }
+
         // Fetch
         char *instruccionStr = funFetch(sockets_cpu.socket_memoria);
 

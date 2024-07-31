@@ -21,6 +21,7 @@ struct config_kernel {
 };
 
 extern struct config_kernel config_kernel;
+extern int multiprogramacion_actual;
 
 void cargar_config();
 

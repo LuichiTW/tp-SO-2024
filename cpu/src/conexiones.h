@@ -9,6 +9,8 @@ struct sockets_cpu {
     int socket_memoria;
     int socket_kernel_interrupt;
     int socket_kernel_dispatch;
+    int socket_escucha_interrupt;
+    int socket_escucha_dispatch;
 };
 
 extern struct sockets_cpu sockets_cpu;

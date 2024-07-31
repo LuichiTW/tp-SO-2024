@@ -19,16 +19,35 @@ void cargar_sockets() {
     log_info(logger, "Tam pag: %s", tam_pagina_str);
     tam_pagina = atoi(tam_pagina_str);
 
-    // Kernel
+    // Levantar servidores para Kernel
     //* Dispatch
-    log_info(logger, "Conectando a Kernel en puerto Dispatch...");
-    sockets_cpu.socket_kernel_dispatch = iniciar_servidor(config_cpu.puerto_escucha_dispatch);
-	log_info(logger, "Conexión creada");
+
+    log_info(logger, "Levantando servidor en puerto Dispatch...");
+    sockets_cpu.socket_escucha_dispatch = iniciar_servidor(config_cpu.puerto_escucha_dispatch);
+	log_info(logger, "Servidor listo");
 
     //* Interrupt
-    log_info(logger, "Conectando a Kernel en puerto Interrupt...");
-    sockets_cpu.socket_kernel_interrupt = iniciar_servidor(config_cpu.puerto_escucha_interrupt);
-	log_info(logger, "Conexión creada");
+
+    log_info(logger, "Levantando servidor en puerto Interrupt...");
+    sockets_cpu.socket_escucha_interrupt = iniciar_servidor(config_cpu.puerto_escucha_interrupt);
+	log_info(logger, "Servidor listo");
+
+    // Esperar conexiones del Kernel
+    //* Dispatch
+
+    sockets_cpu.socket_kernel_dispatch = esperar_cliente2(sockets_cpu.socket_escucha_dispatch, logger);
+    recibir_operacion(sockets_cpu.socket_kernel_dispatch);
+    int mod_dispatch = recibir_entero(sockets_cpu.socket_kernel_dispatch);
+    if (mod_dispatch != MOD_KERNEL) exit(EXIT_FAILURE);
+    enviar_entero(MOD_CPU, sockets_cpu.socket_kernel_dispatch);
+
+    //* Interrupt
+
+    sockets_cpu.socket_kernel_interrupt = esperar_cliente2(sockets_cpu.socket_escucha_interrupt, logger);
+    recibir_operacion(sockets_cpu.socket_kernel_interrupt);
+    int mod_interrupt = recibir_entero(sockets_cpu.socket_kernel_interrupt);
+    if (mod_interrupt != MOD_KERNEL) exit(EXIT_FAILURE);
+    enviar_entero(MOD_CPU, sockets_cpu.socket_kernel_interrupt);
 
     log_destroy(logger);
 }

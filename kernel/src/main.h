@@ -16,6 +16,7 @@
 #include <commons/temporal.h>
 #include <commons/temporal.h>
 
+#include <semaphore.h>
 #include <pthread.h>
 #include "config.h"
 #include "conexion.h"

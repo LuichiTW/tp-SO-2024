@@ -1,27 +1,24 @@
 #include "pcb.h"
 
 t_pcb pcb;
+bool proceso_ejecutando = false;
 
-void recibir_pcb(int socket_cliente_kernel_dispatch, int socket_cliente_kernel_interrupt){
-    // ! Reemplazar por los que vengan de kernel
-    pcb.pid = 1;
-    pcb.pc = 0;
-    pcb.quantum = 2;
-    pcb.registros;
-    // !
+void recibir_pcb(){
+    int op = recibir_operacion(sockets_cpu.socket_kernel_dispatch);
+    printf("op: %i\n", op);
+    t_list *lista_pcb = recibir_paquete(sockets_cpu.socket_kernel_dispatch);
+    t_pcb *pcb_ptr = desempaquetar_pcb(lista_pcb);
+    
+    pcb.pid = pcb_ptr->pid;
+    pcb.pc = pcb_ptr->pc;
+    pcb.quantum = pcb_ptr->quantum;
+    pcb.registros = pcb_ptr->registros;
 
     regcpu = reg_gen_to_reg_cpu(pcb.registros);
     regcpu.PC = pcb.pc;
 
-    // Recibir PCB
-    /* t_pcb *pcb = malloc(sizeof(t_pcb));
-    int bytesRecibidos = recv(socket_cliente_kernel_dispatch, pcb, sizeof(t_pcb), 0);
-    if (bytesRecibidos <= 0) {
-        log_error(loggerPrincipal, "No se pudo recibir el PCB");
-        exit(EXIT_FAILURE);
-    }
-    ////log_info(loggerPrincipal, "Se recibio el PCB correctamente");
-    return pcb; */
+    proceso_ejecutando = true;
+    list_destroy(lista_pcb);
 }
 
 void actualizar_pcb() {

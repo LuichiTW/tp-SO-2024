@@ -23,16 +23,16 @@ void recibir_interrupciones() {
 
 void funCheckInterrupt(){
     if (hay_interrupcion) {
-        devolver_contexto_ejecucion();
+        //devolver_contexto_ejecucion();
         hay_interrupcion = false;
     }
 }
 
-void devolver_contexto_ejecucion(enum motivo_desalojo motivo_desalojo) {
+/* void devolver_contexto_ejecucion(enum motivo_desalojo motivo_desalojo) {
     actualizar_pcb();
     // Enviar a kernel el CDE y Motivo desalojo
-    // ? Esperar otro CDE de kernel?
-}
+    proceso_ejecutando = false;
+} */
 
 
 /* void checkInterrupt(t_parametroCheckInterrupt *parametros){

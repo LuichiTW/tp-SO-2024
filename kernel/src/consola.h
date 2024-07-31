@@ -5,6 +5,9 @@
 #include <readline/readline.h>
 #include <commons/string.h>
 #include <commons/log.h>
+#include <utils/pcb.h>
+#include "conexion.h"
+#include "planificador.h"
 
 enum comandos_consola {
     COM_EJECUTAR_SCRIPT,

@@ -1,6 +1,7 @@
 #include "config.h"
 
 struct config_kernel config_kernel;
+int multiprogramacion_actual = 0;
 
 // TODO listas recursos
 

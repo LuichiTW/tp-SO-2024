@@ -38,7 +38,8 @@ typedef enum
     IO_FS_TRUNCATE,
     IO_FS_WRITE,
     IO_FS_READ,
-	CPU_INTERRUPT
+	CPU_INTERRUPT,
+	CPU_EXEC_PROC
 } op_code;
 
 typedef struct

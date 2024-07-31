@@ -17,9 +17,6 @@ int main() {
     procesos_actuales = list_create();
     tablas_paginas = list_create();
 
-    // DEBUG
-    crear_proceso(1, "prueba.txt");
-
     // ? Por ahora no veo motivos para crear el hilo
     // Crea un hilo que se encargue de esperar clientes para gestionar sus conexiones.
     //// pthread_t thread_receptor;
@@ -28,7 +25,6 @@ int main() {
 
     while (true) {
         t_log *logger = alt_memlogger();
-        // TODO mandarle a la funcion handshake el modulo
         
         int socket_cliente = esperar_cliente2(socket_server, logger);
         hacer_handshake(socket_cliente);
@@ -69,8 +65,11 @@ void recibir_solicitudes(int *socket_cliente_dir) {
                 pid = *((int*) list_get(datos, 0));
                 scriptname = list_get(datos, 1);
 
-                // ! Devolver algo
-                crear_proceso(pid, scriptname);
+                int rta = crear_proceso(pid, scriptname);
+
+                delay(config_memoria.retardo_respuesta);
+
+                enviar_entero(rta, socket_cliente);
             }
             break;
 
@@ -178,6 +177,8 @@ void hacer_handshake(int socket_cliente) {
 
     switch (i_modulo) {
         case MOD_KERNEL:
+            // Responde a Kernel con un 1
+            enviar_entero(MOD_MEMORIA, socket_cliente);
             break;
         case MOD_CPU:
             // Responde a CPU con el tamaño de página

@@ -1,6 +1,8 @@
 #include <main.h>
 
+sem_t sem;
 // TODO Iniciar escucha io
+// TODO Usar semáforo para canal dispatch
 int main() 
 {
     cargar_config();
@@ -10,6 +12,14 @@ int main()
     pthread_t thread_consola;
     pthread_create(&thread_consola, NULL, (void*)iniciar_consola, NULL);
     pthread_detach(thread_consola);
+
+    /* pthread_t thread_planificador;
+    pthread_create(&thread_planificador, NULL, (void*)planificar, NULL);
+    pthread_detach(thread_planificador); */
+
+    sem_init(&sem, 0, 0);
+    sem_wait(&sem);
+
     return 0;
 }
 /*

@@ -30,8 +30,8 @@ typedef struct
 
 void crear_thread_interrupt();
 void recibir_interrupciones();
-void funCheckInterrupt(t_pcb *pcb, int socket_cliente_kernel_interrupt);
-void devolver_contexto_ejecucion(enum motivo_desalojo motivo_desalojo);
+void funCheckInterrupt();
+//void devolver_contexto_ejecucion(enum motivo_desalojo motivo_desalojo);
 
 //void checkInterrupt(t_parametroCheckInterrupt *parametros);
 

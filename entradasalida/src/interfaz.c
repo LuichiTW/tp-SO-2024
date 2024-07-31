@@ -143,7 +143,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     {
         return 1;
     }
-    
+
     texto = readline("> ");
     t_paquete *paquete = crear_paquete();
     agregar_a_paquete(paquete, texto, strlen(texto) + 1);
@@ -214,9 +214,9 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
-    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
 
-    int i;
+    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
+    int i = 0;
     while ((bitarray_test_bit(bitmap_f, i) != 0) && (i < config_dialfs.block_count))
     {
         i++;
@@ -224,16 +224,13 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     if (bitarray_test_bit(bitmap_f, i) == 0)
     {
         bitarray_set_bit(bitmap_f, i);
-        FILE *f = fopen(terminacion_archivo(nombre_archivo, ".txt"), "w");
-        fclose(f);
-        log_info(parametros.logger, "PID: %d - Operacion: IO_FS_CREATE - Crear Archivo: %d", pid, nombre_archivo);
     }
-    else
-    {
-        return 1;
-    }
-
     fclose(bitmap_f);
+
+    FILE *f = fopen(terminacion_archivo(nombre_archivo, ".txt"), "w");
+    fclose(f);
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_CREATE - Crear Archivo: %d", pid, nombre_archivo);
+
     nanosleep(&tiempo, NULL);
     free(buffer);
     free(nombre_archivo);
@@ -251,19 +248,9 @@ int iO_FS_DELETE(t_parametroEsperar parametros)
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
 
-    int comienzo_archivo = info_archivo(nombre_archivo, "COMIENZO");
-    int tamanio_archivo = info_archivo(nombre_archivo, "TAMANIO");
-
-    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
-
-    int i;
-    for (i = comienzo_archivo; i < division_redondeada(tamanio_archivo, config_dialfs.block_size); i++)
-    { // desde el bloque inicial limpia los bits del bitmap hasta que alcance todos los bloques que ocupa el archivo
-        bitarray_clean_bit(bitmap_f, i);
-    }
+    limpiar_archivo_bitmap(nombre_archivo);
 
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_DELETE - Eliminar Archivo: %d", pid, nombre_archivo);
-    fclose(bitmap_f);
     remove(terminacion_archivo(nombre_archivo, ".txt"));
     remove(terminacion_archivo(nombre_archivo, "_metadata.txt"));
     nanosleep(&tiempo, NULL);
@@ -281,10 +268,22 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
-    int tamanio = leer_entero(buffer, &desp);
+    int tamanio = leer_entero(buffer, &desp); // tamaño a aumentar o Sdisminuir
+    int tamanio_archivo = info_archivo(nombre_archivo, "TAMANIO");
 
-    truncate(terminacion_archivo(nombre_archivo, ".txt"), tamanio);
-    modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
+    if (tamanio < 0)
+    {
+        truncate(terminacion_archivo(nombre_archivo, ".txt"), tamanio);
+        modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
+    }
+    else
+    {
+        limpiar_archivo_bitmap(nombre_archivo);
+        // compactacion
+        agregar_archivo_bitmap(nombre_archivo, tamanio_archivo);
+        truncate(terminacion_archivo(nombre_archivo, ".txt"), tamanio);
+        modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
+    }
 
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_TRUNCATE- Truncar Archivo: %d", pid, nombre_archivo);
 
@@ -391,14 +390,6 @@ int leer_entero(char *buffer, int *desplazamiento)
     return ret;
 }
 
-int leer_64(char *buffer, int *desplazamiento)
-{
-    int ret;
-    memcpy(&ret, buffer + (*desplazamiento), sizeof(int));
-    (*desplazamiento) += sizeof(uint64_t);
-    return ret;
-}
-
 char *leer_string(char *buffer, int *desplazamiento)
 {
     int tamanio = leer_entero(buffer, desplazamiento);
@@ -408,29 +399,15 @@ char *leer_string(char *buffer, int *desplazamiento)
     return valor;
 }
 
-char **leer_array(char *buffer, int *desp)
-{
-    int len = leer_entero(buffer, desp);
-    char **arr = malloc((len + 1) * sizeof(char *));
-    for (int i = 0; i < len; i++)
-    {
-        arr[i] = leer_string(buffer, desp);
-    }
-    arr[len] = NULL;
-    return arr;
-}
-
 int *leer_array_entero(char *buffer, int *desp)
 {
     int len = leer_entero(buffer, desp);
-
     int *arr = malloc((len + 1) * sizeof(int));
     for (int i = 0; i < len; i++)
     {
         arr[i] = leer_entero(buffer, desp);
     }
     arr[len] = -1;
-
     return arr;
 }
 
@@ -491,4 +468,39 @@ int suma_array(int *array, int tamanio)
         suma += array[i];
     }
     return suma;
+}
+
+void limpiar_archivo_bitmap(char *archivo)
+{
+    int comienzo_archivo = info_archivo(archivo, "COMIENZO");
+    int tamanio_archivo = info_archivo(archivo, "TAMANIO");
+
+    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
+
+    int i;
+    for (i = comienzo_archivo; i < division_redondeada(tamanio_archivo, config_dialfs.block_size); i++)
+    { // desde el bloque inicial limpia los bits del bitmap hasta que alcance todos los bloques que ocupa el archivo
+        bitarray_clean_bit(bitmap_f, i);
+    }
+    fclose(bitmap_f);
+}
+
+void agregar_archivo_bitmap(char *archivo, int tamanio)
+{
+    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
+    int i = 0;
+    while ((bitarray_test_bit(bitmap_f, i) != 0) && (i < config_dialfs.block_count))
+    {
+        i++;
+    }
+    if (bitarray_test_bit(bitmap_f, i) == 0)
+    {
+        modificar_metadata(archivo, "COMIENZO", i);
+        for (int j = 0; j < tamanio; (i++, j++))
+        {
+            bitarray_set_bit(bitmap_f, i);
+        }
+        modificar_metadata(archivo, "TAMANIO", tamanio);
+    }
+    fclose(bitmap_f);
 }

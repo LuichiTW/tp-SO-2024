@@ -68,10 +68,7 @@ int iO_FS_READ(t_parametroEsperar parametros);
 
 // auxiliares
 int leer_entero(char *buffer, int *desplazamiento);
-int leer_64(char *buffer, int *desplazamiento);
-
 char *leer_string(char *buffer, int *desplazamiento);
-char **leer_array(char *buffer, int *desp);
 int *leer_array_entero(char *buffer, int *desp);
 
 void crear_metadata(char *nombre_archivo, int pos);
@@ -80,5 +77,7 @@ int info_archivo(char *nombre_archivo, char *parametro);
 int division_redondeada(int numerador, int denominador);
 char terminacion_archivo(char *archivo, char *terminacion);
 int suma_array(int *array, int tamanio);
+void limpiar_archivo_bitmap(char *archivo);
+void agregar_archivo_bitmap(char *archivo,int tamanio);
 
 #endif // !INTERFAZ_IO

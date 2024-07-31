@@ -10,33 +10,9 @@
 #include <commons/log.h>
 #include <commons/error.h>
 #include <readline/readline.h>
-
-
-//REGISTROS QUE TIENE EL CPU
-typedef struct {
-    uint8_t AX, BX, CX, DX;
-    uint32_t EAX, EBX, ECX, EDX, SI, DI, PC;
-} registros_cpu;
-
-typedef struct {
-    uint8_t AX, BX, CX, DX;
-    uint32_t EAX, EBX, ECX, EDX;
-} t_registros_uso_general;
+#include <utils/registros.h>
 
 extern registros_cpu regcpu;
-//CANTIDAD DE REGISTROS Q TIENE EL CPU
-typedef enum lista_registros_CPU{
-    AX, BX, CX, DX,
-    EAX, EBX, ECX, EDX,
-    PC, SI, DI,
-} lista_registros_CPU;
-
-typedef enum{
-    PROXIMAINSTRUCCION, //la memoria me devuelve un char con la proxima instruccion a ejecutar
-    RESIZE, //reducir o aumentarel tamaño del proceso
-    MOV_IN, //la memoria me devuelve un char con lo que habia en la direccion logica
-    MOV_OUT, //le envio a memoria un char y lo escribe en la direccion fisica enviada
-} op_codigo_conexion_memoria;
 
 typedef enum{
     EXIT, //FIN DE UN PROCESO POR INSTRUCCION O POR ERROR
@@ -52,10 +28,6 @@ typedef enum{
     IOFSREAD,
 } op_codigo_conexion_kernel;
 
-int tamanioRegistro(lista_registros_CPU);
 void* obtenerRegistro(lista_registros_CPU);
-
-registros_cpu reg_gen_to_reg_cpu(t_registros_uso_general reg_gen);
-t_registros_uso_general reg_cpu_to_reg_gen(registros_cpu reg_cpu);
 
 #endif // !REGISTROSCPU

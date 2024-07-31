@@ -1,12 +1,7 @@
 #ifndef PCB_H
 #define PCB_H
 
-#include <stdint.h>
-
-typedef struct {
-    uint8_t AX, BX, CX, DX;
-    uint32_t EAX, EBX, ECX, EDX;
-} t_registros_uso_general;
+#include "registros.h"
 
 typedef struct
 {

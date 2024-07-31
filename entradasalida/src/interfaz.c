@@ -434,6 +434,7 @@ int *leer_array_entero(char *buffer, int *desp)
     return arr;
 }
 
+//! modificar para que cree una un puntero a metadata lista
 void crear_metadata(char *nombre_archivo, int pos)
 {
     t_config *metadata = config_create(terminacion_archivo(nombre_archivo, "_metadata.txt"));

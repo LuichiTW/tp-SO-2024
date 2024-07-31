@@ -84,7 +84,7 @@ int archivo_esta_vacio(char *nombre_archivo)
     return st.st_size == 0;
 }
 
-
+//! no se usa
 bool necesita_compactacion(t_bitarray *bitmap, int tamanioArchivo)//tamanioArchivo es la cantidad de bloques que ocupa
 {
     int bits = bitarray_get_max_bit(bitmap);
@@ -115,14 +115,14 @@ void compactacion(t_bloque *bloques, t_bitarray *bitmap)
     bloques = compactar_bloque(bloques);
 
     // actualizar bloques.dat
-    guardarListaEnArchivo(bloques, "bloques.dat");
+    guardarListaEnArchivo(bloques, "bloques.dat");// todo: que se pueda pasar el path desde parametro
 
     // actualizar bitmap
     actualizar_bitmap(bitmap, bloques);
     guardar_bitmap(bitmap);
 
     //actualizar metadata
-
+    modificar_metadata();
 }
 
 

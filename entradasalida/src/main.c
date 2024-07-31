@@ -41,8 +41,6 @@ void esperar(t_parametroEsperar parametros)
 
 void manejarConexion(t_parametroEsperar parametros)
 {
-    // !falta implementar el recibir_operacion
-    // ? recibir un char* y apartir de eso cambiar el tipo de operacion
     int tipoInterfaz = recibir_operacion(parametros.socket_cliente);
     int resultado;
 

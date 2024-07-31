@@ -95,7 +95,7 @@ void manejo_config_interfaz(t_config config)
         parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
 
         // comprobar filesystem
-        rutina_filesystem();
+        comprobar_filesystem(config_interfaz.path_base_dialfs);
     }
     else
     {
@@ -103,6 +103,8 @@ void manejo_config_interfaz(t_config config)
         exit(EXIT_FAILURE);
     }
 }
+
+//! realizar unit testing para cada funcion de interfaz
 
 int iO_GEN_SLEEP(t_parametroEsperar parametros)
 {
@@ -141,7 +143,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     {
         return 1;
     }
-    //! que pasa al tener varios hilos que quieran leer consola
+    
     texto = readline("> ");
     t_paquete *paquete = crear_paquete();
     agregar_a_paquete(paquete, texto, strlen(texto) + 1);

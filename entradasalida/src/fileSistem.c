@@ -8,12 +8,16 @@ t_bloque *bloques;
 // todo: implementar el aviso de que el archivo supera el tamaño maximo
 // todo: logs principales
 
-void rutina_archivos(void)
+//todo: que se pueda actualizar metadata
+
+void comprobar_filesystem(char *path)
 {
     t_bloque *bloques = malloc(sizeof(t_bloque));
     t_bitarray *bitmap = malloc(sizeof(t_bitarray));
+
+    char *path_bloques = string_from_format("%s%s", path, "/bloques.dat");
     // comprueba si el archivo de bloques esta vacio
-    int vacio = archivo_esta_vacio("bloques.dat");
+    int vacio = archivo_esta_vacio(path_bloques);
     if (vacio == -1)
     {
         // Manejar el error
@@ -22,7 +26,7 @@ void rutina_archivos(void)
     else if (vacio)
     {
         // Si está vacío, lo crea
-        FILE *archivo = fopen("bloques.dat", "w");
+        FILE *archivo = fopen(path_bloques, "w");
         if (archivo == NULL)
         {
             perror("Error al crear el archivo");
@@ -38,8 +42,9 @@ void rutina_archivos(void)
         t_bloque *bloques = levantar_bloques();
     }
 
+    char *path_bitmap = string_from_format("%s%s", path, "/bitmap.dat");
     // comprueba si el archivo de bitmap esta vacio
-    vacio = archivo_esta_vacio("bitmap.dat");
+    vacio = archivo_esta_vacio(path_bitmap);
     if (vacio == -1)
     {
         // Manejar el error
@@ -48,7 +53,7 @@ void rutina_archivos(void)
     else if (vacio)
     {
         // Si está vacío, lo crea
-        FILE *archivo = fopen("bitmap.dat", "w");
+        FILE *archivo = fopen(path_bitmap, "w");
         if (archivo == NULL)
         {
             perror("Error al crear el archivo");
@@ -63,6 +68,9 @@ void rutina_archivos(void)
         // Si no está vacío, lo carga
         t_bitarray *bitmap = cargar_bitmap();
     }
+
+    free(path_bloques);
+    free(path_bitmap);
 }
 
 int archivo_esta_vacio(char *nombre_archivo)
@@ -76,6 +84,31 @@ int archivo_esta_vacio(char *nombre_archivo)
     return st.st_size == 0;
 }
 
+
+bool necesita_compactacion(t_bitarray *bitmap, int tamanioArchivo)//tamanioArchivo es la cantidad de bloques que ocupa
+{
+    int bits = bitarray_get_max_bit(bitmap);
+    int espacio = 0;
+    //recorre el bitmap y cuenta los bloques vacios
+    for(int i = 0; i < bits; i++)
+    {
+        if(!bitarray_test_bit(bitmap, i))
+        {
+            espacio++;
+        }else{
+            //si encuentra un bloque ocupado, reinicia el contador
+            espacio = 0;
+        }
+        //si encuentra un espacio igual al tamaño del archivo, no necesita compactacion
+        if(espacio == tamanioArchivo)
+        {
+            return false;
+        }
+    }
+    //si no encuentra un espacio igual al tamaño del archivo, necesita compactacion
+    return tamanioArchivo > espacio;
+}
+
 void compactacion(t_bloque *bloques, t_bitarray *bitmap)
 {
     // compactar bloques
@@ -87,32 +120,15 @@ void compactacion(t_bloque *bloques, t_bitarray *bitmap)
     // actualizar bitmap
     actualizar_bitmap(bitmap, bloques);
     guardar_bitmap(bitmap);
+
+    //actualizar metadata
+
 }
 
-//! implementacion aun no confirmada
-void carga_archivos_fs(void)
+
+t_bitarray *crear_bitmap(t_config_interfaz *config_dialfs)
 {
-    FILE *bloques;
-    FILE *bitmap;
-    bloques = fopen("bloques.dat", "rb"); // usar ftruncate para crear archivo
-    bitmap = fopen("bitmap.dat", "rb");
-    if (bloques == NULL || bitmap == NULL)
-    {
-        perror("Error al abrir archivos");
-        exit(EXIT_FAILURE);
-    }
-
-    // crear bitmap
-
-    // crear bloques
-
-    fclose(bloques);
-    fclose(bitmap);
-}
-
-t_bitarray *crear_bitmap(t_config *config_dialfs)
-{
-    int cantidad_bloques = config_get_int_value(config_dialfs, "CANTIDAD_BLOQUES");
+    int cantidad_bloques = config_dialfs->block_count;
     char *bitarray = malloc(cantidad_bloques);
     t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, cantidad_bloques, LSB_FIRST);
     return nuevo_bitarray;
@@ -157,9 +173,10 @@ void actualizar_bitmap(t_bitarray *bitmap, t_bloque *bloques)
 }
 
 // guarda el bitmap en un archivo
-void guardar_bitmap(t_bitarray *bitmap)
-{ // ! posible cambio para que use un parametro de nombre de archivo
-    FILE *archivo = fopen("bitmap.dat", "wb");
+void guardar_bitmap(t_bitarray *bitmap, t_config_interfaz *config_dialfs)
+{
+    char *path_bitmap = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bitmap.dat");
+    FILE *archivo = fopen(path_bitmap, "wb");
     if (archivo == NULL)
     {
         perror("Error al abrir el archivo");
@@ -170,9 +187,10 @@ void guardar_bitmap(t_bitarray *bitmap)
 }
 
 // carga el bitmap desde un archivo
-t_bitarray *cargar_bitmap(void)
+t_bitarray *cargar_bitmap(t_config_interfaz *config_dialfs)
 {
-    FILE *archivo = fopen("bitmap.dat", "rb");
+    char *path_bitmap = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bitmap.dat");
+    FILE *archivo = fopen(path_bitmap, "rb");
     if (archivo == NULL)
     {
         perror("Error al abrir el archivo");
@@ -205,8 +223,9 @@ void imprimir_bitmap(t_bitarray *bitmap)
 }
 
 // asignacion contigua de bloques
-t_bloque *levantar_bloques(void)
+t_bloque *levantar_bloques(t_config_interfaz *config_dialfs)
 {
+    char *path_bloques = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bloques.dat");
     t_bloque *bloques_mapeados = leerListaDesdeArchivo("bloques.dat"); // cargar bloques desde archivo
     if (bloques_mapeados == NULL)
     {
@@ -228,6 +247,31 @@ t_bloque *crear_bloque(size_t tamano_dato)
     nuevo_bloque->longitud = tamano_dato;
     nuevo_bloque->siguiente = NULL;
     return nuevo_bloque;
+}
+
+t_bloque *insertarEnLista(t_bloque *cabeza, t_bitarray *bitmap, char *dato){
+    //! revisar que funcione
+    //todo que busque un espacio vacio en el bitmap y lo asigne
+    //todo que si no hay espacio, devuelva un error
+    t_bloque *nuevoNodo = crear_bloque(strlen(dato));
+    strncpy(nuevoNodo->dato, dato, strlen(dato));
+    nuevoNodo->siguiente = NULL;
+
+    if (cabeza == NULL)
+    {
+        cabeza = nuevoNodo;
+    }
+    else
+    {
+        t_bloque *temp = cabeza;
+        while (temp->siguiente != NULL)
+        {
+            temp = temp->siguiente;
+        }
+        temp->siguiente = nuevoNodo;
+    }
+    actualizar_bitmap(bitmap, cabeza);
+    return cabeza;
 }
 
 t_bloque *insertarAlFinal(t_bloque *cabeza, t_config *config_dialfs, char *dato)

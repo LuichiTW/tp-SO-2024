@@ -1,6 +1,8 @@
 #include "main.h"
 t_bitarray *bitmap;
 
+//todo reorganizar las funciones los archivos
+
 // considerar pasar los argumentos de creacion de interfaces por el main y no por la funcion (issue #3709)
 int main(char *nombreInterfaz, char *pathInterfaz) // ? como hacer que la interfaz sea unica
 {

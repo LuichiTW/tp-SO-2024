@@ -60,8 +60,6 @@ void recibir_solicitudes(int *socket_cliente_dir) {
                 int pid;
                 char *scriptname;
 
-                datos = recibir_paquete(socket_cliente);
-
                 pid = *((int*) list_get(datos, 0));
                 scriptname = list_get(datos, 1);
 

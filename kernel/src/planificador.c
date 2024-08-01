@@ -35,7 +35,7 @@ void planificar() {
 }
 
 t_pcb *crear_proceso() {
-    t_pcb *pcb = malloc(sizeof(pcb));
+    t_pcb *pcb = malloc(sizeof(*pcb));
 
     ultimo_pid++;
     pcb->pid = ultimo_pid;

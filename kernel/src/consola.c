@@ -83,7 +83,8 @@ void c_iniciar_proceso(char *path) {
 
     t_paquete *paquete = crear_paquete();
     agregar_a_paquete(paquete, &(pcb->pid), sizeof(pcb->pid));
-    agregar_a_paquete(paquete, path, string_length(path));
+    agregar_a_paquete(paquete, path, string_length(path)+1);
+    
     enviar_peticion(paquete, sockets.memoria, MEM_CREAR_PROCESO);
     eliminar_paquete(paquete);
 

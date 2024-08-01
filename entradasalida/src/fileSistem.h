@@ -43,6 +43,9 @@ t_bloque *insertarAlFinal(t_bloque *cabeza, t_config *config_dialfs, char *dato)
 void guardarListaEnArchivo(t_bloque *cabeza, char *nombreArchivo);
 t_bloque *leerListaDesdeArchivo(char *nombreArchivo);
 void liberarLista(t_bloque *cabeza);
+int crear_archivo_bloques(t_bloque *cabeza);
+void eliminar_archivo_bloques(t_bloque *cabeza, int bloque_inicial, int tamanio);
+
 
 
 #endif // !FILE_SYTEM

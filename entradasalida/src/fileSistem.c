@@ -1,16 +1,11 @@
 #include "fileSistem.h"
 
 extern t_config config_dialfs;
-t_bloque *bloques;
 
-// todo: implementar el ftruncate para que el archivo no supere el tamaño maximo
 // todo: eliminar los bloques vacios que superen el maximo de bloques
 // todo: implementar el aviso de que el archivo supera el tamaño maximo
 // todo: logs principales
 
-//todo: que se pueda actualizar metadata
-
-//! crear funcion para que al crear un archivo los datos vayan en el espacio vacio (para conveniencia el null del siguiente)
 t_bloque *bloques = NULL;
 t_bitarray *bitmap = NULL;
 t_metadata *metadata = NULL;
@@ -203,6 +198,51 @@ void imprimir_bitmap(t_bitarray *bitmap)
         printf("%d", bitarray_test_bit(bitmap, i));
     }
     printf("\n");
+}
+
+int crear_archivo_bloques(t_bloque *cabeza){
+    //carga un dato vacio en el bloque
+    char *dato = "";
+    t_bloque *nuevoNodo = crear_bloque(strlen(dato));
+    for (int i = 0; i < bitmap->size; i++)
+    {
+        if (!bitarray_test_bit(bitmap, i))
+        {
+            bitarray_set_bit(bitmap, i);
+            nuevoNodo->siguiente = NULL;
+            cabeza = nuevoNodo;
+            return i;
+        }
+    }
+}
+
+void eliminar_archivo_bloques(t_bloque *cabeza, int bloque_inicial, int tamanio){
+    t_bloque *temp = cabeza;
+    t_bloque *prev = NULL;
+    int i = 0;
+
+    // Avanzar hasta el bloque inicial
+    while (temp != NULL && i < bloque_inicial) {
+        prev = temp;
+        temp = temp->siguiente;
+        i++;
+    }
+
+    // Liberar los bloques desde el bloque inicial hasta el tamaño especificado
+    for (int j = 0; j < tamanio && temp != NULL; j++) {
+        t_bloque *a_eliminar = temp;
+        temp = temp->siguiente;
+        bitarray_clean_bit(bitmap, bloque_inicial + j);
+        free(a_eliminar);
+    }
+
+    // Conectar el nodo anterior al último nodo liberado con el siguiente nodo
+    if (prev != NULL) {
+        prev->siguiente = temp;
+    } else {
+        // Si el bloque inicial es el primero, actualizar la cabeza
+        cabeza = temp;
+    }
 }
 
 // asignacion contigua de bloques

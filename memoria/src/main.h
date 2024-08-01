@@ -9,7 +9,6 @@
 #include <commons/log.h>
 #include <commons/error.h>
 #include <commons/memory.h>
-#include <commons/temporal.h>
 #include <commons/string.h>
 #include <readline/readline.h>
 

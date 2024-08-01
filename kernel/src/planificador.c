@@ -21,17 +21,29 @@ void inicializar_colas() {
 }
 
 void planificar() {
+    t_log *logger = kernel_logger();
+
     // NEW -> READY
+    bool ingreso_a_ready = false;
     while (multiprogramacion_actual < config_kernel.grado_multiprogramacion && queue_size(cola_new) > 0) {
         t_pcb *pcb_ready = (t_pcb*) queue_pop(cola_new);
         agregar_a_ready(pcb_ready);
+        log_info(logger, "PID: %i - Estado Anterior: NEW - Estado Actual: READY", pcb_ready->pid);
+        ingreso_a_ready = true;
+    }
+    if (ingreso_a_ready) {
+        log_cola_ready();
     }
 
+    // READY -> EXEC
     if (exec == NULL && !queue_is_empty(cola_ready)) {
-        // TODO chequear con cola ready_aux para VRR
+        // TODO chequear con cola ready_aux para VRR (y cambiar el log)
         t_pcb *pcb_exec = (t_pcb*) queue_pop(cola_ready);
         ejecutar_proceso(pcb_exec);
+        log_info(logger, "PID: %i - Estado Anterior: READY - Estado Actual: EXEC", pcb_exec->pid);
     }
+
+    log_destroy(logger);
 }
 
 t_pcb *crear_proceso() {
@@ -63,4 +75,26 @@ void ejecutar_proceso(t_pcb *pcb) {
 
     t_paquete *paquete = empaquetar_pcb(pcb);
     enviar_peticion(paquete, sockets.cpu_dispatch, CPU_EXEC_PROC);
+}
+
+
+
+void log_cola_ready() {
+    t_log *logger = kernel_logger();
+    int cant_proc_ready = queue_size(cola_ready);
+    char *lista_pid = string_new();
+    for (int i = 0; i < cant_proc_ready; i++) {
+        if (i > 0) {
+            string_append(&lista_pid, ",");
+        }
+        t_pcb *pcb = list_get(cola_ready->elements, i);
+        char *pid_str = string_itoa(pcb->pid);
+        string_append(&lista_pid, pid_str);
+
+        free(pid_str);
+    }
+    log_info(logger, "Cola Ready: [%s]", lista_pid);
+    
+    free(lista_pid);
+    log_destroy(logger);
 }

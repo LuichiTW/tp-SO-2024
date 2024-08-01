@@ -23,6 +23,9 @@ struct config_kernel {
 extern struct config_kernel config_kernel;
 extern int multiprogramacion_actual;
 
+t_log *kernel_logger();
+t_log *alt_kernel_logger();
+
 void cargar_config();
 
 #endif // CONFIG_KERNEL_H

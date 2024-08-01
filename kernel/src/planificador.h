@@ -21,4 +21,6 @@ t_pcb *crear_proceso();
 void agregar_a_ready(t_pcb *pcb);
 void ejecutar_proceso(t_pcb *pcb);
 
+void log_cola_ready();
+
 #endif // PLANIFICADOR_H

@@ -92,6 +92,8 @@ void c_iniciar_proceso(char *path) {
     recibir_entero(sockets.memoria);
 
     queue_push(cola_new, pcb);
+    t_log *logger = kernel_logger();
+    log_info(logger, "Se crea el proceso %i en NEW", pcb->pid);
     planificar();
 }
 void c_finalizar_proceso(int pid) {
@@ -107,5 +109,23 @@ void c_multiprogramacion(int valor) {
 
 }
 void c_proceso_estado() {
-
+    void imprimir_pid(void *vpcb) {
+        t_pcb *pcb = (t_pcb*) vpcb;
+        printf("%i\n", pcb->pid);
+    }
+    printf("----- NEW -----\n");
+    list_iterate(cola_new->elements, imprimir_pid);
+    printf("\n----- READY -----\n");
+    list_iterate(cola_ready->elements, imprimir_pid);
+    printf("\n----- READY PRIORIDAD -----\n");
+    list_iterate(cola_ready_aux->elements, imprimir_pid);
+    printf("\n----- EXEC -----\n");
+    if (exec != NULL) {
+        printf("%i\n", exec->pid);
+    }
+    printf("\n----- BLOCKED -----\n");
+    list_iterate(cola_blocked->elements, imprimir_pid);
+    printf("\n----- EXIT -----\n");
+    list_iterate(cola_exit->elements, imprimir_pid);
+    printf("\n");
 }

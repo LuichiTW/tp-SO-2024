@@ -9,7 +9,7 @@ void cargar_config() {
     t_config *config = config_create("kernel.config");
 
     if (config == NULL) {
-        t_log *logger = log_create("kernel_alt.log", "kernel", true, LOG_LEVEL_INFO);
+        t_log *logger = alt_kernel_logger();
         log_error(logger, "No se leyó el archivo de configuracion");
         log_destroy(logger);
         exit(EXIT_FAILURE);
@@ -28,4 +28,13 @@ void cargar_config() {
     config_kernel.grado_multiprogramacion = config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
     
     config_kernel.config_original = config;
+}
+
+
+t_log *kernel_logger() {
+    return log_create("kernel_alt.log", "kernel extra", true, LOG_LEVEL_INFO);
+}
+
+t_log *alt_kernel_logger() {
+    return log_create("kernel.log", "kernel", true, LOG_LEVEL_INFO);
 }

@@ -1,6 +1,7 @@
 #include "conexiones.h"
 
 struct sockets_cpu sockets_cpu;
+sem_t mutex_dispatch;
 
 void cargar_sockets() {
     t_log *logger = log_create("cpu_extra.log", "cpu extra", true, LOG_LEVEL_INFO);
@@ -50,4 +51,6 @@ void cargar_sockets() {
     enviar_entero(MOD_CPU, sockets_cpu.socket_kernel_interrupt);
 
     log_destroy(logger);
+
+    sem_init(&mutex_dispatch, false, 1);
 }

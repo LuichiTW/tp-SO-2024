@@ -1,6 +1,7 @@
 #ifndef CONEXION_KERNEL_H
 #define CONEXION_KERNEL_H
 
+#include <semaphore.h>
 #include <commons/collections/list.h>
 #include <commons/log.h>
 #include <utils/conexiones/conexiones_cliente.h>
@@ -16,6 +17,7 @@ struct sockets {
 };
 
 extern struct sockets sockets;
+extern sem_t mutex_dispatch;
 
 void levantar_conexiones();
 

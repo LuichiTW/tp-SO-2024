@@ -1,6 +1,7 @@
 #include "conexion.h"
 
 struct sockets sockets;
+sem_t mutex_dispatch;
 
 // TODO esperar conexiones de clientes IO
 
@@ -47,4 +48,6 @@ void levantar_conexiones() {
     sockets.clientes_io = list_create();
 
     log_destroy(alt_logger);
+
+    sem_init(&mutex_dispatch, false, 1);
 }

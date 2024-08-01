@@ -17,7 +17,9 @@ void eliminar_Lista_Instruccion(struct s_instruccion *instruccion){
         while (instruccion->variables != NULL) {
             temp = instruccion->variables;
             instruccion->variables = instruccion->variables->siguiente;
-            free(temp->variable);
+            if (temp->variable != NULL) {
+                free(temp->variable);
+            }
             free(temp);
         }
         free(instruccion);

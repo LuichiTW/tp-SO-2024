@@ -4,6 +4,10 @@ void *funDecode(char instruccionRecibida[]){
     char **a = string_split(instruccionRecibida, " ");
     struct s_instruccion* instruccion = malloc(sizeof(struct s_instruccion));
     instruccion->numInstruccion = decodificarInstruccion(a[0]);
+    if (string_array_size(a) == 1) {
+        instruccion->variables = NULL;
+        return instruccion;
+    }
     instruccion->variables = malloc(sizeof(struct nodo_instruccion));
     instruccion->variables->variable = a[1];
     instruccion->variables->siguiente=NULL;

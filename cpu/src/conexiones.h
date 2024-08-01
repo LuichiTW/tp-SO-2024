@@ -3,6 +3,7 @@
 
 #include <utils/conexiones/conexiones_servidor.h>
 #include <utils/conexiones/conexiones_cliente.h>
+#include <semaphore.h>
 #include "config.h"
 
 struct sockets_cpu {
@@ -14,6 +15,7 @@ struct sockets_cpu {
 };
 
 extern struct sockets_cpu sockets_cpu;
+extern sem_t mutex_dispatch;
 
 void cargar_sockets();
 

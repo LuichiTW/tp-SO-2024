@@ -252,6 +252,6 @@ void fIO_FS_READ(char interface[], char NombreArchivo[], enum lista_registros_CP
 
 }
 void fEXIT(){
-    
+    devolver_contexto_ejecucion("EXIT");
 }
 

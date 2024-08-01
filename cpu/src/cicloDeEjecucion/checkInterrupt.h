@@ -31,7 +31,7 @@ typedef struct
 void crear_thread_interrupt();
 void recibir_interrupciones();
 void funCheckInterrupt();
-//void devolver_contexto_ejecucion(enum motivo_desalojo motivo_desalojo);
+void devolver_contexto_ejecucion(char *motivo_desalojo);
 
 //void checkInterrupt(t_parametroCheckInterrupt *parametros);
 

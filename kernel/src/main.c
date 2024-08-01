@@ -17,7 +17,7 @@ int main()
     pthread_create(&thread_planificador, NULL, (void*)planificar, NULL);
     pthread_detach(thread_planificador); */
 
-    sem_init(&sem, 0, 0);
+    sem_init(&sem, false, 0);
     sem_wait(&sem);
 
     return 0;

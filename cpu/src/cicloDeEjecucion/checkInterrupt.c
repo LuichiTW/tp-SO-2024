@@ -1,6 +1,5 @@
 #include "checkInterrupt.h"
 
-//t_pcb *pcb;
 bool hay_interrupcion;
 
 void crear_thread_interrupt() {
@@ -14,6 +13,8 @@ void recibir_interrupciones() {
     while (true) {    
         int op = recibir_operacion(sockets_cpu.socket_kernel_interrupt);
         if (op == CPU_INTERRUPT) {
+            // Guardar el motivo de la interrupción en algún lado
+            //char *motivoInterrupt = recibir_msg(sockets_cpu.socket_kernel_interrupt);
             hay_interrupcion = true;
         }
     }
@@ -23,16 +24,25 @@ void recibir_interrupciones() {
 
 void funCheckInterrupt(){
     if (hay_interrupcion) {
-        //devolver_contexto_ejecucion();
+        if (proceso_ejecutando) {
+            devolver_contexto_ejecucion("INTERRUPT"); // TODO agregar motivo de interrupción
+        }
         hay_interrupcion = false;
     }
 }
 
-/* void devolver_contexto_ejecucion(enum motivo_desalojo motivo_desalojo) {
+void devolver_contexto_ejecucion(char *motivo_desalojo) {
     actualizar_pcb();
-    // Enviar a kernel el CDE y Motivo desalojo
+    sem_wait(&mutex_dispatch);
+
+    t_paquete *paquete = empaquetar_pcb(&pcb);
+    agregar_a_paquete(paquete, motivo_desalojo, string_length(motivo_desalojo)+1);
+    enviar_peticion(paquete, sockets_cpu.socket_kernel_dispatch, KER_CDE);
+    eliminar_paquete(paquete);
+    
+    sem_post(&mutex_dispatch);
     proceso_ejecutando = false;
-} */
+}
 
 
 /* void checkInterrupt(t_parametroCheckInterrupt *parametros){

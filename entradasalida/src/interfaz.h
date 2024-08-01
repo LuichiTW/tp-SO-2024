@@ -40,6 +40,7 @@ typedef struct
 typedef struct t_metadata
 {
 	char *nombre;
+	char *bloque_inicial;
 	struct t_metadata *siguiente;
 } t_metadata;
 
@@ -53,7 +54,10 @@ enum tipo_interfaz
 };
 
 extern t_log *logger;
+extern t_bitarray *bitmap;
+extern t_bloque *bloques;
 
+t_metadata *metadata;
 t_config_interfaz config_interfaz;
 t_parametroEsperar parametros;
 struct timespec tiempo;

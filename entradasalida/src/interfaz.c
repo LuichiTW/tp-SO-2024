@@ -215,24 +215,15 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
 
-    //crear archivo //todo usar funcion crear bloque
+    //crear archivo
+    int pos = crear_archivo_bloques(bloques);//todo falta inplementar
 
-    //actualizar bitmap //todo reemplazar por la funcion agregar_archivo_bitmap
-    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
-    int i = 0;
-    while ((bitarray_test_bit(bitmap_f, i) != 0) && (i < config_dialfs.block_count))
-    {
-        i++;
-    }
-    if (bitarray_test_bit(bitmap_f, i) == 0)
-    {
-        bitarray_set_bit(bitmap_f, i);
-    }
-    fclose(bitmap_f);
+    //actualizar bitmap
+    actualizar_bitmap(bitmap, bloques);
 
-    //crear metadata //todo reemplazar por la funcion crear_metadata
-    FILE *f = fopen(terminacion_archivo(nombre_archivo, ".txt"), "w");
-    fclose(f);
+    //crear metadata 
+    metadata = crear_metadata(nombre_archivo, pos);
+
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_CREATE - Crear Archivo: %d", pid, nombre_archivo);
 
     nanosleep(&tiempo, NULL);
@@ -251,7 +242,11 @@ int iO_FS_DELETE(t_parametroEsperar parametros)
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
+    
+    //eliminar bloques
+    eliminar_archivo_bloques(bloques, nombre_archivo); //todo falta inplementar
 
+    //eliminar archivo
     limpiar_archivo_bitmap(nombre_archivo);
 
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_DELETE - Eliminar Archivo: %d", pid, nombre_archivo);
@@ -472,6 +467,7 @@ t_metadata *agregar_a_lista(t_metadata *cabeza, t_metadata *nuevo)
     return cabeza;
 }
 
+//todo agregar path del filesystem
 int info_archivo(char *nombre_archivo, char *parametro)
 {
     t_config *metadata = config_create(terminacion_archivo(nombre_archivo, "_metadata.txt"));
@@ -479,6 +475,7 @@ int info_archivo(char *nombre_archivo, char *parametro)
     config_destroy(metadata);
     return info;
 }
+
 int division_redondeada(int numerador, int denominador)
 {
     if (denominador == 0)
@@ -523,7 +520,7 @@ void limpiar_archivo_bitmap(char *archivo)
     FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
 
     int i;
-    for (i = comienzo_archivo; i < division_redondeada(tamanio_archivo, config_dialfs.block_size); i++)
+    for (i = comienzo_archivo; i < comienzo_archivo + division_redondeada(tamanio_archivo, config_dialfs.block_size); i++)
     { // desde el bloque inicial limpia los bits del bitmap hasta que alcance todos los bloques que ocupa el archivo
         bitarray_clean_bit(bitmap_f, i);
     }

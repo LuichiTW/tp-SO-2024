@@ -25,6 +25,7 @@ typedef struct t_bloque
 extern t_log *logger;
 extern t_config_interfaz config_interfaz;
 
+
 void comprobar_filesystem(t_config_interfaz *config_dialfs);
 int archivo_esta_vacio(char *nombre_archivo);
 

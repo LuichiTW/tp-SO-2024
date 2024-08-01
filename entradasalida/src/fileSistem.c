@@ -11,14 +11,12 @@ t_bloque *bloques;
 //todo: que se pueda actualizar metadata
 
 //! crear funcion para que al crear un archivo los datos vayan en el espacio vacio (para conveniencia el null del siguiente)
+t_bloque *bloques = NULL;
+t_bitarray *bitmap = NULL;
+t_metadata *metadata = NULL;
 
 void comprobar_filesystem(t_config_interfaz *config_dialfs)
 {
-    //posiblemente se tenga que usar variables globales
-    t_bloque *bloques = malloc(sizeof(t_bloque));
-    t_bitarray *bitmap = malloc(sizeof(t_bitarray));
-    t_metadata *metadata = malloc(sizeof(t_metadata));
-
     char *path_bloques = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bloques.dat");
     // comprueba si el archivo de bloques esta vacio
     int vacio = archivo_esta_vacio(path_bloques);
@@ -44,7 +42,7 @@ void comprobar_filesystem(t_config_interfaz *config_dialfs)
     else
     {
         // Si no está vacío, lo carga
-        t_bloque *bloques = levantar_bloques();
+        bloques = levantar_bloques();
     }
 
     char *path_bitmap = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bitmap.dat");
@@ -66,7 +64,7 @@ void comprobar_filesystem(t_config_interfaz *config_dialfs)
         }
         fclose(archivo);
         // creo el bitmap
-        t_bitarray *bitmap = crear_bitmap(config_dialfs);
+        bitmap = crear_bitmap(config_dialfs);
     }
     else
     {

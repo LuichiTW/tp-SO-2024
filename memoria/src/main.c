@@ -48,9 +48,6 @@ void recibir_solicitudes(int *socket_cliente_dir) {
     while (true) {
     int op = recibir_operacion(socket_cliente);
 
-    t_log *logger = alt_memlogger();
-    log_info(logger, "op_code: %i", op);
-
     t_list *datos;
     datos = recibir_paquete(socket_cliente);
 
@@ -175,7 +172,7 @@ void hacer_handshake(int socket_cliente) {
 
     switch (i_modulo) {
         case MOD_KERNEL:
-            // Responde a Kernel con un 1
+            // Responde a Kernel con MOD_MEMORIA
             enviar_entero(MOD_MEMORIA, socket_cliente);
             break;
         case MOD_CPU:
@@ -183,13 +180,14 @@ void hacer_handshake(int socket_cliente) {
             enviar_mensaje(string_itoa(config_memoria.tam_pagina), socket_cliente);
             break;
         case MOD_IO:
+            // Responde a la interfaz con MOD_MEMORIA
+            enviar_entero(MOD_MEMORIA, socket_cliente);
             break;
     }
 }
 
 
 void delay(int milisegundos) {
-    t_temporal *t = temporal_create();
-    while(temporal_gettime(t) < milisegundos) {}
-    temporal_destroy(t);
+    useconds_t microsegundos = milisegundos * 1000;
+    usleep(microsegundos);
 }

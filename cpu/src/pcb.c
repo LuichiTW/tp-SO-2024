@@ -4,8 +4,7 @@ t_pcb pcb;
 bool proceso_ejecutando = false;
 
 void recibir_pcb(){
-    int op = recibir_operacion(sockets_cpu.socket_kernel_dispatch);
-    printf("op: %i\n", op);
+    recibir_operacion(sockets_cpu.socket_kernel_dispatch);
     t_list *lista_pcb = recibir_paquete(sockets_cpu.socket_kernel_dispatch);
     t_pcb *pcb_ptr = desempaquetar_pcb(lista_pcb);
     

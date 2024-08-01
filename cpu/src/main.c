@@ -87,20 +87,19 @@ int main() {
 
         // Log de instrucción ejecutada
         char **instYParametros = string_n_split(instruccionStr, 2, " ");
-        char *params;
         if (string_array_size(instYParametros) < 2) {
-            params = "";
+            log_info(logger, "PID: %i - Ejecutando: %s", pcb.pid, instYParametros[0]);
         }
         else {
-            params = instYParametros[1];
+            log_info(logger, "PID: %i - Ejecutando: %s - %s", pcb.pid, instYParametros[0], instYParametros[1]);
         }
-        log_info(logger, "PID: %i - Ejecutando: %s - %s", 1, instYParametros[0], params);
 
         // Check interrupt
-        ////funCheckInterrupt();
+        funCheckInterrupt();
 
         // Limpieza de memoria
         free(instruccionStr);
+        string_array_destroy(instYParametros);
         eliminar_Lista_Instruccion(instruccionDecodificada);
     }
     log_destroy(logger);

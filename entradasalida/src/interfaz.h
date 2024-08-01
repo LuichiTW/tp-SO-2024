@@ -94,5 +94,7 @@ char terminacion_archivo(char *archivo, char *terminacion);
 int suma_array(int *array, int tamanio);
 void limpiar_archivo_bitmap(char *archivo);
 void agregar_archivo_bitmap(char *archivo,int tamanio);
+void insertar_a_lista(t_metadata *nuevo);
+void actualizar_comienzo_lista(char *nombre_archivo,int posicion);
 
 #endif // !INTERFAZ_IO

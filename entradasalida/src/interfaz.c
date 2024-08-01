@@ -267,7 +267,7 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
-    int tamanio = leer_entero(buffer, &desp); // tamaño a aumentar o Sdisminuir
+    int tamanio = leer_entero(buffer, &desp); // tamaño a aumentar o disminuir
     int tamanio_archivo = info_archivo(nombre_archivo, "TAMANIO");
 
     if (tamanio < 0)
@@ -443,6 +443,10 @@ t_metadata *crear_metadata(char *nombre_archivo, int pos)
     //agregar datos al archivo metadata
     t_config *metadata = config_create(terminacion_archivo(nombre_archivo, "_metadata.txt"));
     nuevo->nombre = nombre_archivo;
+    nuevo->bloque_inicial = pos;
+    nuevo->siguiente = NULL;
+    insertar_a_lista(nuevo);
+
     config_set_value(metadata, "BLOQUE_INICIAL", string_itoa(pos));
     config_set_value(metadata, "TAMANIO_ARCHIVO", "1");
     config_destroy(metadata);
@@ -454,17 +458,10 @@ void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modifica
     t_config *metadata = config_create(terminacion_archivo(nombre_archivo, "_metadata.txt"));
     config_set_value(metadata, parametro, string_itoa(dato_modificar));
     config_destroy(metadata);
-}
 
-t_metadata *agregar_a_lista(t_metadata *cabeza, t_metadata *nuevo)
-{
-    t_metadata *aux = cabeza;
-    while (aux->siguiente != NULL)
-    {
-        aux = aux->siguiente;
+    if(parametro == "BLOQUE_INICIAL"){
+        actualizar_comienzo_lista(nombre_archivo,dato_modificar);
     }
-    aux->siguiente = nuevo;
-    return cabeza;
 }
 
 //todo agregar path del filesystem
@@ -545,4 +542,37 @@ void agregar_archivo_bitmap(char *archivo, int tamanio)
         modificar_metadata(archivo, "TAMANIO", tamanio);
     }
     fclose(bitmap_f);
+}
+void insertar_a_lista(t_metadata *nuevo){
+    t_metadata *aux = metadata;
+
+    while(aux->siguiente != NULL){
+        aux = aux->siguiente;
+    }
+    if(metadata == NULL){
+        metadata = nuevo;
+    }else{
+        aux->siguiente = nuevo;
+    }
+}
+
+void actualizar_comienzo_lista(char *nombre_archivo,int posicion){
+    t_metadata *aux = metadata;
+
+    while((aux->nombre != nombre_archivo)&&(aux !=NULL)){
+        aux = aux->siguiente;
+    }
+    if(aux->nombre == nombre_archivo){
+        aux->bloque_inicial = posicion;
+    }
+}
+
+char buscar_metadata(int posicion){
+    t_metadata *aux = ; //lista metadata
+    while(aux->comienzo != posicion){
+        aux = aux->siguiente;
+    }
+    if(aux != NULL){
+        return aux->nombre;
+    }
 }

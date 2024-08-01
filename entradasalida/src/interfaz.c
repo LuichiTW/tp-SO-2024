@@ -420,7 +420,7 @@ t_metadata *cargar_metadata(t_config_interfaz *config_dialfs)
     {
         while ((dir = readdir(d)) != NULL)
         {
-            if (string_starts_with(dir->d_name, "_metadata"))
+            if (string_starts_with(dir->d_name, "metadata_"))
             {
                 t_metadata *nuevo = malloc(sizeof(t_metadata));
                 nuevo->nombre = dir->d_name;
@@ -575,44 +575,4 @@ void actualizar_comienzo_lista(char *nombre_archivo, int posicion)
     }
 }
 
-char buscar_metadata(int posicion)
-{
-    t_metadata *aux = ; // lista metadata
-    while (aux->comienzo != posicion)
-    {
-        aux = aux->siguiente;
-    }
-    if (aux != NULL)
-    {
-        return aux->nombre;
-    }
-}
 
-void compactacion_metadata()
-{
-    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w");
-
-    int l = 0;
-    while ((l < config_dialfs.block_count))
-    {
-        int i = 0;
-        while ((bitarray_test_bit(bitmap_f, i) != 0) && (i < config_dialfs.block_count))
-        {
-            i++;
-        }
-        if (bitarray_test_bit(bitmap_f, i) == 0)
-        {
-            int j = i;
-            while ((bitarray_test_bit(bitmap_f, j) == 0) && (j < config_dialfs.block_count))
-            {
-                j++;
-            }
-            if (bitarray_test_bit(bitmap_f, j) != 0)
-            {
-                char *archivo = buscar_metadata(j);
-                modificar_metadata(archivo, "BLOQUE_INICIAL", i);
-            }
-        }
-        l++;
-    }
-}

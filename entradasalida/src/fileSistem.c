@@ -10,6 +10,16 @@ t_bloque *bloques = NULL;
 t_bitarray *bitmap = NULL;
 t_metadata *metadata = NULL;
 
+char buscar_metadata(int posicion){
+    t_metadata *aux = ; //lista metadata
+    while(aux->comienzo != posicion){
+        aux = aux->siguiente;
+    }
+    if(aux != NULL){
+        return aux->nombre;
+    }
+}
+
 void comprobar_filesystem(t_config_interfaz *config_dialfs)
 {
     char *path_bloques = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bloques.dat");
@@ -94,15 +104,44 @@ void compactacion(t_bloque *bloques, t_bitarray *bitmap)
 
     // actualizar bloques.dat
     guardarListaEnArchivo(bloques, "bloques.dat");// todo: que se pueda pasar el path desde parametro
+    
+    //actualizar metadata
+    compactacion_metadata();
+    metadata = cargar_metadata();
 
     // actualizar bitmap
     actualizar_bitmap(bitmap, bloques);
     guardar_bitmap(bitmap);
 
-    //actualizar metadata
-    modificar_metadata();
 }
 
+void compactacion_metadata()
+{
+    
+    int l = 0;
+    while ((l < config_dialfs.block_count))
+    {
+        int i = 0;
+        while ((bitarray_test_bit(bitmap, i) != 0) && (i < config_dialfs.block_count))
+        {
+            i++;
+        }
+        if (bitarray_test_bit(bitmap, i) == 0)
+        {
+            int j = i;
+            while ((bitarray_test_bit(bitmap, j) == 0) && (j < config_dialfs.block_count))
+            {
+                j++;
+            }
+            if (bitarray_test_bit(bitmap, j) != 0)
+            {
+                char *archivo = buscar_metadata(j);
+                modificar_metadata(archivo, "BLOQUE_INICIAL", i);
+            }
+        }
+        l++;
+    }
+}
 
 t_bitarray *crear_bitmap(t_config_interfaz *config_dialfs)
 {

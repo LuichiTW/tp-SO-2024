@@ -85,7 +85,6 @@ int *leer_array_entero(char *buffer, int *desp);
 // funciones metadata //? podrian ir en otro archivo
 t_metadata *cargar_metadata(t_config_interfaz *config_dialfs);
 t_metadata *crear_metadata(char *nombre_archivo, int pos);
-t_metadata *agregar_a_lista(t_metadata *cabeza, t_metadata *nuevo);
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar);
 int info_archivo(char *nombre_archivo, char *parametro);
 

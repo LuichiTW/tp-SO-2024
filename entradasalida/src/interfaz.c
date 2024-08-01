@@ -215,13 +215,13 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
 
-    //crear archivo
-    int pos = crear_archivo_bloques(bloques);//todo falta inplementar, devuelve posicion donde se creo
+    // crear archivo
+    int pos = crear_archivo_bloques(bloques); // todo falta inplementar, devuelve posicion donde se creo
 
-    //actualizar bitmap
+    // actualizar bitmap
     actualizar_bitmap(bitmap, bloques);
 
-    //crear metadata 
+    // crear metadata
     crear_metadata(nombre_archivo, pos);
 
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_CREATE - Crear Archivo: %d", pid, nombre_archivo);
@@ -241,16 +241,16 @@ int iO_FS_DELETE(t_parametroEsperar parametros)
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
-    
-    //eliminar bloques
-    eliminar_archivo_bloques(bloques, nombre_archivo); //todo falta inplementar
 
-    //eliminar archivo
+    // eliminar bloques
+    eliminar_archivo_bloques(bloques, nombre_archivo); // todo falta inplementar
+
+    // eliminar archivo
     limpiar_archivo_bitmap(nombre_archivo);
 
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_DELETE - Eliminar Archivo: %d", pid, nombre_archivo);
-    //remove(nombre_archivo);
-    remove(terminacion_archivo( "metadata_",nombre_archivo));
+    // remove(nombre_archivo);
+    remove(terminacion_archivo("metadata_", nombre_archivo));
     nanosleep(&tiempo, NULL);
     free(buffer);
     free(nombre_archivo);
@@ -271,7 +271,7 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
 
     if (tamanio < 0)
     {
-        truncate(nombre_archivo,tamanio);
+        truncate(nombre_archivo, tamanio);
         modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
     }
     else
@@ -339,7 +339,7 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
-    char *nombre_archivo = leer_string(buffer, &desp); 
+    char *nombre_archivo = leer_string(buffer, &desp);
     int tamanio_a_escribir[sizeof(leer_array_entero(buffer, &desp))];
     memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), sizeof(tamanio_a_escribir));
     int puntero = leer_entero(buffer, &desp);
@@ -435,13 +435,13 @@ t_metadata *cargar_metadata(t_config_interfaz *config_dialfs)
 void crear_metadata(char *nombre_archivo, int pos)
 {
     t_metadata *nuevo = malloc(sizeof(t_metadata));
-    
-    //crear archivo metadata
-    FILE *f = fopen(terminacion_archivo( "metadata_",nombre_archivo), "w");
+
+    // crear archivo metadata
+    FILE *f = fopen(terminacion_archivo("metadata_", nombre_archivo), "w");
     fclose(f);
 
-    //agregar datos al archivo metadata
-    t_config *metadata = config_create(terminacion_archivo( "metadata_",nombre_archivo));
+    // agregar datos al archivo metadata
+    t_config *metadata = config_create(terminacion_archivo("metadata_", nombre_archivo));
     nuevo->nombre = nombre_archivo;
     nuevo->bloque_inicial = pos;
     nuevo->siguiente = NULL;
@@ -454,19 +454,20 @@ void crear_metadata(char *nombre_archivo, int pos)
 
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar)
 {
-    t_config *metadata = config_create(terminacion_archivo( "metadata_",nombre_archivo));
+    t_config *metadata = config_create(terminacion_archivo("metadata_", nombre_archivo));
     config_set_value(metadata, parametro, string_itoa(dato_modificar));
     config_destroy(metadata);
 
-    if(parametro == "BLOQUE_INICIAL"){
-        actualizar_comienzo_lista(nombre_archivo,dato_modificar);
+    if (parametro == "BLOQUE_INICIAL")
+    {
+        actualizar_comienzo_lista(nombre_archivo, dato_modificar);
     }
 }
 
-//todo agregar path del filesystem
+// todo agregar path del filesystem
 int info_archivo(char *nombre_archivo, char *parametro)
 {
-    t_config *metadata = config_create(terminacion_archivo( "metadata_",nombre_archivo));
+    t_config *metadata = config_create(terminacion_archivo("metadata_", nombre_archivo));
     int info = config_get_int_value(metadata, parametro);
     config_destroy(metadata);
     return info;
@@ -542,56 +543,76 @@ void agregar_archivo_bitmap(char *archivo, int tamanio)
     }
     fclose(bitmap_f);
 }
-void insertar_a_lista(t_metadata *nuevo){
+void insertar_a_lista(t_metadata *nuevo)
+{
     t_metadata *aux = metadata;
 
-    while(aux->siguiente != NULL){
+    while (aux->siguiente != NULL)
+    {
         aux = aux->siguiente;
     }
-    if(metadata == NULL){
+    if (metadata == NULL)
+    {
         metadata = nuevo;
-    }else{
+    }
+    else
+    {
         aux->siguiente = nuevo;
     }
 }
 
-void actualizar_comienzo_lista(char *nombre_archivo,int posicion){
+void actualizar_comienzo_lista(char *nombre_archivo, int posicion)
+{
     t_metadata *aux = metadata;
 
-    while((aux->nombre != nombre_archivo)&&(aux !=NULL)){
+    while ((aux->nombre != nombre_archivo) && (aux != NULL))
+    {
         aux = aux->siguiente;
     }
-    if(aux->nombre == nombre_archivo){
+    if (aux->nombre == nombre_archivo)
+    {
         aux->bloque_inicial = posicion;
     }
 }
 
-char buscar_metadata(int posicion){
-    t_metadata *aux = ; //lista metadata
-    while(aux->comienzo != posicion){
+char buscar_metadata(int posicion)
+{
+    t_metadata *aux = ; // lista metadata
+    while (aux->comienzo != posicion)
+    {
         aux = aux->siguiente;
     }
-    if(aux != NULL){
+    if (aux != NULL)
+    {
         return aux->nombre;
     }
 }
 
-void funcion(){
-    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); 
-    int i = 0;
-    while ((bitarray_test_bit(bitmap_f, i) != 0) && (i < config_dialfs.block_count))
-    {
-        i++;
-    }
-    if(bitarray_test_bit(bitmap_f, i) == 0){
-        int j = i;
-        while((bitarray_test_bit(bitmap_f, j) == 0) && (j < config_dialfs.block_count)){
-            j++;
-        }
-        if(bitarray_test_bit(bitmap_f, j) != 0){
-            char *archivo = buscar_metadata(j);
-            modificar_metadata(archivo,"BLOQUE_INICIAL",i);
-        }
-    }
+void compactacion_metadata()
+{
+    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w");
 
+    int l = 0;
+    while ((l < config_dialfs.block_count))
+    {
+        int i = 0;
+        while ((bitarray_test_bit(bitmap_f, i) != 0) && (i < config_dialfs.block_count))
+        {
+            i++;
+        }
+        if (bitarray_test_bit(bitmap_f, i) == 0)
+        {
+            int j = i;
+            while ((bitarray_test_bit(bitmap_f, j) == 0) && (j < config_dialfs.block_count))
+            {
+                j++;
+            }
+            if (bitarray_test_bit(bitmap_f, j) != 0)
+            {
+                char *archivo = buscar_metadata(j);
+                modificar_metadata(archivo, "BLOQUE_INICIAL", i);
+            }
+        }
+        l++;
+    }
 }

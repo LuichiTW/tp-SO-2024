@@ -1,23 +1,21 @@
 #include "fileSistem.h"
 
-extern t_config config_dialfs;
 
 // todo: eliminar los bloques vacios que superen el maximo de bloques
 // todo: implementar el aviso de que el archivo supera el tamaño maximo
 // todo: logs principales
 
-t_bloque *bloques = NULL;
-t_bitarray *bitmap = NULL;
-t_metadata *metadata = NULL;
 
-char buscar_metadata(int posicion){
-    t_metadata *aux = ; //lista metadata
-    while(aux->comienzo != posicion){
+
+char *buscar_metadata(int posicion){
+    t_metadata *aux = metadata; //lista metadata
+    while(aux->bloque_inicial != posicion){
         aux = aux->siguiente;
     }
     if(aux != NULL){
         return aux->nombre;
     }
+    return NULL;
 }
 
 void comprobar_filesystem(t_config_interfaz *config_dialfs)
@@ -47,7 +45,7 @@ void comprobar_filesystem(t_config_interfaz *config_dialfs)
     else
     {
         // Si no está vacío, lo carga
-        bloques = levantar_bloques();
+        bloques = levantar_bloques(config_dialfs);
     }
 
     char *path_bitmap = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bitmap.dat");
@@ -74,13 +72,13 @@ void comprobar_filesystem(t_config_interfaz *config_dialfs)
     else
     {
         // Si no está vacío, lo carga
-        t_bitarray *bitmap = cargar_bitmap();
+        bitmap = cargar_bitmap(config_dialfs);
     }
 
     //comprueba si hay metadata
     //todo: implementar
     //sino esta lo carga
-    metadata = cargar_metadata();
+    metadata = cargar_metadata(config_dialfs);
 
     free(path_bloques);
     free(path_bitmap);
@@ -107,11 +105,11 @@ void compactacion(t_bloque *bloques, t_bitarray *bitmap)
     
     //actualizar metadata
     compactacion_metadata();
-    metadata = cargar_metadata();
+    metadata = cargar_metadata(config_interfaz);
 
     // actualizar bitmap
     actualizar_bitmap(bitmap, bloques);
-    guardar_bitmap(bitmap);
+    guardar_bitmap(bitmap, config_interfaz);
 
 }
 
@@ -119,17 +117,17 @@ void compactacion_metadata()
 {
     
     int l = 0;
-    while ((l < config_dialfs.block_count))
+    while ((l < config_interfaz->block_count))
     {
         int i = 0;
-        while ((bitarray_test_bit(bitmap, i) != 0) && (i < config_dialfs.block_count))
+        while ((bitarray_test_bit(bitmap, i) != 0) && (i < config_interfaz->block_count))
         {
             i++;
         }
         if (bitarray_test_bit(bitmap, i) == 0)
         {
             int j = i;
-            while ((bitarray_test_bit(bitmap, j) == 0) && (j < config_dialfs.block_count))
+            while ((bitarray_test_bit(bitmap, j) == 0) && (j < config_interfaz->block_count))
             {
                 j++;
             }
@@ -239,6 +237,69 @@ void imprimir_bitmap(t_bitarray *bitmap)
     printf("\n");
 }
 
+void insertar_archivo_bloques(t_bloque *archivo){
+
+    if (bloques == NULL) {
+        // Si la primera lista está vacía, simplemente apunta a la segunda lista
+        bloques = archivo;
+        return;
+    }
+    
+    t_bloque *temp = bloques;
+    while (temp->siguiente != NULL)
+    {
+        temp = temp->siguiente;
+    }
+    temp->siguiente = archivo;
+
+}
+
+// Función para extraer una parte de la lista
+t_bloque* extraer_parte_lista(t_bloque *cabeza, int indice_inicial, int cantidad) {
+    if (cabeza == NULL || cantidad <= 0) {
+        return NULL;
+    }
+
+    t_bloque *temp = cabeza;
+    t_bloque *prev = NULL;
+    t_bloque *inicio_extraccion = NULL;
+    t_bloque *fin_extraccion = NULL;
+
+    // Avanzar hasta el índice inicial
+    for (int i = 0; i < indice_inicial && temp != NULL; i++) {
+        prev = temp;
+        temp = temp->siguiente;
+    }
+
+    // Si no se encuentra el índice inicial, retornar NULL
+    if (temp == NULL) {
+        return NULL;
+    }
+
+    // Marcar el inicio de la extracción
+    inicio_extraccion = temp;
+
+    // Avanzar hasta el final de la cantidad a extraer
+    for (int i = 0; i < cantidad && temp != NULL; i++) {
+        fin_extraccion = temp;
+        temp = temp->siguiente;
+    }
+
+    // Ajustar los punteros para mantener la integridad de la lista original
+    if (prev != NULL) {
+        prev->siguiente = temp;
+    } else {
+        cabeza = temp;
+    }
+
+    // Terminar la sublista extraída
+    if (fin_extraccion != NULL) {
+        fin_extraccion->siguiente = NULL;
+    }
+
+    return inicio_extraccion;
+}
+
 int crear_archivo_bloques(t_bloque *cabeza){
     //carga un dato vacio en el bloque
     char *dato = "";
@@ -253,6 +314,7 @@ int crear_archivo_bloques(t_bloque *cabeza){
             return i;
         }
     }
+    return -1;
 }
 
 void eliminar_archivo_bloques(t_bloque *cabeza, int bloque_inicial, int tamanio){

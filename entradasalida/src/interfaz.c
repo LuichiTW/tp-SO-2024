@@ -279,7 +279,7 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
         limpiar_archivo_bitmap(nombre_archivo);
         // compactacion
         agregar_archivo_bitmap(nombre_archivo, tamanio_archivo);
-        truncate(nombre_archivo, tamanio);
+        
         modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
     }
 

@@ -1,5 +1,4 @@
 #include "main.h"
-t_bitarray *bitmap;
 
 //todo reorganizar las funciones los archivos
 

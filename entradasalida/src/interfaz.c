@@ -299,28 +299,19 @@ int iO_FS_READ(t_parametroEsperar parametros)
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
-    char *nombre_archivo = leer_string(buffer, &desp); // VER
+    char *nombre_archivo = leer_string(buffer, &desp);
     int tamanio_a_leer = leer_entero(buffer, &desp);
     int puntero = leer_entero(buffer, &desp);
     char caracter;
-    int bloque_inicial = info_archivo(nombre_archivo);
+    int bloque_inicial = info_archivo(nombre_archivo,"BLOQUE_INICIAL");
 
-    FILE *f = fopen(nombre_archivo, "r");
+    for (int i = puntero; i < puntero + tamanio_a_leer; i++)
+    {
+        fseek(bloques, puntero, bloque_inicial * (config_interfaz.block_size));
+        caracter = fgetc(bloques);
+        printf("%c", caracter);
+    }
 
-    if (f == NULL)
-    {
-        printf("ERROR al abrir el archivo");
-        return 1;
-    }
-    else
-    {
-        for (int i = puntero; i < puntero + tamanio_a_leer; i++)
-        {
-            fseek(nombre_archivo, puntero, SEEK_SET);
-            caracter = fgetc(f);
-            printf("%c", caracter);
-        }
-    }
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_READ - Leer Archivo: %s - Tamaño a Leer: %d - Puntero Archivo: %d",
              pid, nombre_archivo, tamanio_a_leer, puntero);
 
@@ -340,19 +331,22 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
+
     int tamanio_a_escribir[sizeof(leer_array_entero(buffer, &desp))];
     memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), sizeof(tamanio_a_escribir));
     int puntero = leer_entero(buffer, &desp);
+
     int direcciones[sizeof(leer_array_entero(buffer, &desp))];
     memcpy(direcciones, leer_array_entero(buffer, &desp), sizeof(direcciones));
+
+    int bloque_inicial = info_archivo(nombre_archivo,"BLOQUE_INICIAL");
 
     if (direcciones == NULL)
     {
         return 1;
     }
     desp = 0;
-    FILE *f = fopen(nombre_archivo, "w");
-    fseek(nombre_archivo, puntero, SEEK_SET);
+    fseek(bloques, puntero, bloque_inicial * (config_interfaz.block_size));
     for (int i = 0; i < sizeof(direcciones) + 1; i++)
     { // envia a memoria cada direccion con su respectivo tamaño a leer
         t_paquete *paquete = crear_paquete();
@@ -363,7 +357,7 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
         int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
         buffer = recibir_buffer(&size, socketCliente);
         char *texto = leer_string(buffer, &desp);
-        fwrite(texto, sizeof(char), strlen(texto), nombre_archivo);
+        fwrite(texto, sizeof(char), strlen(texto), bloques);
         eliminar_paquete(paquete);
     }
 

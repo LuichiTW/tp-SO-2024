@@ -3,14 +3,15 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <utils/conexiones/conexiones_cliente.h>
+#include <pthread.h>
+#include <dirent.h>
+#include <readline/readline.h>
 #include <commons/config.h>
 #include <commons/log.h>
 #include <commons/error.h>
-#include <pthread.h>
-#include <readline/readline.h>
-#include <utils/conexiones/conexiones_servidor.h>
 #include <commons/string.h>
+#include <utils/conexiones/conexiones_servidor.h>
+#include <utils/conexiones/conexiones_cliente.h>
 
 #include "fileSistem.h"
 
@@ -35,6 +36,12 @@ typedef struct
 	char *ip_kernel;
 	int puerto_kernel;
 } t_config_interfaz;
+
+typedef struct t_metadata
+{
+	char *nombre;
+	struct t_metadata *siguiente;
+} t_metadata;
 
 
 enum tipo_interfaz
@@ -71,9 +78,13 @@ int leer_entero(char *buffer, int *desplazamiento);
 char *leer_string(char *buffer, int *desplazamiento);
 int *leer_array_entero(char *buffer, int *desp);
 
-void crear_metadata(char *nombre_archivo, int pos);
+// funciones metadata //? podrian ir en otro archivo
+t_metadata *cargar_metadata(t_config_interfaz *config_dialfs);
+t_metadata *crear_metadata(char *nombre_archivo, int pos);
+t_metadata *agregar_a_lista(t_metadata *cabeza, t_metadata *nuevo);
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar);
 int info_archivo(char *nombre_archivo, char *parametro);
+
 int division_redondeada(int numerador, int denominador);
 char terminacion_archivo(char *archivo, char *terminacion);
 int suma_array(int *array, int tamanio);

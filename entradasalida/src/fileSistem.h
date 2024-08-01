@@ -25,11 +25,10 @@ typedef struct t_bloque
 extern t_log *logger;
 extern t_config_interfaz config_interfaz;
 
-void comprobar_filesystem(char *path);
+void comprobar_filesystem(t_config_interfaz *config_dialfs);
 int archivo_esta_vacio(char *nombre_archivo);
 
 void compactacion(t_bloque *bloques, t_bitarray *bitmap);
-bool necesita_compactacion(t_bitarray *bitmap, int tamanioArchivo);
 
 t_bloque *compactar_bloque(t_bloque *bloques);
 t_bloque *levantar_bloques(t_config_interfaz *config_dialfs);

@@ -95,7 +95,7 @@ void manejo_config_interfaz(t_config config)
         parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
 
         // comprobar filesystem
-        comprobar_filesystem(config_interfaz.path_base_dialfs);
+        comprobar_filesystem(config_interfaz);
     }
     else
     {
@@ -215,6 +215,9 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
 
+    //crear archivo //todo usar funcion crear bloque
+
+    //actualizar bitmap //todo reemplazar por la funcion agregar_archivo_bitmap
     FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
     int i = 0;
     while ((bitarray_test_bit(bitmap_f, i) != 0) && (i < config_dialfs.block_count))
@@ -227,6 +230,7 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     }
     fclose(bitmap_f);
 
+    //crear metadata //todo reemplazar por la funcion crear_metadata
     FILE *f = fopen(terminacion_archivo(nombre_archivo, ".txt"), "w");
     fclose(f);
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_CREATE - Crear Archivo: %d", pid, nombre_archivo);
@@ -411,13 +415,43 @@ int *leer_array_entero(char *buffer, int *desp)
     return arr;
 }
 
-//! modificar para que cree una un puntero a metadata lista
-void crear_metadata(char *nombre_archivo, int pos)
+t_metadata *cargar_metadata(t_config_interfaz *config_dialfs)
 {
+    t_metadata *cabeza = NULL;
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(config_dialfs->path_base_dialfs);
+    if (d)
+    {
+        while ((dir = readdir(d)) != NULL)
+        {
+            if (string_ends_with(dir->d_name, "_metadata.txt"))
+            {
+                t_metadata *nuevo = malloc(sizeof(t_metadata));
+                nuevo->nombre = dir->d_name;
+                cabeza = agregar_a_lista(cabeza, nuevo);
+            }
+        }
+        closedir(d);
+    }
+    return cabeza;
+}
+
+t_metadata *crear_metadata(char *nombre_archivo, int pos)
+{
+    t_metadata *nuevo = malloc(sizeof(t_metadata));
+    
+    //crear archivo metadata
+    FILE *f = fopen(terminacion_archivo(nombre_archivo, "_metadata.txt"), "w");
+    fclose(f);
+
+    //agregar datos al archivo metadata
     t_config *metadata = config_create(terminacion_archivo(nombre_archivo, "_metadata.txt"));
-    config_set_value(metadata, "COMIENZO", string_itoa(pos));
-    config_set_value(metadata, "TAMANIO", "1");
+    nuevo->nombre = nombre_archivo;
+    config_set_value(metadata, "BLOQUE_INICIAL", string_itoa(pos));
+    config_set_value(metadata, "TAMANIO_ARCHIVO", "1");
     config_destroy(metadata);
+    return nuevo;
 }
 
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar)
@@ -425,6 +459,17 @@ void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modifica
     t_config *metadata = config_create(terminacion_archivo(nombre_archivo, "_metadata.txt"));
     config_set_value(metadata, parametro, string_itoa(dato_modificar));
     config_destroy(metadata);
+}
+
+t_metadata *agregar_a_lista(t_metadata *cabeza, t_metadata *nuevo)
+{
+    t_metadata *aux = cabeza;
+    while (aux->siguiente != NULL)
+    {
+        aux = aux->siguiente;
+    }
+    aux->siguiente = nuevo;
+    return cabeza;
 }
 
 int info_archivo(char *nombre_archivo, char *parametro)

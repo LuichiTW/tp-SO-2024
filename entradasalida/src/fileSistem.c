@@ -10,12 +10,16 @@ t_bloque *bloques;
 
 //todo: que se pueda actualizar metadata
 
-void comprobar_filesystem(char *path)
+//! crear funcion para que al crear un archivo los datos vayan en el espacio vacio (para conveniencia el null del siguiente)
+
+void comprobar_filesystem(t_config_interfaz *config_dialfs)
 {
+    //posiblemente se tenga que usar variables globales
     t_bloque *bloques = malloc(sizeof(t_bloque));
     t_bitarray *bitmap = malloc(sizeof(t_bitarray));
+    t_metadata *metadata = malloc(sizeof(t_metadata));
 
-    char *path_bloques = string_from_format("%s%s", path, "/bloques.dat");
+    char *path_bloques = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bloques.dat");
     // comprueba si el archivo de bloques esta vacio
     int vacio = archivo_esta_vacio(path_bloques);
     if (vacio == -1)
@@ -32,6 +36,7 @@ void comprobar_filesystem(char *path)
             perror("Error al crear el archivo");
             exit(EXIT_FAILURE);
         }
+        ftruncate(fileno(archivo), config_dialfs->block_count * config_dialfs->block_size);
         fclose(archivo);
         // creo los bloques
 
@@ -42,7 +47,7 @@ void comprobar_filesystem(char *path)
         t_bloque *bloques = levantar_bloques();
     }
 
-    char *path_bitmap = string_from_format("%s%s", path, "/bitmap.dat");
+    char *path_bitmap = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bitmap.dat");
     // comprueba si el archivo de bitmap esta vacio
     vacio = archivo_esta_vacio(path_bitmap);
     if (vacio == -1)
@@ -69,6 +74,11 @@ void comprobar_filesystem(char *path)
         t_bitarray *bitmap = cargar_bitmap();
     }
 
+    //comprueba si hay metadata
+    //todo: implementar
+    //sino esta lo carga
+    metadata = cargar_metadata();
+
     free(path_bloques);
     free(path_bitmap);
 }
@@ -82,31 +92,6 @@ int archivo_esta_vacio(char *nombre_archivo)
         return -1; // Error al obtener información del archivo
     }
     return st.st_size == 0;
-}
-
-//! no se usa
-bool necesita_compactacion(t_bitarray *bitmap, int tamanioArchivo)//tamanioArchivo es la cantidad de bloques que ocupa
-{
-    int bits = bitarray_get_max_bit(bitmap);
-    int espacio = 0;
-    //recorre el bitmap y cuenta los bloques vacios
-    for(int i = 0; i < bits; i++)
-    {
-        if(!bitarray_test_bit(bitmap, i))
-        {
-            espacio++;
-        }else{
-            //si encuentra un bloque ocupado, reinicia el contador
-            espacio = 0;
-        }
-        //si encuentra un espacio igual al tamaño del archivo, no necesita compactacion
-        if(espacio == tamanioArchivo)
-        {
-            return false;
-        }
-    }
-    //si no encuentra un espacio igual al tamaño del archivo, necesita compactacion
-    return tamanioArchivo > espacio;
 }
 
 void compactacion(t_bloque *bloques, t_bitarray *bitmap)
@@ -226,7 +211,7 @@ void imprimir_bitmap(t_bitarray *bitmap)
 t_bloque *levantar_bloques(t_config_interfaz *config_dialfs)
 {
     char *path_bloques = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bloques.dat");
-    t_bloque *bloques_mapeados = leerListaDesdeArchivo("bloques.dat"); // cargar bloques desde archivo
+    t_bloque *bloques_mapeados = leerListaDesdeArchivo(path_bloques); // cargar bloques desde archivo
     if (bloques_mapeados == NULL)
     {
         perror("Error al cargar bloques");

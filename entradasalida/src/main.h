@@ -13,10 +13,57 @@
 #include <commons/string.h>
 #include <commons/bitarray.h>
 
-#include "interfaz.h"
-#include "fileSistem.h"
 
-extern t_parametroEsperar parametros;
+
+typedef struct
+{
+	int conexion_memoria;
+	int conexion_kernel;
+	int server_fd;
+	int socket_cliente;
+	t_log *logger;
+} t_parametroEsperar;
+
+typedef struct
+{
+	int tiempo_unidad_trabajo;
+	char *path_base_dialfs;
+	int block_size;
+	int block_count;
+	int retraso_compactacion;
+	char *ip_memoria;
+	int puerto_memoria;
+	char *ip_kernel;
+	int puerto_kernel;
+} t_config_interfaz;
+
+typedef struct t_metadata
+{
+	char *nombre;
+	int bloque_inicial;
+	struct t_metadata *siguiente;
+} t_metadata;
+
+
+typedef struct t_bloque
+{
+    size_t longitud;
+    struct t_bloque *siguiente;
+    char dato[];
+}t_bloque;
+
+enum tipo_interfaz
+{
+	GENERICA,
+	STDIN,
+	STDOUT,
+	DIALFS
+};
+
+t_parametroEsperar parametros;
+t_bloque *bloques = NULL;
+t_bitarray *bitmap = NULL;
+t_metadata *metadata = NULL;
 
 void manejarConexion(t_parametroEsperar parametros);
 void esperar(t_parametroEsperar parametros);

@@ -13,21 +13,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "interfaz.h"
-
-typedef struct t_bloque
-{
-    size_t longitud;
-    struct t_bloque *siguiente;
-    char dato[];
-}t_bloque;
+#include "main.h"
 
 extern t_log *logger;
-extern struct t_config_interfaz *config_interfaz;
+extern t_config_interfaz *config_interfaz;
 
-extern struct t_metadata *metadata;
-t_bloque *bloques = NULL;
-t_bitarray *bitmap = NULL;
+extern t_bitarray *bitmap;
+extern t_bloque *bloques;
+extern t_metadata *metadata;
 
 
 char *buscar_metadata(int posicion);

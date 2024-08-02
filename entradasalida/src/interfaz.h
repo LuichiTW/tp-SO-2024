@@ -12,55 +12,19 @@
 #include <commons/string.h>
 #include <utils/conexiones/conexiones_servidor.h>
 #include <utils/conexiones/conexiones_cliente.h>
+#include <commons/bitarray.h>
 
-#include "fileSistem.h"
-
-typedef struct
-{
-	int conexion_memoria;
-	int conexion_kernel;
-	int server_fd;
-	int socket_cliente;
-	t_log *logger;
-} t_parametroEsperar;
-
-typedef struct
-{
-	int tiempo_unidad_trabajo;
-	char *path_base_dialfs;
-	int block_size;
-	int block_count;
-	int retraso_compactacion;
-	char *ip_memoria;
-	int puerto_memoria;
-	char *ip_kernel;
-	int puerto_kernel;
-} t_config_interfaz;
-
-typedef struct t_metadata
-{
-	char *nombre;
-	int bloque_inicial;
-	struct t_metadata *siguiente;
-} t_metadata;
+#include "main.h"
 
 
-enum tipo_interfaz
-{
-	GENERICA,
-	STDIN,
-	STDOUT,
-	DIALFS
-};
+extern t_log *logger;
+extern t_bitarray *bitmap;
+extern t_bloque *bloques;
+extern t_metadata *metadata;
 
-//extern t_log *logger;
-//extern t_bitarray *bitmap;
-//extern t_bloque *bloques;
-
-t_config_interfaz *config_interfaz = NULL;
-t_parametroEsperar parametros;
+extern t_config_interfaz *config_interfaz;
+extern t_parametroEsperar parametros;
 struct timespec tiempo;
-t_metadata *metadata = NULL;
 
 // inicio programa
 t_log *iniciar_logger_io(void);

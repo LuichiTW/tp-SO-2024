@@ -456,7 +456,7 @@ t_bloque *insertarAlFinal(t_bloque *cabeza, t_config *config_dialfs, char *dato)
 
 void guardarListaEnArchivo(t_bloque *cabeza)
 {
-    char *path_bloques = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bloques.dat");
+    char *path_bloques = string_from_format("%s%s", config_interfaz->path_base_dialfs, "/bloques.dat");
     FILE *archivo = fopen(path_bloques, "wb");
     if (archivo == NULL)
     {

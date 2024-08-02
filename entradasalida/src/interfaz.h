@@ -47,6 +47,7 @@ int iO_FS_READ(t_parametroEsperar parametros);
 int leer_entero(char *buffer, int *desplazamiento);
 char *leer_string(char *buffer, int *desplazamiento);
 int *leer_array_entero(char *buffer, int *desp);
+char** leer_array_string(char*buffer, int* desp);
 
 // funciones metadata //? podrian ir en otro archivo
 void crear_metadata(char *nombre_archivo, int pos);

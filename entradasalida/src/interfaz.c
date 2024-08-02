@@ -138,11 +138,11 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     int pid = leer_entero(buffer, &desp);
     
     int numero_direcciones = leer_entero(buffer,&desp);
-    int *direcciones[numero_direcciones];
-    memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
+    char **direcciones[numero_direcciones];
+    memcpy(direcciones, leer_array_string(buffer, &desp), numero_direcciones);
 
     int *tamanios[numero_direcciones];
-    memcpy(tamanios, leer_array_entero(buffer, &desp), numero_direcciones);
+    memcpy(tamanios, leer_array_string(buffer, &desp), numero_direcciones);
 
     texto = readline("> ");
     int anterior = 0;
@@ -176,11 +176,11 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
     int pid = leer_entero(buffer, &desp);
     
     int numero_direcciones = leer_entero(buffer,&desp);
-    int *direcciones[numero_direcciones];
-    memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
+    char *direcciones[numero_direcciones];
+    memcpy(direcciones, leer_array_string(buffer, &desp), numero_direcciones);
 
     int *tamanios[numero_direcciones];
-    memcpy(tamanios, leer_array_entero(buffer, &desp), numero_direcciones);
+    memcpy(tamanios, leer_array_string(buffer, &desp), numero_direcciones);
 
     char *direccionesT[numero_direcciones];
     desp = 0;
@@ -218,7 +218,7 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     char *nombre_archivo = leer_string(buffer, &desp);
 
     // crear archivo
-    int pos = crear_archivo_bloques(bloques); // todo falta inplementar, devuelve posicion donde se creo
+    int pos = crear_archivo_bloques(bloques);
 
     // actualizar bitmap
     actualizar_bitmap(bitmap, bloques);
@@ -320,11 +320,11 @@ int iO_FS_READ(t_parametroEsperar parametros)
     int puntero = leer_entero(buffer, &desp);
     int numero_direcciones = leer_entero(buffer, &desp);
 
-    int *direcciones[numero_direcciones];
-    memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
+    char *direcciones[numero_direcciones];
+    memcpy(direcciones, leer_array_string(buffer, &desp), numero_direcciones);
 
     int *tamanios[numero_direcciones];
-    memcpy(tamanios, leer_array_entero(buffer, &desp), numero_direcciones);
+    memcpy(tamanios, leer_array_string(buffer, &desp), numero_direcciones);
 
     char *texto = NULL;
     char *path_bloques = string_from_format("%s%s", config_interfaz->path_base_dialfs, "/bloques.dat");
@@ -372,11 +372,11 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
     int numero_direcciones = leer_entero(buffer,&desp);
 
     int *tamanio_a_escribir[numero_direcciones];
-    memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), numero_direcciones);
+    memcpy(tamanio_a_escribir, leer_array_string(buffer, &desp), numero_direcciones);
     int puntero = leer_entero(buffer, &desp);
 
-    int *direcciones[numero_direcciones];
-    memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
+    char *direcciones[numero_direcciones];
+    memcpy(direcciones, leer_array_string(buffer, &desp), numero_direcciones);
 
     desp = 0;
 

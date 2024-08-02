@@ -532,3 +532,16 @@ char* agregar_caracter(const char* texto, char caracter) {
 
     return nuevo_texto;
 }
+char** leer_array_string(char*buffer, int* desp)
+{
+	int len = leer_entero(buffer, desp);
+	char** arr = malloc((len+1)*sizeof(char*));
+
+	for(int i = 0; i < len; i++)
+	{
+		arr[i] = leer_string(buffer, desp);
+	}
+	arr[len] = NULL;
+
+	return arr;
+}

@@ -98,7 +98,13 @@ void c_iniciar_proceso(char *path) {
     planificar();
 }
 void c_finalizar_proceso(int pid) {
-
+    if (exec->pid == pid) {
+        interrumpir("FINALIZAR_PROCESO");
+    }
+    else {
+        t_pcb *pcb_fin = buscar_pcb_por_pid(pid);
+        finalizar_proceso(pcb_fin);
+    }
 }
 void c_detener_planificacion() {
     pthread_t t;

@@ -49,6 +49,7 @@ void ejecutar_proceso(t_pcb *pcb);
 void finalizar_proceso(t_pcb *pcb);
 
 t_estado_proceso *buscar_estado_proceso(int pid);
+t_pcb *buscar_pcb_por_pid(int pid);
 t_queue *obtener_cola_por_estado(enum estado estado);
 
 void log_cola_ready();

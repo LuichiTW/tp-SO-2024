@@ -1,6 +1,7 @@
 #include "checkInterrupt.h"
 
 bool hay_interrupcion;
+char *motivo_interrupcion;
 
 void crear_thread_interrupt() {
     pthread_t thread_interr;
@@ -13,8 +14,17 @@ void recibir_interrupciones() {
     while (true) {    
         int op = recibir_operacion(sockets_cpu.socket_kernel_interrupt);
         if (op == CPU_INTERRUPT) {
-            // Guardar el motivo de la interrupción en algún lado
-            //char *motivoInterrupt = recibir_msg(sockets_cpu.socket_kernel_interrupt);
+            t_list *lista_rta = recibir_paquete(sockets_cpu.socket_kernel_interrupt);
+            char *motivo_rta = list_get(lista_rta, 0);
+            // FINALIZAR_PROCESO debería tener más prioridad que las demás interrupciones
+            if (motivo_interrupcion != NULL && string_equals_ignore_case(motivo_rta, "FINALIZAR_PROCESO")) {
+                free(motivo_rta);
+            }
+            else {
+                free(motivo_interrupcion);
+                motivo_interrupcion = motivo_rta;
+            }
+            list_destroy(lista_rta);
             hay_interrupcion = true;
         }
     }
@@ -25,9 +35,13 @@ void recibir_interrupciones() {
 void funCheckInterrupt(){
     if (hay_interrupcion) {
         if (proceso_ejecutando) {
-            devolver_contexto_ejecucion("INTERRUPT"); // TODO agregar motivo de interrupción
+            char *motivo = string_from_format("INTERRUPT %s", motivo_interrupcion);
+            devolver_contexto_ejecucion(motivo);
+            free(motivo);
         }
         hay_interrupcion = false;
+        free(motivo_interrupcion);
+        motivo_interrupcion = NULL;
     }
 }
 

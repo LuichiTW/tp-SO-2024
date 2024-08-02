@@ -9,6 +9,7 @@
 #include <utils/pcb.h>
 #include "conexion.h"
 #include "planificador.h"
+#include "interrupciones.h"
 
 enum comandos_consola {
     COM_EJECUTAR_SCRIPT,

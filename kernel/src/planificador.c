@@ -142,6 +142,7 @@ void finalizar_proceso(t_pcb *pcb) {
     recibir_operacion(sockets.memoria);
     recibir_entero(sockets.memoria);
 
+    sem_wait(&sem_planificacion);
     if (pcb == exec) {
         exec = NULL;
     }
@@ -150,6 +151,7 @@ void finalizar_proceso(t_pcb *pcb) {
         t_queue *cola_actual = obtener_cola_por_estado(est->estado);
         if (cola_actual != NULL) list_remove_element(cola_actual->elements, pcb);
     }
+    sem_post(&sem_planificacion);
     agregar_a_exit(pcb);
 }
 
@@ -159,6 +161,16 @@ t_estado_proceso *buscar_estado_proceso(int pid) {
         return est->pid == pid;
     }
     return list_find(lista_procesos, (void *) es_el_buscado);
+}
+t_pcb *buscar_pcb_por_pid(int pid) {
+    bool es_el_buscado(t_pcb *pcb) {
+        return pcb->pid == pid;
+    }
+
+    t_estado_proceso *est = buscar_estado_proceso(pid);
+    t_queue *cola = obtener_cola_por_estado(est->estado);
+
+    return list_find(cola->elements, (void *) es_el_buscado);
 }
 t_queue *obtener_cola_por_estado(enum estado estado) {
     switch (estado) {

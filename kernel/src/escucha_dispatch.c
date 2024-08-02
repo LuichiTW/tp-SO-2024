@@ -37,6 +37,14 @@ void manejar_desalojo(char *motivo_raw) {
         log_destroy(logger);
         finalizar_proceso(exec);
     }
+    if (string_equals_ignore_case(motivo[0], "INTERRUPT")) {
+        if (string_equals_ignore_case(motivo[1], "FINALIZAR_PROCESO")) {
+            t_log *logger = kernel_logger();
+            log_info(logger, "Finaliza el proceso %i - Motivo: INTERRUPTED_BY_USER", exec->pid);
+            log_destroy(logger);
+            finalizar_proceso(exec);
+        }
+    }
 
     string_array_destroy(motivo);
 }

@@ -105,6 +105,7 @@ void c_finalizar_proceso(int pid) {
         t_pcb *pcb_fin = buscar_pcb_por_pid(pid);
         finalizar_proceso(pcb_fin);
     }
+    planificar();
 }
 void c_detener_planificacion() {
     pthread_t t;
@@ -116,7 +117,8 @@ void c_iniciar_planificacion() {
     sem_post(&sem_planificacion);
 }
 void c_multiprogramacion(int valor) {
-
+    config_kernel.grado_multiprogramacion = valor;
+    planificar();
 }
 void c_proceso_estado() {
     void imprimir_pid(void *vpcb) {

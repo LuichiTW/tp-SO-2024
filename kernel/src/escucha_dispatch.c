@@ -36,6 +36,7 @@ void manejar_desalojo(char *motivo_raw) {
         log_info(logger, "Finaliza el proceso %i - Motivo: SUCCESS", exec->pid);
         log_destroy(logger);
         finalizar_proceso(exec);
+        planificar();
     }
     if (string_equals_ignore_case(motivo[0], "INTERRUPT")) {
         if (string_equals_ignore_case(motivo[1], "FINALIZAR_PROCESO")) {
@@ -44,6 +45,7 @@ void manejar_desalojo(char *motivo_raw) {
             log_destroy(logger);
             finalizar_proceso(exec);
         }
+        planificar();
     }
 
     string_array_destroy(motivo);

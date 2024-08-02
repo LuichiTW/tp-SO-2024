@@ -23,11 +23,12 @@ typedef struct t_bloque
 }t_bloque;
 
 extern t_log *logger;
-//extern t_config_interfaz *config_interfaz;
+extern struct t_config_interfaz *config_interfaz;
 
+extern struct t_metadata *metadata;
 t_bloque *bloques = NULL;
 t_bitarray *bitmap = NULL;
-t_metadata *metadata = NULL;
+
 
 char *buscar_metadata(int posicion);
 void comprobar_filesystem(t_config_interfaz *config_dialfs);

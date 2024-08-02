@@ -57,9 +57,10 @@ enum tipo_interfaz
 //extern t_bitarray *bitmap;
 //extern t_bloque *bloques;
 
-t_config_interfaz *config_interfaz;
+t_config_interfaz *config_interfaz = NULL;
 t_parametroEsperar parametros;
 struct timespec tiempo;
+t_metadata *metadata = NULL;
 
 // inicio programa
 t_log *iniciar_logger_io(void);

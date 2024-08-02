@@ -100,8 +100,8 @@ void compactacion(t_bloque *bloques, t_bitarray *bitmap)
     bloques = compactar_bloque(bloques);
 
     // actualizar bloques.dat
-    guardarListaEnArchivo(bloques, "bloques.dat");// todo: que se pueda pasar el path desde parametro
-    
+    guardarListaEnArchivo(bloques); 
+
     //actualizar metadata
     compactacion_metadata();
     metadata = cargar_metadata(config_interfaz);
@@ -397,30 +397,6 @@ t_bloque *crear_bloque(size_t tamano_dato)
     return nuevo_bloque;
 }
 
-t_bloque *insertarEnLista(t_bloque *cabeza, t_bitarray *bitmap, char *dato){
-    //! revisar que funcione
-    //todo que busque un espacio vacio en el bitmap y lo asigne
-    //todo que si no hay espacio, devuelva un error
-    t_bloque *nuevoNodo = crear_bloque(strlen(dato));
-    strncpy(nuevoNodo->dato, dato, strlen(dato));
-    nuevoNodo->siguiente = NULL;
-
-    if (cabeza == NULL)
-    {
-        cabeza = nuevoNodo;
-    }
-    else
-    {
-        t_bloque *temp = cabeza;
-        while (temp->siguiente != NULL)
-        {
-            temp = temp->siguiente;
-        }
-        temp->siguiente = nuevoNodo;
-    }
-    actualizar_bitmap(bitmap, cabeza);
-    return cabeza;
-}
 
 t_bloque *insertarAlFinal(t_bloque *cabeza, t_config *config_dialfs, char *dato)
 {
@@ -478,9 +454,10 @@ t_bloque *insertarAlFinal(t_bloque *cabeza, t_config *config_dialfs, char *dato)
     return cabeza;
 }
 
-void guardarListaEnArchivo(t_bloque *cabeza, char *nombreArchivo)
+void guardarListaEnArchivo(t_bloque *cabeza)
 {
-    FILE *archivo = fopen(nombreArchivo, "wb");
+    char *path_bloques = string_from_format("%s%s", config_dialfs->path_base_dialfs, "/bloques.dat");
+    FILE *archivo = fopen(path_bloques, "wb");
     if (archivo == NULL)
     {
         perror("Error al abrir el archivo");

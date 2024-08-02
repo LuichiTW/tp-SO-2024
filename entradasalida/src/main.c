@@ -1,10 +1,9 @@
 
 #include "interfaz.h"
-#include "fileSistem.h"
 
 //todo reorganizar las funciones los archivos
 char *nombreInterfaz = "TECLADO";
-char *pathInterfaz = "dialfs.config"; 
+char *pathInterfaz = "./dialfs.config"; 
 
 // considerar pasar los argumentos de creacion de interfaces por el main y no por la funcion (issue #3709)
 int main(){

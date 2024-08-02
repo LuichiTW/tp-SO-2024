@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #include <utils/conexiones/conexiones_cliente.h>
 #include <commons/config.h>
 #include <commons/log.h>
@@ -60,6 +61,7 @@ enum tipo_interfaz
 	DIALFS
 };
 
+t_config_interfaz *config_interfaz;
 t_parametroEsperar parametros;
 t_bloque *bloques = NULL;
 t_bitarray *bitmap = NULL;

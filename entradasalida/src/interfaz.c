@@ -501,19 +501,7 @@ void insertar_a_lista(t_metadata *nuevo)
     }
 }
 
-void actualizar_comienzo_lista(char *nombre_archivo, int posicion)
-{
-    t_metadata *aux = metadata;
 
-    while ((aux->nombre != nombre_archivo) && (aux != NULL))
-    {
-        aux = aux->siguiente;
-    }
-    if (aux->nombre == nombre_archivo)
-    {
-        aux->bloque_inicial = posicion;
-    }
-}
 
 char* leer_subcadena(const char* cadena, size_t inicio, size_t fin) {
     if (inicio > fin || inicio >= strlen(cadena)) {

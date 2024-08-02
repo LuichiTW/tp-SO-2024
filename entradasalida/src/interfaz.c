@@ -136,21 +136,30 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     char *texto;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
+
     int direcciones[sizeof(leer_array_entero(buffer, &desp))];
     memcpy(direcciones, leer_array_entero(buffer, &desp), sizeof(direcciones));
+
+    int tamanios[sizeof(leer_array_entero(buffer, &desp))];
+    memcpy(tamanios, leer_array_entero(buffer, &desp), sizeof(tamanios));
 
     if (direcciones == NULL)
     {
         return 1;
     }
-
     texto = readline("> ");
-    t_paquete *paquete = crear_paquete();
-    agregar_a_paquete(paquete, texto, strlen(texto) + 1);
-    agregar_a_paquete(paquete, direcciones, sizeof(direcciones) + 1);
+    int anterior = 0;
 
-    enviar_paquete(paquete, parametros.conexion_memoria);
-    eliminar_paquete(paquete);
+    for (int i = 0; i < (sizeof(direcciones) / sizeof(direcciones[0])); i++)
+    {
+        t_paquete *paquete = crear_paquete();
+        agregar_a_paquete(paquete, leer_subcadena(texto,anterior,tamanios[i]), tamanios[i] + 1);
+        agregar_a_paquete(paquete, direcciones, sizeof(direcciones) + 1);
+
+        enviar_paquete(paquete, parametros.conexion_memoria);
+        eliminar_paquete(paquete);
+        anterior = tamanios[i];
+    }
 
     free(texto);
     free(buffer);
@@ -279,7 +288,7 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
         limpiar_archivo_bitmap(nombre_archivo);
         // compactacion
         agregar_archivo_bitmap(nombre_archivo, tamanio_archivo);
-        
+
         modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
     }
 
@@ -303,7 +312,7 @@ int iO_FS_READ(t_parametroEsperar parametros)
     int tamanio_a_leer = leer_entero(buffer, &desp);
     int puntero = leer_entero(buffer, &desp);
     char caracter;
-    int bloque_inicial = info_archivo(nombre_archivo,"BLOQUE_INICIAL");
+    int bloque_inicial = info_archivo(nombre_archivo, "BLOQUE_INICIAL");
 
     for (int i = puntero; i < puntero + tamanio_a_leer; i++)
     {
@@ -339,7 +348,7 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
     int direcciones[sizeof(leer_array_entero(buffer, &desp))];
     memcpy(direcciones, leer_array_entero(buffer, &desp), sizeof(direcciones));
 
-    int bloque_inicial = info_archivo(nombre_archivo,"BLOQUE_INICIAL");
+    int bloque_inicial = info_archivo(nombre_archivo, "BLOQUE_INICIAL");
 
     if (direcciones == NULL)
     {
@@ -569,4 +578,20 @@ void actualizar_comienzo_lista(char *nombre_archivo, int posicion)
     }
 }
 
+char* leer_subcadena(const char* cadena, size_t inicio, size_t fin) {
+    if (inicio > fin || inicio >= strlen(cadena)) {
+        return NULL; // Verificación básica de parámetros
+    }
 
+    size_t longitud = fin - inicio + 1;
+    char* subcadena = (char*)malloc((longitud + 1) * sizeof(char));
+    if (subcadena == NULL) {
+        perror("Error al asignar memoria");
+        exit(EXIT_FAILURE);
+    }
+
+    strncpy(subcadena, cadena + inicio, longitud);
+    subcadena[longitud] = '\0'; // Asegurar la terminación con null
+
+    return subcadena;
+}

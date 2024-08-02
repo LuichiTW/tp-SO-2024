@@ -94,5 +94,6 @@ void limpiar_archivo_bitmap(char *archivo);
 void agregar_archivo_bitmap(char *archivo,int tamanio);
 void insertar_a_lista(t_metadata *nuevo);
 void actualizar_comienzo_lista(char *nombre_archivo,int posicion);
+char* leer_subcadena(const char* cadena, size_t inicio, size_t fin);
 
 #endif // !INTERFAZ_IO

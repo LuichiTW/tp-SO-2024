@@ -194,13 +194,10 @@ void fWAIT(char recurso[]){
 void fSIGNAL(char recurso[]){
 
 }
-void fIO_GEN_SLEEP(char interface[], int unidadesDeTrabajo){//!OBLIGATORIO
-    t_paquete *paquete = crear_paquete();
-    char *unidad_trabajo = string_itoa(unidadesDeTrabajo);
-    agregar_a_paquete(paquete, interface, strlen(interface)+1);
-    agregar_a_paquete(paquete, unidad_trabajo, strlen(unidad_trabajo)+1);
-
-    enviar_paquete(paquete, sockets_cpu.socket_kernel_dispatch);
+void fIO_GEN_SLEEP(char interface[], int unidadesDeTrabajo){
+    char *motivo_desalojo = string_from_format("IO_GEN_SLEEP %s %i", interface, unidadesDeTrabajo);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
 void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
     /* t_paquete *paquete;

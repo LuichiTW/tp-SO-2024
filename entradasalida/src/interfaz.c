@@ -26,7 +26,7 @@ t_config *iniciar_config(char *path_config)
     return config;
 }
 
-void manejo_config_interfaz(t_config config)
+void manejo_config_interfaz(t_config *config)
 {
     char *tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
     parametros.logger = logger; //??
@@ -39,60 +39,60 @@ void manejo_config_interfaz(t_config config)
     {
         log_info(logger, "Interfaz generica");
         // cargar config de interfaz generica
-        config_interfaz.ip_kernel = config_get_string_value(config, "IP_KERNEL");
-        config_interfaz.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
-        config_interfaz.tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
+        config_interfaz->ip_kernel = config_get_string_value(config, "IP_KERNEL");
+        config_interfaz->puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
+        config_interfaz->tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
 
         // crear conexiones
-        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, "conexion con IO");
-        parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
+        parametros.conexion_kernel = crear_conexion(config_interfaz->ip_kernel, config_interfaz->puerto_kernel, "conexion con IO");
+        parametros.server_fd = iniciar_servidor(config_interfaz->puerto_kernel);
     }
     else if (strcmp(tipo_interfaz, "STDIN") == 0)
     {
         log_info(logger, "Interfaz STDIN");
         // cargar config de interfaz stdin
-        config_interfaz.ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-        config_interfaz.puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-        config_interfaz.ip_kernel = config_get_string_value(config, "IP_KERNEL");
-        config_interfaz.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
+        config_interfaz->ip_memoria = config_get_string_value(config, "IP_MEMORIA");
+        config_interfaz->puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
+        config_interfaz->ip_kernel = config_get_string_value(config, "IP_KERNEL");
+        config_interfaz->puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
 
         // crear conexiones
-        parametros.conexion_memoria = crear_conexion(config_interfaz.ip_memoria, config_interfaz.puerto_memoria, "conexion con IO");
-        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, "conexion con IO");
-        parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
+        parametros.conexion_memoria = crear_conexion(config_interfaz->ip_memoria, config_interfaz->puerto_memoria, "conexion con IO");
+        parametros.conexion_kernel = crear_conexion(config_interfaz->ip_kernel, config_interfaz->puerto_kernel, "conexion con IO");
+        parametros.server_fd = iniciar_servidor(config_interfaz->puerto_kernel);
     }
     else if (strcmp(tipo_interfaz, "STDOUT") == 0)
     {
         log_info(logger, "Interfaz STDOUT");
         // cargar config de interfaz stdout
-        config_interfaz.ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-        config_interfaz.puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-        config_interfaz.ip_kernel = config_get_string_value(config, "IP_KERNEL");
-        config_interfaz.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
+        config_interfaz->ip_memoria = config_get_string_value(config, "IP_MEMORIA");
+        config_interfaz->puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
+        config_interfaz->ip_kernel = config_get_string_value(config, "IP_KERNEL");
+        config_interfaz->puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
 
         // crear conexiones
-        parametros.conexion_memoria = crear_conexion(config_interfaz.ip_memoria, config_interfaz.puerto_memoria, "conexion con IO");
-        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, "conexion con IO");
-        parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
+        parametros.conexion_memoria = crear_conexion(config_interfaz->ip_memoria, config_interfaz->puerto_memoria, "conexion con IO");
+        parametros.conexion_kernel = crear_conexion(config_interfaz->ip_kernel, config_interfaz->puerto_kernel, "conexion con IO");
+        parametros.server_fd = iniciar_servidor(config_interfaz->puerto_kernel);
     }
     else if (strcmp(tipo_interfaz, "DIALFS") == 0)
     {
         log_info(logger, "Interfaz DIALFS");
         // cargar config de interfaz dialfs
-        config_interfaz.tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
-        config_interfaz.path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
-        config_interfaz.block_size = config_get_int_value(config, "BLOCK_SIZE");
-        config_interfaz.block_count = config_get_int_value(config, "BLOCK_COUNT");
-        config_interfaz.retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
-        config_interfaz.ip_memoria = config_get_string_value(config, "IP_MEMORIA");
-        config_interfaz.puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
-        config_interfaz.ip_kernel = config_get_string_value(config, "IP_KERNEL");
-        config_interfaz.puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
+        config_interfaz->tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
+        config_interfaz->path_base_dialfs = config_get_string_value(config, "PATH_BASE_DIALFS");
+        config_interfaz->block_size = config_get_int_value(config, "BLOCK_SIZE");
+        config_interfaz->block_count = config_get_int_value(config, "BLOCK_COUNT");
+        config_interfaz->retraso_compactacion = config_get_int_value(config, "RETRASO_COMPACTACION");
+        config_interfaz->ip_memoria = config_get_string_value(config, "IP_MEMORIA");
+        config_interfaz->puerto_memoria = config_get_string_value(config, "PUERTO_MEMORIA");
+        config_interfaz->ip_kernel = config_get_string_value(config, "IP_KERNEL");
+        config_interfaz->puerto_kernel = config_get_string_value(config, "PUERTO_KERNEL");
 
         // crear conexiones
-        parametros.conexion_memoria = crear_conexion(config_interfaz.ip_memoria, config_interfaz.puerto_memoria, "conexion con IO");
-        parametros.conexion_kernel = crear_conexion(config_interfaz.ip_kernel, config_interfaz.puerto_kernel, "conexion con IO");
-        parametros.server_fd = iniciar_servidor(config_interfaz.puerto_kernel);
+        parametros.conexion_memoria = crear_conexion(config_interfaz->ip_memoria, config_interfaz->puerto_memoria, "conexion con IO");
+        parametros.conexion_kernel = crear_conexion(config_interfaz->ip_kernel, config_interfaz->puerto_kernel, "conexion con IO");
+        parametros.server_fd = iniciar_servidor(config_interfaz->puerto_kernel);
 
         // comprobar filesystem
         comprobar_filesystem(config_interfaz);
@@ -121,10 +121,6 @@ int iO_GEN_SLEEP(t_parametroEsperar parametros)
     }
 
     free(buffer);
-    if (uTrabajo == NULL)
-    {
-        return 1;
-    }
     return 0;
 }
 
@@ -154,7 +150,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     {
         t_paquete *paquete = crear_paquete();
         agregar_a_paquete(paquete, leer_subcadena(texto,anterior,tamanios[i]), tamanios[i] + 1);
-        agregar_a_paquete(paquete, direcciones, sizeof(direcciones) + 1);
+        agregar_a_paquete(paquete, direcciones[i], __SIZEOF_INT__);
 
         enviar_paquete(paquete, parametros.conexion_memoria);
         eliminar_paquete(paquete);
@@ -186,7 +182,6 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
     { // envia a memoria cada direccion con su respectivo tamaño a leer
         t_paquete *paquete = crear_paquete();
         agregar_a_paquete(paquete, direcciones[i], __SIZEOF_INT__);
-        agregar_a_paquete(paquete, tamanio_a_escribir[i], __SIZEOF_INT__);
         enviar_paquete(paquete, parametros.conexion_memoria);
 
         int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
@@ -412,29 +407,6 @@ int *leer_array_entero(char *buffer, int *desp)
     arr[len] = -1;
     return arr;
 }
-
-t_metadata *cargar_metadata(t_config_interfaz *config_dialfs)
-{
-    t_metadata *cabeza = NULL;
-    DIR *d;
-    struct dirent *dir;
-    d = opendir(config_dialfs->path_base_dialfs);
-    if (d)
-    {
-        while ((dir = readdir(d)) != NULL)
-        {
-            if (string_starts_with(dir->d_name, "metadata_"))
-            {
-                t_metadata *nuevo = malloc(sizeof(t_metadata));
-                nuevo->nombre = dir->d_name;
-                cabeza = agregar_a_lista(cabeza, nuevo);
-            }
-        }
-        closedir(d);
-    }
-    return cabeza;
-}
-
 void crear_metadata(char *nombre_archivo, int pos)
 {
     t_metadata *nuevo = malloc(sizeof(t_metadata));

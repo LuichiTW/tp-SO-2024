@@ -15,6 +15,7 @@
 #include <commons/bitarray.h>
 
 #include "main.h"
+#include "fileSistem.h"
 
 
 extern t_log *logger;
@@ -29,7 +30,7 @@ struct timespec tiempo;
 // inicio programa
 t_log *iniciar_logger_io(void);
 t_config *iniciar_config(char *tipo_interfaz);
-void manejo_config_interfaz(t_config config);
+void manejo_config_interfaz(t_config *config);
 
 // instrucciones interfaz
 int iO_GEN_SLEEP(t_parametroEsperar parametros);
@@ -47,7 +48,6 @@ char *leer_string(char *buffer, int *desplazamiento);
 int *leer_array_entero(char *buffer, int *desp);
 
 // funciones metadata //? podrian ir en otro archivo
-t_metadata *cargar_metadata(t_config_interfaz *config_dialfs);
 t_metadata *crear_metadata(char *nombre_archivo, int pos);
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar);
 int info_archivo(char *nombre_archivo, char *parametro);

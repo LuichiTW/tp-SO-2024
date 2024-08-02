@@ -580,3 +580,23 @@ t_bloque *compactar_bloque(t_bloque *bloques)
     }
     return bloques;
 }
+t_metadata *cargar_metadata(t_config_interfaz *config_dialfs)
+{
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(config_dialfs->path_base_dialfs);
+    if (d)
+    {
+        while ((dir = readdir(d)) != NULL)
+        {
+            if (string_starts_with(dir->d_name, "metadata_"))
+            {
+                t_metadata *nuevo = malloc(sizeof(t_metadata));
+                nuevo->nombre = dir->d_name;
+                insertar_a_lista(nuevo);
+            }
+        }
+        closedir(d);
+    }
+    return metadata;
+}

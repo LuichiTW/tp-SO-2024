@@ -8,12 +8,14 @@
 #include <commons/config.h>
 #include <commons/bitarray.h>
 #include <commons/string.h>
+#include <dirent.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
 #include "main.h"
+#include "interfaz.h"
 
 extern t_log *logger;
 extern t_config_interfaz *config_interfaz;
@@ -48,6 +50,7 @@ t_bloque *leerListaDesdeArchivo(char *nombreArchivo);
 void liberarLista(t_bloque *cabeza);
 int crear_archivo_bloques(t_bloque *cabeza);
 void eliminar_archivo_bloques(t_bloque *cabeza, int bloque_inicial, int tamanio);
+t_metadata *cargar_metadata(t_config_interfaz *config_dialfs);
 
 
 

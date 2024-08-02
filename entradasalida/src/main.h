@@ -32,9 +32,9 @@ typedef struct
 	int block_count;
 	int retraso_compactacion;
 	char *ip_memoria;
-	int puerto_memoria;
+	char *puerto_memoria;
 	char *ip_kernel;
-	int puerto_kernel;
+	char *puerto_kernel;
 } t_config_interfaz;
 
 typedef struct t_metadata

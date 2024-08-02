@@ -1,4 +1,6 @@
-#include "main.h"
+
+#include "interfaz.h"
+#include "fileSistem.h"
 
 //todo reorganizar las funciones los archivos
 

@@ -28,10 +28,11 @@ extern t_metadata *metadata;
 char *buscar_metadata(int posicion);
 void comprobar_filesystem(t_config_interfaz *config_dialfs);
 int archivo_esta_vacio(char *nombre_archivo);
-;
+
 void compactacion(t_bloque *bloques, t_bitarray *bitmap);
 void compactacion_metadata(void);
 void insertar_archivo_bloques(t_bloque *archivo);
+void cambiar_seccion_lista(t_bloque *cabeza, int indice_inicial, int cantidad, char *nuevo_dato);
 t_bloque* extraer_parte_lista(t_bloque *cabeza, int indice_inicial, int cantidad);
 int crear_archivo_bloques(t_bloque *cabeza);
 void eliminar_archivo_bloques(t_bloque *cabeza, int bloque_inicial, int tamanio);

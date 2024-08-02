@@ -273,16 +273,27 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     int tamanio = leer_entero(buffer, &desp); // tamaño a aumentar o disminuir
     int tamanio_archivo = info_archivo(nombre_archivo, "TAMANIO");
 
-    if (tamanio < 0)
+    if (tamanio < 0) //que hacer en caso de tamanio 0
     {
-        truncate(nombre_archivo, tamanio);
+        //truncate(nombre_archivo, tamanio);
+        
+        //cambiar el tamaño del archivo
+        cambiar_seccion_lista(bloques, info_archivo(nombre_archivo, "BLOQUE_INICIAL") + division_redondeada(tamanio,config_interfaz->block_size), division_redondeada(tamanio,config_interfaz->block_size), "");
+
+        actualizar_bitmap(bitmap,bloques);
         modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
+        compactacion(bloques, bitmap);
     }
     else
     {
         //sacar archivo de bloques
+        t_metadata *aux = extraer_parte_lista(metadata, 0, 1);
+
         // compactacion
+        compactacion(bloques, bitmap);
         //agregar archivo al final de bloques
+        insertar_archivo_bloques(aux);
+
         actualizar_bitmap(bitmap,bloques);
         modificar_metadata(nombre_archivo, "TAMANIO", tamanio + tamanio_archivo);
     }

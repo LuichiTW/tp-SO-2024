@@ -75,14 +75,13 @@ void comprobar_filesystem(t_config_interfaz *config_dialfs)
         bitmap = cargar_bitmap(config_dialfs);
     }
 
-    //comprueba si hay metadata
-    //todo: implementar
-    //sino esta lo carga
+    //carga la metadata
     metadata = cargar_metadata(config_dialfs);
 
     free(path_bloques);
     free(path_bitmap);
 }
+
 
 int archivo_esta_vacio(char *nombre_archivo)
 {
@@ -254,7 +253,32 @@ void insertar_archivo_bloques(t_bloque *archivo){
 
 }
 
-// Función para extraer una parte de la lista
+
+void cambiar_seccion_lista(t_bloque *cabeza, int indice_inicial, int cantidad, char *nuevo_dato) {
+    if (cabeza == NULL || cantidad <= 0) {
+        return;
+    }
+
+    t_bloque *temp = cabeza;
+
+    // Avanzar hasta el índice inicial
+    for (int i = 0; i < indice_inicial && temp != NULL; i++) {
+        temp = temp->siguiente;
+    }
+
+    // Si no se encuentra el índice inicial, retornar
+    if (temp == NULL) {
+        return;
+    }
+
+    // Cambiar los valores de los nodos desde el índice inicial hasta la cantidad especificada
+    for (int i = 0; i < cantidad && temp != NULL; i++) {
+        temp->dato = string_duplicate(nuevo_dato);
+        temp = temp->siguiente;
+    }
+}
+
+// Función para extraer una parte de la lista 
 t_bloque* extraer_parte_lista(t_bloque *cabeza, int indice_inicial, int cantidad) {
     if (cabeza == NULL || cantidad <= 0) {
         return NULL;

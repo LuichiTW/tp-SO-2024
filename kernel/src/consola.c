@@ -101,10 +101,13 @@ void c_finalizar_proceso(int pid) {
 
 }
 void c_detener_planificacion() {
-
+    pthread_t t;
+    pthread_create(&t, NULL, (void*)detener_planificacion_thread, NULL);
+    pthread_detach(t);
 }
 void c_iniciar_planificacion() {
-
+    sem_post(&sem_planificacion_general);
+    sem_post(&sem_planificacion);
 }
 void c_multiprogramacion(int valor) {
 
@@ -129,4 +132,10 @@ void c_proceso_estado() {
     printf("\n+---- EXIT ----------------\n");
     list_iterate(cola_exit->elements, imprimir_pid);
     printf("\n");
+}
+
+
+void detener_planificacion_thread() {
+    sem_wait(&sem_planificacion_general);
+    sem_wait(&sem_planificacion);
 }

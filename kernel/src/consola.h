@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <readline/readline.h>
+#include <pthread.h>
 #include <commons/string.h>
 #include <commons/log.h>
 #include <utils/pcb.h>
@@ -32,5 +33,7 @@ void c_detener_planificacion();
 void c_iniciar_planificacion();
 void c_multiprogramacion(int valor);
 void c_proceso_estado();
+
+void detener_planificacion_thread();
 
 #endif // CONSOLA_H

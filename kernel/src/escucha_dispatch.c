@@ -35,7 +35,7 @@ void manejar_desalojo(char *motivo_raw) {
         t_log *logger = kernel_logger();
         log_info(logger, "Finaliza el proceso %i - Motivo: SUCCESS", exec->pid);
         log_destroy(logger);
-        finalizar_proceso(exec, NULL);
+        finalizar_proceso(exec);
     }
 
     string_array_destroy(motivo);

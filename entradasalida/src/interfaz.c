@@ -141,7 +141,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     int *direcciones[numero_direcciones];
     memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
 
-    int tamanios[numero_direcciones];
+    int *tamanios[numero_direcciones];
     memcpy(tamanios, leer_array_entero(buffer, &desp), numero_direcciones);
 
     texto = readline("> ");
@@ -150,12 +150,14 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     for (int i = 0; i < numero_direcciones; i++)
     {
         t_paquete *paquete = crear_paquete();
-        agregar_a_paquete(paquete, leer_subcadena(texto,anterior,tamanios[i]), tamanios[i] + 1);
         agregar_a_paquete(paquete, direcciones[i], __SIZEOF_INT__);
+        agregar_a_paquete(paquete,tamanios[i],__SIZEOF_INT__);
+        agregar_a_paquete(paquete, leer_subcadena(texto,anterior,*tamanios[i]), *tamanios[i] + 1);
 
-        enviar_paquete(paquete, parametros.conexion_memoria);
+
+        enviar_peticion(paquete, parametros.conexion_memoria,MEM_ESCRIBIR_MEMORIA);
         eliminar_paquete(paquete);
-        anterior = tamanios[i];
+        anterior = *tamanios[i];
     }
     log_info(parametros.logger, "PID: %d - Operacion: IO_STDIN_READ", pid );
 
@@ -177,13 +179,17 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
     int *direcciones[numero_direcciones];
     memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
 
+    int *tamanios[numero_direcciones];
+    memcpy(tamanios, leer_array_entero(buffer, &desp), numero_direcciones);
+
     char *direccionesT[numero_direcciones];
     desp = 0;
     for (int i = 0; i < sizeof(direcciones) + 1; i++)
     { // envia a memoria cada direccion con su respectivo tamaño a leer
         t_paquete *paquete = crear_paquete();
         agregar_a_paquete(paquete, direcciones[i], __SIZEOF_INT__);
-        enviar_paquete(paquete, parametros.conexion_memoria);
+        agregar_a_paquete(paquete, tamanios[i], __SIZEOF_INT__);
+        enviar_peticion(paquete, parametros.conexion_memoria,MEM_LEER_MEMORIA);
 
         int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
         buffer = recibir_buffer(&size, socketCliente);
@@ -298,19 +304,37 @@ int iO_FS_READ(t_parametroEsperar parametros)
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
-    int tamanio_a_leer = leer_entero(buffer, &desp);
     int puntero = leer_entero(buffer, &desp);
-    char caracter;
-    int bloque_inicial = info_archivo(nombre_archivo, "BLOQUE_INICIAL");
+    int numero_direcciones = leer_entero(buffer, &desp);
 
+    int *direcciones[numero_direcciones];
+    memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
+
+    int *tamanios[numero_direcciones];
+    memcpy(tamanios, leer_array_entero(buffer, &desp), numero_direcciones);
+
+    char *texto = NULL;
     char *path_bloques = string_from_format("%s%s", config_interfaz->path_base_dialfs, "/bloques.dat");
     FILE *f = fopen(path_bloques, "r");
-    for (int i = puntero; i < puntero + tamanio_a_leer; i++)
+    int anterior = 0;
+    for (int i = 0; i < numero_direcciones; i++)
     {
-        fseek(f, puntero, bloque_inicial * (config_interfaz->block_size));       //CREAR FUNCION LEER ARCHIVO
-        caracter = fgetc(f);
-        printf("%c", caracter);
+        fseek(f, *tamanios[i], puntero + anterior);
+        agregar_caracter(texto, fgetc(f));
+
+        t_paquete *paquete = crear_paquete();
+        agregar_a_paquete(paquete, direcciones[i], __SIZEOF_INT__);
+        agregar_a_paquete(paquete,tamanios[i]+1,__SIZEOF_INT__);
+        agregar_a_paquete(paquete, texto, *tamanios[i] + 1);
+
+        enviar_peticion(paquete, parametros.conexion_memoria, MEM_ESCRIBIR_MEMORIA);
+        eliminar_paquete(paquete);
+
+        anterior = *tamanios[i];
+
     }
+
+    int tamanio_a_leer = suma_array(*tamanios,numero_direcciones);
 
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_READ - Leer Archivo: %s - Tamaño a Leer: %d - Puntero Archivo: %d",
              pid, nombre_archivo, tamanio_a_leer, puntero);
@@ -333,6 +357,7 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
     char *nombre_archivo = leer_string(buffer, &desp);
 
     int numero_direcciones = leer_entero(buffer,&desp);
+
     int *tamanio_a_escribir[numero_direcciones];
     memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), numero_direcciones);
     int puntero = leer_entero(buffer, &desp);
@@ -340,30 +365,27 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
     int *direcciones[numero_direcciones];
     memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
 
-    int bloque_inicial = info_archivo(nombre_archivo, "BLOQUE_INICIAL");
-
-    if (direcciones == NULL)
-    {
-        return 1;
-    }
     desp = 0;
 
     char *path_bloques = string_from_format("%s%s", config_interfaz->path_base_dialfs, "/bloques.dat");
     FILE *f = fopen(path_bloques, "w");
 
-    fseek(f, puntero, bloque_inicial * (config_interfaz->block_size));
-    for (int i = 0; i <  + 1; i++)
+    int anterior = 0;
+
+    for (int i = 0; i < numero_direcciones; i++)
     { // envia a memoria cada direccion con su respectivo tamaño a leer
         t_paquete *paquete = crear_paquete();
         agregar_a_paquete(paquete, direcciones[i], __SIZEOF_INT__);
-        agregar_a_paquete(paquete, tamanio_a_escribir[i], __SIZEOF_INT__);
-        enviar_paquete(paquete, parametros.conexion_memoria);
+        agregar_a_paquete(paquete, tamanio_a_escribir[i] + 1, __SIZEOF_INT__);
+        enviar_peticion(paquete, parametros.conexion_memoria,MEM_LEER_MEMORIA);
 
         int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
         buffer = recibir_buffer(&size, socketCliente);
         char *texto = leer_string(buffer, &desp); 
+        fseek(f, *tamanio_a_escribir[i], puntero + anterior);
         fwrite(texto, sizeof(char), strlen(texto), f);
         eliminar_paquete(paquete);
+        anterior = *tamanio_a_escribir[i];
     }
 
     int tamanio_total = suma_array(*tamanio_a_escribir, numero_direcciones);
@@ -480,4 +502,19 @@ char* leer_subcadena(const char* cadena, size_t inicio, size_t fin) {
     subcadena[longitud] = '\0'; // Asegurar la terminación con null
 
     return subcadena;
+}
+char* agregar_caracter(const char* texto, char caracter) {
+    size_t longitud = strlen(texto);
+    char* nuevo_texto = (char*)malloc((longitud + 2) * sizeof(char)); // +2 para el nuevo caracter y '\0'
+    
+    if (nuevo_texto == NULL) {
+        perror("Error al asignar memoria");
+        exit(EXIT_FAILURE);
+    }
+
+    strcpy(nuevo_texto, texto);
+    nuevo_texto[longitud] = caracter; // Añadir el nuevo caracter al final
+    nuevo_texto[longitud + 1] = '\0'; // Añadir el terminador nulo
+
+    return nuevo_texto;
 }

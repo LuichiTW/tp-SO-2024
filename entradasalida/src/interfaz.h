@@ -55,5 +55,6 @@ int info_archivo(char *nombre_archivo, char *parametro);
 int division_redondeada(int numerador, int denominador);
 int suma_array(int *array, int tamanio);
 char* leer_subcadena(const char* cadena, size_t inicio, size_t fin);
+char* agregar_caracter(const char* texto, char caracter);
 
 #endif // !INTERFAZ_IO

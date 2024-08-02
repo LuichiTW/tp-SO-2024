@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <time.h>
 #include <dirent.h>
 #include <readline/readline.h>
 #include <commons/config.h>
@@ -14,7 +15,7 @@
 #include <utils/conexiones/conexiones_cliente.h>
 #include <commons/bitarray.h>
 
-//#include "main.h"
+#include "main.h"
 #include "fileSistem.h"
 
 
@@ -22,10 +23,10 @@ extern t_log *logger;
 extern t_bitarray *bitmap;
 extern t_bloque *bloques;
 extern t_metadata *metadata;
+extern struct timespec tiempo;
 
 extern t_config_interfaz *config_interfaz;
 extern t_parametroEsperar parametros;
-struct timespec tiempo;
 
 // inicio programa
 t_log *iniciar_logger_io(void);

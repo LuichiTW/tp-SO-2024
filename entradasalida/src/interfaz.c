@@ -426,17 +426,6 @@ void crear_metadata(char *nombre_archivo, int pos)
     config_destroy(metadata);
 }
 
-void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar)
-{
-    t_config *metadata = config_create(terminacion_archivo("metadata_", nombre_archivo));
-    config_set_value(metadata, parametro, string_itoa(dato_modificar));
-    config_destroy(metadata);
-
-    if (string_equals_ignore_case(parametro,"BLOQUE_INICIAL"))
-    {
-        actualizar_comienzo_lista(nombre_archivo, dato_modificar);
-    }
-}
 
 // todo agregar path del filesystem
 int info_archivo(char *nombre_archivo, char *parametro)
@@ -462,16 +451,6 @@ int division_redondeada(int numerador, int denominador)
     return resultado;
 }
 
-char *terminacion_archivo(char *archivo, char *terminacion)
-{
-    size_t nuevo_tamano = strlen(archivo) + strlen(terminacion) + 1; // +1 para el carácter nulo
-    char *nuevo_archivo = (char *)malloc(nuevo_tamano);
-    // Copiar el nombre del archivo original y agregar la terminación
-    strcpy(nuevo_archivo, archivo);
-    strcat(nuevo_archivo, terminacion);
-
-    return nuevo_archivo;
-}
 
 int suma_array(int *array, int tamanio)
 {
@@ -481,24 +460,6 @@ int suma_array(int *array, int tamanio)
         suma += array[i];
     }
     return suma;
-}
-
-void insertar_a_lista(t_metadata *nuevo)
-{
-    t_metadata *aux = metadata;
-
-    while (aux->siguiente != NULL)
-    {
-        aux = aux->siguiente;
-    }
-    if (metadata == NULL)
-    {
-        metadata = nuevo;
-    }
-    else
-    {
-        aux->siguiente = nuevo;
-    }
 }
 
 

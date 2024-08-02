@@ -28,11 +28,9 @@ extern t_metadata *metadata;
 char *buscar_metadata(int posicion);
 void comprobar_filesystem(t_config_interfaz *config_dialfs);
 int archivo_esta_vacio(char *nombre_archivo);
-
-void insertar_a_lista(t_metadata *nuevo);
+;
 void compactacion(t_bloque *bloques, t_bitarray *bitmap);
 void compactacion_metadata(void);
-void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar);
 void insertar_archivo_bloques(t_bloque *archivo);
 t_bloque* extraer_parte_lista(t_bloque *cabeza, int indice_inicial, int cantidad);
 int crear_archivo_bloques(t_bloque *cabeza);
@@ -53,8 +51,6 @@ void liberarLista(t_bloque *cabeza);
 int crear_archivo_bloques(t_bloque *cabeza);
 void eliminar_archivo_bloques(t_bloque *cabeza, int bloque_inicial, int tamanio);
 t_metadata *cargar_metadata(t_config_interfaz *config_dialfs);
-char *terminacion_archivo(char *archivo, char *terminacion);
-void actualizar_comienzo_lista(char *nombre_archivo,int posicion);
 
 
 #endif // !FILE_SYTEM

@@ -61,14 +61,13 @@ enum tipo_interfaz
 	DIALFS
 };
 
-t_config_interfaz *config_interfaz;
-t_parametroEsperar parametros;
-t_bloque *bloques = NULL;
-t_bitarray *bitmap = NULL;
-t_metadata *metadata = NULL;
-t_log *logger;
+
 
 void manejarConexion(t_parametroEsperar parametros);
 void esperar(t_parametroEsperar parametros);
+void insertar_a_lista(t_metadata *nuevo);
+void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar);
+char *terminacion_archivo(char *archivo, char *terminacion);
+void actualizar_comienzo_lista(char *nombre_archivo,int posicion);
 
 #endif // !MAIN_IO

@@ -272,7 +272,9 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     char *nombre_archivo = leer_string(buffer, &desp);
     int tamanio = leer_entero(buffer, &desp); // tamaño a aumentar o disminuir
     int tamanio_archivo = info_archivo(nombre_archivo, "TAMANIO");
-
+    
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_TRUNCATE- Truncar Archivo: %s", pid, nombre_archivo);
+    log_info(parametros.logger, "PID: %d - Inicio Compactación." , pid);
     if (tamanio < 0) //que hacer en caso de tamanio 0
     {
         //truncate(nombre_archivo, tamanio);
@@ -287,7 +289,7 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     else
     {
         //sacar archivo de bloques
-        t_metadata *aux = extraer_parte_lista(metadata, 0, 1);
+        t_bloque *aux = extraer_parte_lista(bloques, info_archivo(nombre_archivo, "BLOQUE_INICIAL"), division_redondeada(tamanio,config_interfaz->block_size));
 
         // compactacion
         compactacion(bloques, bitmap);
@@ -298,9 +300,9 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
         modificar_metadata(nombre_archivo, "TAMANIO", tamanio + tamanio_archivo);
     }
 
-    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_TRUNCATE- Truncar Archivo: %s", pid, nombre_archivo);
 
     nanosleep(&tiempo, NULL);
+    log_info(parametros.logger, "PID: %d - Fin Compactación." , pid);
     free(buffer);
     free(nombre_archivo);
     return 0;
@@ -460,10 +462,11 @@ void crear_metadata(char *nombre_archivo, int pos)
 }
 
 
-// todo agregar path del filesystem
 int info_archivo(char *nombre_archivo, char *parametro)
 {
-    t_config *metadata = config_create(terminacion_archivo("metadata_", nombre_archivo));
+    char *path_metadata = terminacion_archivo("metadata_", nombre_archivo);
+    path_metadata = string_from_format("%s%s", config_interfaz->path_base_dialfs, path_metadata); 
+    t_config *metadata = config_create(path_metadata);
     int info = config_get_int_value(metadata, parametro);
     config_destroy(metadata);
     return info;

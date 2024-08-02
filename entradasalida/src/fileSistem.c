@@ -273,7 +273,7 @@ void cambiar_seccion_lista(t_bloque *cabeza, int indice_inicial, int cantidad, c
 
     // Cambiar los valores de los nodos desde el índice inicial hasta la cantidad especificada
     for (int i = 0; i < cantidad && temp != NULL; i++) {
-        temp->dato = string_duplicate(nuevo_dato);
+        strcpy(temp->dato, nuevo_dato);
         temp = temp->siguiente;
     }
 }

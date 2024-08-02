@@ -83,7 +83,6 @@ void recibir_solicitudes(int *socket_cliente_dir) {
                 delay(config_memoria.retardo_respuesta);
 
                 enviar_mensaje(rta, socket_cliente);
-                free(rta);
             }
             break;
 

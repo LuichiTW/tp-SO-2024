@@ -112,21 +112,21 @@ void c_multiprogramacion(int valor) {
 void c_proceso_estado() {
     void imprimir_pid(void *vpcb) {
         t_pcb *pcb = (t_pcb*) vpcb;
-        printf("%i\n", pcb->pid);
+        printf("| %i\n", pcb->pid);
     }
-    printf("----- NEW -----\n");
+    printf("+---- NEW -----------------\n");
     list_iterate(cola_new->elements, imprimir_pid);
-    printf("\n----- READY -----\n");
+    printf("\n+---- READY ---------------\n");
     list_iterate(cola_ready->elements, imprimir_pid);
-    printf("\n----- READY PRIORIDAD -----\n");
+    printf("\n+---- READY PRIORIDAD -----\n");
     list_iterate(cola_ready_aux->elements, imprimir_pid);
-    printf("\n----- EXEC -----\n");
+    printf("\n+---- EXEC ----------------\n");
     if (exec != NULL) {
         printf("%i\n", exec->pid);
     }
-    printf("\n----- BLOCKED -----\n");
+    printf("\n+---- BLOCKED -------------\n");
     list_iterate(cola_blocked->elements, imprimir_pid);
-    printf("\n----- EXIT -----\n");
+    printf("\n+---- EXIT ----------------\n");
     list_iterate(cola_exit->elements, imprimir_pid);
     printf("\n");
 }

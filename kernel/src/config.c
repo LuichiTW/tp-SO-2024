@@ -32,9 +32,9 @@ void cargar_config() {
 
 
 t_log *kernel_logger() {
-    return log_create("kernel_alt.log", "kernel extra", true, LOG_LEVEL_INFO);
+    return log_create("kernel.log", "kernel", false, LOG_LEVEL_INFO);
 }
 
 t_log *alt_kernel_logger() {
-    return log_create("kernel.log", "kernel", true, LOG_LEVEL_INFO);
+    return log_create("kernel_extra.log", "kernel extra", false, LOG_LEVEL_INFO);
 }

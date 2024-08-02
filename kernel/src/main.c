@@ -13,9 +13,9 @@ int main()
     pthread_create(&thread_consola, NULL, (void*)iniciar_consola, NULL);
     pthread_detach(thread_consola);
 
-    /* pthread_t thread_planificador;
-    pthread_create(&thread_planificador, NULL, (void*)planificar, NULL);
-    pthread_detach(thread_planificador); */
+    pthread_t thread_dispatch;
+    pthread_create(&thread_dispatch, NULL, (void*)atender_dispatch, NULL);
+    pthread_detach(thread_dispatch);
 
     sem_init(&sem, false, 0);
     sem_wait(&sem);

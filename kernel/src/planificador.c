@@ -9,6 +9,7 @@ t_pcb *exec;
 
 // ! Revisar planificacion_activada por espera activa
 // ? Para eso podría usar semáforos
+// Afectar también a finalizar_proceso
 
 int ultimo_pid = 0;
 
@@ -75,6 +76,28 @@ void ejecutar_proceso(t_pcb *pcb) {
 
     t_paquete *paquete = empaquetar_pcb(pcb);
     enviar_peticion(paquete, sockets.cpu_dispatch, CPU_EXEC_PROC);
+
+    eliminar_paquete(paquete);
+}
+
+
+void finalizar_proceso(t_pcb *pcb, t_queue *cola_actual) {
+    t_paquete *paquete = crear_paquete();
+    agregar_a_paquete(paquete, &(pcb->pid), sizeof(pcb->pid));
+    
+    enviar_peticion(paquete, sockets.memoria, MEM_FINALIZAR_PROCESO);
+    eliminar_paquete(paquete);
+
+    recibir_operacion(sockets.memoria);
+    recibir_entero(sockets.memoria);
+
+    if (pcb == exec) {
+        exec = NULL;
+    }
+    else {
+        if (cola_actual != NULL) list_remove_element(cola_actual->elements, pcb);
+    }
+    queue_push(cola_exit, pcb);
 }
 
 

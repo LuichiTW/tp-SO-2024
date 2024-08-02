@@ -17,6 +17,7 @@ void recibir_pcb(){
     regcpu.PC = pcb.pc;
 
     proceso_ejecutando = true;
+    free(pcb_ptr);
     list_destroy(lista_pcb);
 }
 

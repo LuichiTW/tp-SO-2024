@@ -34,6 +34,10 @@ int crear_proceso(int pid, const char *scriptname) {
     t_tabla_paginas *tabla = crear_tabla_paginas(pid);
     list_add(tablas_paginas, tabla);
 
+    t_log *logger = crear_memlogger();
+    log_info(logger, "PID: %i - Tamaño: 0", pid);
+    log_destroy(logger);
+
     return 0; // ? OK
 }
 
@@ -44,6 +48,10 @@ void finalizar_proceso(int pid) {
     t_tabla_paginas *tabla;
     tabla = obtener_tabla_por_pid(pid);
     if (tabla != NULL) {
+        t_log *logger = crear_memlogger();
+        log_info(logger, "PID: %i - Tamaño: %i", pid, tabla->cant);
+        log_destroy(logger);
+
         resize_proceso(pid, 0);
         list_remove_element(tablas_paginas, tabla);
         free(tabla);
@@ -57,7 +65,6 @@ void finalizar_proceso(int pid) {
         list_remove_element(procesos_actuales, proceso);
         free(proceso);
     }
-
 }
 
 
@@ -92,6 +99,7 @@ char **leer_script(const char *filename) {
     lista = string_split(content, "\n");
 
     free(content);
+    free(path);
 
     return lista;
 }

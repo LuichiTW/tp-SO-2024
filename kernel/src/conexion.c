@@ -6,7 +6,7 @@ sem_t mutex_dispatch;
 // TODO esperar conexiones de clientes IO
 
 void levantar_conexiones() {
-    t_log *alt_logger = log_create("kernel_alt.log", "kernel", true, LOG_LEVEL_INFO);
+    t_log *alt_logger = alt_kernel_logger();
 
     // Memoria
     log_info(alt_logger, "Conectando a Memoria...");

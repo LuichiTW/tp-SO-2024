@@ -94,6 +94,7 @@ void c_iniciar_proceso(char *path) {
     queue_push(cola_new, pcb);
     t_log *logger = kernel_logger();
     log_info(logger, "Se crea el proceso %i en NEW", pcb->pid);
+    log_destroy(logger);
     planificar();
 }
 void c_finalizar_proceso(int pid) {

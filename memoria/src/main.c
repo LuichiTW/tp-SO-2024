@@ -10,7 +10,9 @@ int main() {
     cargar_config();
     iniciar_mem_usuario();
     
-    int socket_server = iniciar_servidor(string_itoa(config_memoria.puerto_escucha));
+    char *puerto_str = string_itoa(config_memoria.puerto_escucha);
+    int socket_server = iniciar_servidor(puerto_str);
+    free(puerto_str);
 
     log_info(logger, "Memoria lista para recibir conexiones");
 
@@ -92,6 +94,9 @@ void recibir_solicitudes(int *socket_cliente_dir) {
                 pid = *((int*) list_get(datos, 0));
 
                 finalizar_proceso(pid);
+
+                delay(config_memoria.retardo_respuesta);
+                enviar_entero(MOD_MEMORIA, socket_cliente);
             }
             break;
         

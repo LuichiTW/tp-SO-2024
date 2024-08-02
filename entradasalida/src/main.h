@@ -64,6 +64,7 @@ t_parametroEsperar parametros;
 t_bloque *bloques = NULL;
 t_bitarray *bitmap = NULL;
 t_metadata *metadata = NULL;
+t_log *logger;
 
 void manejarConexion(t_parametroEsperar parametros);
 void esperar(t_parametroEsperar parametros);

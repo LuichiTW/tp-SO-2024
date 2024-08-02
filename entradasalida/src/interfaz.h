@@ -48,15 +48,13 @@ char *leer_string(char *buffer, int *desplazamiento);
 int *leer_array_entero(char *buffer, int *desp);
 
 // funciones metadata //? podrian ir en otro archivo
-t_metadata *crear_metadata(char *nombre_archivo, int pos);
+void crear_metadata(char *nombre_archivo, int pos);
 void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modificar);
 int info_archivo(char *nombre_archivo, char *parametro);
 
 int division_redondeada(int numerador, int denominador);
-char terminacion_archivo(char *archivo, char *terminacion);
+char *terminacion_archivo(char *archivo, char *terminacion);
 int suma_array(int *array, int tamanio);
-void limpiar_archivo_bitmap(char *archivo);
-void agregar_archivo_bitmap(char *archivo,int tamanio);
 void insertar_a_lista(t_metadata *nuevo);
 void actualizar_comienzo_lista(char *nombre_archivo,int posicion);
 char* leer_subcadena(const char* cadena, size_t inicio, size_t fin);

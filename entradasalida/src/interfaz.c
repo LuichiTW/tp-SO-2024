@@ -113,12 +113,15 @@ int iO_GEN_SLEEP(t_parametroEsperar parametros)
     int desp = 0;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
+    int pid = leer_entero(buffer, &desp);
 
     int uTrabajo = leer_entero(buffer, &desp);
     for (int i = 0; i < uTrabajo; i++)
     {
         nanosleep(&tiempo, NULL);
     }
+
+    log_info(parametros.logger, "PID: %d - Operacion: IO_GEN_SLEEP", pid );
 
     free(buffer);
     return 0;
@@ -132,21 +135,19 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     char *texto;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
+    int pid = leer_entero(buffer, &desp);
+    
+    int numero_direcciones = leer_entero(buffer,&desp);
+    int *direcciones[numero_direcciones];
+    memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
 
-    int direcciones[sizeof(leer_array_entero(buffer, &desp))];
-    memcpy(direcciones, leer_array_entero(buffer, &desp), sizeof(direcciones));
+    int tamanios[numero_direcciones];
+    memcpy(tamanios, leer_array_entero(buffer, &desp), numero_direcciones);
 
-    int tamanios[sizeof(leer_array_entero(buffer, &desp))];
-    memcpy(tamanios, leer_array_entero(buffer, &desp), sizeof(tamanios));
-
-    if (direcciones == NULL)
-    {
-        return 1;
-    }
     texto = readline("> ");
     int anterior = 0;
 
-    for (int i = 0; i < (sizeof(direcciones) / sizeof(direcciones[0])); i++)
+    for (int i = 0; i < numero_direcciones; i++)
     {
         t_paquete *paquete = crear_paquete();
         agregar_a_paquete(paquete, leer_subcadena(texto,anterior,tamanios[i]), tamanios[i] + 1);
@@ -156,6 +157,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
         eliminar_paquete(paquete);
         anterior = tamanios[i];
     }
+    log_info(parametros.logger, "PID: %d - Operacion: IO_STDIN_READ", pid );
 
     free(texto);
     free(buffer);
@@ -167,16 +169,15 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
     int size;
     char *buffer;
     int desp = 0;
-    char *texto;
 
     buffer = recibir_buffer(&size, parametros.socket_cliente);
-    int direcciones[sizeof(leer_array_entero(buffer, &desp))];
-    memcpy(direcciones, leer_array_entero(buffer, &desp), sizeof(direcciones));
-    if (direcciones == NULL)
-    {
-        return 1;
-    }
-    int direccionesT[sizeof(direcciones)];
+    int pid = leer_entero(buffer, &desp);
+    
+    int numero_direcciones = leer_entero(buffer,&desp);
+    int *direcciones[numero_direcciones];
+    memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
+
+    char *direccionesT[numero_direcciones];
     desp = 0;
     for (int i = 0; i < sizeof(direcciones) + 1; i++)
     { // envia a memoria cada direccion con su respectivo tamaño a leer
@@ -189,23 +190,14 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
         direccionesT[i] = leer_string(buffer, &desp);
         eliminar_paquete(paquete);
     }
-    if (direccionesT == NULL)
-    {
-        return 1;
-    }
-    size_t num_direcciones = sizeof(direccionesT) / sizeof(direccionesT[0]);
 
-    for (size_t i = 0; i < num_direcciones; ++i)
+    for (int i = 0; i < numero_direcciones; ++i)
     {
-        char *direccionT = (char *)direccionesT[i];
-        strncpy(texto, direccionT, &size);
-        printf(texto);
+        printf("%s",direccionesT[i]);
     }
-
-    free(texto);
+    log_info(parametros.logger, "PID: %d - Operacion: IO_STDOUT_WRITE", pid );
+    
     free(buffer);
-    free(direcciones);
-    free(direccionesT);
     return 0;
 }
 
@@ -228,7 +220,7 @@ int iO_FS_CREATE(t_parametroEsperar parametros)
     // crear metadata
     crear_metadata(nombre_archivo, pos);
 
-    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_CREATE - Crear Archivo: %d", pid, nombre_archivo);
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_CREATE - Crear Archivo: %s", pid, nombre_archivo);
 
     nanosleep(&tiempo, NULL);
     free(buffer);
@@ -245,14 +237,16 @@ int iO_FS_DELETE(t_parametroEsperar parametros)
     buffer = recibir_buffer(&size, parametros.socket_cliente);
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
+    int bloque_inicial = info_archivo(nombre_archivo, "BLOQUE_INICIAL");
+    int tamanio_archivo = info_archivo(nombre_archivo, "TAMANIO");
 
     // eliminar bloques
-    eliminar_archivo_bloques(bloques, nombre_archivo); // todo falta inplementar
+    eliminar_archivo_bloques(bloques, bloque_inicial,(division_redondeada(tamanio_archivo,config_interfaz->block_size))); // todo falta inplementar
 
     // eliminar archivo
-    limpiar_archivo_bitmap(nombre_archivo);
+    actualizar_bitmap(bitmap,bloques);
 
-    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_DELETE - Eliminar Archivo: %d", pid, nombre_archivo);
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_DELETE - Eliminar Archivo: %s", pid, nombre_archivo);
     // remove(nombre_archivo);
     remove(terminacion_archivo("metadata_", nombre_archivo));
     nanosleep(&tiempo, NULL);
@@ -280,14 +274,14 @@ int iO_FS_TRUNCATE(t_parametroEsperar parametros)
     }
     else
     {
-        limpiar_archivo_bitmap(nombre_archivo);
+        //sacar archivo de bloques
         // compactacion
-        agregar_archivo_bitmap(nombre_archivo, tamanio_archivo);
-
-        modificar_metadata(nombre_archivo, "TAMANIO", tamanio);
+        //agregar archivo al final de bloques
+        actualizar_bitmap(bitmap,bloques);
+        modificar_metadata(nombre_archivo, "TAMANIO", tamanio + tamanio_archivo);
     }
 
-    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_TRUNCATE- Truncar Archivo: %d", pid, nombre_archivo);
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_TRUNCATE- Truncar Archivo: %s", pid, nombre_archivo);
 
     nanosleep(&tiempo, NULL);
     free(buffer);
@@ -309,10 +303,12 @@ int iO_FS_READ(t_parametroEsperar parametros)
     char caracter;
     int bloque_inicial = info_archivo(nombre_archivo, "BLOQUE_INICIAL");
 
+    char *path_bloques = string_from_format("%s%s", config_interfaz->path_base_dialfs, "/bloques.dat");
+    FILE *f = fopen(path_bloques, "r");
     for (int i = puntero; i < puntero + tamanio_a_leer; i++)
     {
-        fseek(bloques, puntero, bloque_inicial * (config_interfaz.block_size));
-        caracter = fgetc(bloques);
+        fseek(f, puntero, bloque_inicial * (config_interfaz->block_size));       //CREAR FUNCION LEER ARCHIVO
+        caracter = fgetc(f);
         printf("%c", caracter);
     }
 
@@ -336,12 +332,13 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
     int pid = leer_entero(buffer, &desp);
     char *nombre_archivo = leer_string(buffer, &desp);
 
-    int tamanio_a_escribir[sizeof(leer_array_entero(buffer, &desp))];
-    memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), sizeof(tamanio_a_escribir));
+    int numero_direcciones = leer_entero(buffer,&desp);
+    int *tamanio_a_escribir[numero_direcciones];
+    memcpy(tamanio_a_escribir, leer_array_entero(buffer, &desp), numero_direcciones);
     int puntero = leer_entero(buffer, &desp);
 
-    int direcciones[sizeof(leer_array_entero(buffer, &desp))];
-    memcpy(direcciones, leer_array_entero(buffer, &desp), sizeof(direcciones));
+    int *direcciones[numero_direcciones];
+    memcpy(direcciones, leer_array_entero(buffer, &desp), numero_direcciones);
 
     int bloque_inicial = info_archivo(nombre_archivo, "BLOQUE_INICIAL");
 
@@ -350,8 +347,12 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
         return 1;
     }
     desp = 0;
-    fseek(bloques, puntero, bloque_inicial * (config_interfaz.block_size));
-    for (int i = 0; i < sizeof(direcciones) + 1; i++)
+
+    char *path_bloques = string_from_format("%s%s", config_interfaz->path_base_dialfs, "/bloques.dat");
+    FILE *f = fopen(path_bloques, "w");
+
+    fseek(f, puntero, bloque_inicial * (config_interfaz->block_size));
+    for (int i = 0; i <  + 1; i++)
     { // envia a memoria cada direccion con su respectivo tamaño a leer
         t_paquete *paquete = crear_paquete();
         agregar_a_paquete(paquete, direcciones[i], __SIZEOF_INT__);
@@ -360,12 +361,12 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
 
         int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
         buffer = recibir_buffer(&size, socketCliente);
-        char *texto = leer_string(buffer, &desp);
-        fwrite(texto, sizeof(char), strlen(texto), bloques);
+        char *texto = leer_string(buffer, &desp); 
+        fwrite(texto, sizeof(char), strlen(texto), f);
         eliminar_paquete(paquete);
     }
 
-    int tamanio_total = suma_array(tamanio_a_escribir, sizeof(tamanio_a_escribir));
+    int tamanio_total = suma_array(*tamanio_a_escribir, numero_direcciones);
 
     log_info(parametros.logger, "PID: %d - Operacion: IO_FS_WRITE - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d",
              pid, nombre_archivo, tamanio_total, puntero);
@@ -374,8 +375,6 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
     nanosleep(&tiempo, NULL);
     free(buffer);
     free(nombre_archivo);
-    free(tamanio_a_escribir);
-    free(direcciones);
     return 0;
 }
 
@@ -433,7 +432,7 @@ void modificar_metadata(char *nombre_archivo, char *parametro, int dato_modifica
     config_set_value(metadata, parametro, string_itoa(dato_modificar));
     config_destroy(metadata);
 
-    if (parametro == "BLOQUE_INICIAL")
+    if (string_equals_ignore_case(parametro,"BLOQUE_INICIAL"))
     {
         actualizar_comienzo_lista(nombre_archivo, dato_modificar);
     }
@@ -463,7 +462,7 @@ int division_redondeada(int numerador, int denominador)
     return resultado;
 }
 
-char terminacion_archivo(char *archivo, char *terminacion)
+char *terminacion_archivo(char *archivo, char *terminacion)
 {
     size_t nuevo_tamano = strlen(archivo) + strlen(terminacion) + 1; // +1 para el carácter nulo
     char *nuevo_archivo = (char *)malloc(nuevo_tamano);
@@ -484,40 +483,6 @@ int suma_array(int *array, int tamanio)
     return suma;
 }
 
-void limpiar_archivo_bitmap(char *archivo)
-{
-    int comienzo_archivo = info_archivo(archivo, "COMIENZO");
-    int tamanio_archivo = info_archivo(archivo, "TAMANIO");
-
-    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
-
-    int i;
-    for (i = comienzo_archivo; i < comienzo_archivo + division_redondeada(tamanio_archivo, config_dialfs.block_size); i++)
-    { // desde el bloque inicial limpia los bits del bitmap hasta que alcance todos los bloques que ocupa el archivo
-        bitarray_clean_bit(bitmap_f, i);
-    }
-    fclose(bitmap_f);
-}
-
-void agregar_archivo_bitmap(char *archivo, int tamanio)
-{
-    FILE *bitmap_f = fopen("..\fileSystem\bitmap.dat", "w"); // ruta bitmap
-    int i = 0;
-    while ((bitarray_test_bit(bitmap_f, i) != 0) && (i < config_dialfs.block_count))
-    {
-        i++;
-    }
-    if (bitarray_test_bit(bitmap_f, i) == 0)
-    {
-        modificar_metadata(archivo, "COMIENZO", i);
-        for (int j = 0; j < tamanio; (i++, j++))
-        {
-            bitarray_set_bit(bitmap_f, i);
-        }
-        modificar_metadata(archivo, "TAMANIO", tamanio);
-    }
-    fclose(bitmap_f);
-}
 void insertar_a_lista(t_metadata *nuevo)
 {
     t_metadata *aux = metadata;

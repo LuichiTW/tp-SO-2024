@@ -3,9 +3,11 @@
 #include "fileSistem.h"
 
 //todo reorganizar las funciones los archivos
+char *nombreInterfaz = "TECLADO";
+char *pathInterfaz = "dialfs.config"; 
 
 // considerar pasar los argumentos de creacion de interfaces por el main y no por la funcion (issue #3709)
-int main(char *nombreInterfaz, char *pathInterfaz){
+int main(){
     //inicia logger y config
     t_log *logger = iniciar_logger_io();
 
@@ -47,15 +49,13 @@ void manejarConexion(t_parametroEsperar parametros)
     switch (tipoInterfaz)
     {
     case IO_GEN_SLEEP:
-        log_info(parametros.logger, "PID: <PID> - Operacion: IO_GEN_SLEEP");
         resultado = iO_GEN_SLEEP(parametros);
         break;
     case IO_STDIN_READ:
-        log_info(parametros.logger, "PID: <PID> - Operacion: IO_STDIN_READ");
+
         resultado = iO_STDIN_READ(parametros);
         break;
     case IO_STDOUT_WRITE:
-        log_info(parametros.logger, "PID: <PID> - Operacion: IO_STDOUT_WRITE");
         resultado = iO_STDOUT_WRITE(parametros);
         break;
     case IO_FS_CREATE:

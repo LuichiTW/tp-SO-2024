@@ -149,7 +149,7 @@ void c_proceso_estado() {
 
 void print_bloqueados() {
     void print_si_bloqueado (void *vest) {
-        t_estado_proceso *est = (*est) vest;
+        t_estado_proceso *est = (t_estado_proceso*) vest;
         if (est->motivo_bloqueo != BLOQUEO_NINGUNO) {
             printf("| %i\n", est->pid);
         }

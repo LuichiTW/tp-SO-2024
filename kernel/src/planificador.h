@@ -5,9 +5,11 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include <commons/collections/queue.h>
+#include <commons/temporal.h>
 #include <utils/pcb.h>
 #include "conexion.h"
 #include "config.h"
+#include "interrupciones.h"
 
 enum estado {
     ESTADO_NEW,
@@ -22,6 +24,11 @@ typedef struct {
     int pid;
     enum estado estado;
 } t_estado_proceso;
+
+struct arg_contar_quantum {
+    int quantum;
+    int64_t tiempo_inicio;
+};
 
 // Lista con los procesos junto a su estado.
 extern t_list *lista_procesos;
@@ -47,6 +54,8 @@ void agregar_a_exit(t_pcb *pcb);
 t_pcb *crear_proceso();
 void ejecutar_proceso(t_pcb *pcb);
 void finalizar_proceso(t_pcb *pcb);
+
+void contar_quantum(void *args);
 
 t_estado_proceso *buscar_estado_proceso(int pid);
 t_pcb *buscar_pcb_por_pid(int pid);

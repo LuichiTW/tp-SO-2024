@@ -45,7 +45,14 @@ void manejar_desalojo(char *motivo_raw) {
             log_destroy(logger);
             finalizar_proceso(exec);
         }
-        // TODO interrupt por quantum
+        if (string_equals_ignore_case(motivo[1], "QUANTUM")) {
+            t_log *logger = kernel_logger();
+            log_info(logger, "PID: %i - Desalojado por fin de Quantum", exec->pid);
+            log_destroy(logger);
+
+            agregar_a_ready(exec);
+            exec = NULL;
+        }
         planificar();
     }
 

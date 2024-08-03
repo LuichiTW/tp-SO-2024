@@ -25,7 +25,9 @@ void recibir_interrupciones() {
                 motivo_interrupcion = motivo_rta;
             }
             list_destroy(lista_rta);
-            hay_interrupcion = true;
+            if (proceso_ejecutando) {
+                hay_interrupcion = true;
+            }
         }
     }
     

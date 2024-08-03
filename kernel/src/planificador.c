@@ -12,6 +12,8 @@ t_list *lista_procesos;
 sem_t sem_planificacion_general;
 sem_t sem_planificacion;
 
+t_temporal *temporal_global;
+int64_t tiempo_inicio_cuenta_q;
 
 int ultimo_pid = 0;
 
@@ -26,6 +28,10 @@ void inicializar_colas() {
 
     sem_init(&sem_planificacion_general, false, 1);
     sem_init(&sem_planificacion, false, 1);
+
+    if (config_kernel.algoritmo_planificacion != ALGO_FIFO) {
+        temporal_global = temporal_create();
+    }
 }
 
 void planificar() {
@@ -120,12 +126,24 @@ t_pcb *crear_proceso() {
 }
 
 void ejecutar_proceso(t_pcb *pcb) {
-    exec = pcb;
+    agregar_a_exec(pcb);
 
     t_paquete *paquete = empaquetar_pcb(pcb);
     enviar_peticion(paquete, sockets.cpu_dispatch, CPU_EXEC_PROC);
 
     eliminar_paquete(paquete);
+
+    if (config_kernel.algoritmo_planificacion != ALGO_FIFO) {
+        tiempo_inicio_cuenta_q = temporal_gettime(temporal_global);
+
+        struct arg_contar_quantum *args = malloc(sizeof(*args));
+        args->tiempo_inicio = tiempo_inicio_cuenta_q;
+        args->quantum = config_kernel.quantum - pcb->quantum;
+
+        pthread_t thread_q;
+        pthread_create(&thread_q, NULL, (void*)contar_quantum, args);
+        pthread_detach(thread_q);
+    }
 }
 
 
@@ -189,6 +207,18 @@ t_queue *obtener_cola_por_estado(enum estado estado) {
     default:
         return NULL;
         break;
+    }
+}
+
+
+void contar_quantum(void *args) {
+    struct arg_contar_quantum *ptr = args;
+    struct arg_contar_quantum datos = *ptr;
+    free(args);
+    
+    usleep(datos.quantum * 1000);
+    if (tiempo_inicio_cuenta_q == datos.tiempo_inicio && exec != NULL) {
+        interrumpir("QUANTUM");
     }
 }
 

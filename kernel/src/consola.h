@@ -22,6 +22,8 @@ enum comandos_consola {
 };
 
 void iniciar_consola();
+
+void interpretar_comando(char *comando_str);
 // Traduce a int el comando pasado por parámetro, o devuelve -1 en caso de que no exista.
 int traducir_comando(char *comando);
 

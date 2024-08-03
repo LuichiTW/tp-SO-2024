@@ -1,67 +1,11 @@
 #include "consola.h"
 
 void iniciar_consola() {
-    t_log *alt_logger = log_create("kernel_alt.log", "kernel", true, LOG_LEVEL_INFO);
-    log_debug(alt_logger, "Consola interactiva iniciada.");
-    
     while (true) {
-
         char *comando_str = readline("> ");
-        if (string_length(comando_str) == 0) continue;
-
-        char **comando_dividido = string_split(comando_str, " ");
-        int comando = traducir_comando(comando_dividido[0]);
-
-        if (comando == -1) {
-            log_error(alt_logger, "Comando ingresado no válido.");
-            continue;
-        }
-
-
-        switch (comando) {
-        case COM_EJECUTAR_SCRIPT:
-            if (string_array_size(comando_dividido) < 2) {
-                log_error(alt_logger, "Parámetros faltantes");
-                continue;
-            }
-            c_ejecutar_script(comando_dividido[1]);
-            break;
-        case COM_INICIAR_PROCESO:
-            if (string_array_size(comando_dividido) < 2) {
-                log_error(alt_logger, "Parámetros faltantes");
-                continue;
-            }
-            c_iniciar_proceso(comando_dividido[1]);
-            break;
-        case COM_FINALIZAR_PROCESO:
-            if (string_array_size(comando_dividido) < 2) {
-                log_error(alt_logger, "Parámetros faltantes");
-                continue;
-            }
-            c_finalizar_proceso(atoi(comando_dividido[1]));
-            break;
-        case COM_DETENER_PLANIFICACION:
-            c_detener_planificacion();
-            break;
-        case COM_INICIAR_PLANIFICACION:
-            c_iniciar_planificacion();
-            break;
-        case COM_MULTIPROGRAMACION:
-            if (string_array_size(comando_dividido) < 2) {
-                log_error(alt_logger, "Parámetros faltantes");
-                continue;
-            }
-            c_multiprogramacion(atoi(comando_dividido[1]));
-            break;
-        case COM_PROCESO_ESTADO:
-            c_proceso_estado();
-            break;
-        }
-
+        interpretar_comando(comando_str);
         free(comando_str);
-        string_array_destroy(comando_dividido);
     }
-    log_destroy(alt_logger);
 }
 
 int traducir_comando(char *comando) {
@@ -74,6 +18,61 @@ int traducir_comando(char *comando) {
     if (string_equals_ignore_case(comando, "PROCESO_ESTADO")) return COM_PROCESO_ESTADO;
     return -1;
 }
+
+
+void interpretar_comando(char *comando_str) {
+    if (string_length(comando_str) == 0) return;
+
+    char **comando_dividido = string_split(comando_str, " ");
+    int comando = traducir_comando(comando_dividido[0]);
+
+    if (comando == -1) {
+        printf("ERROR: comando ingresado no válido.\n");
+        return;
+    }
+
+    switch (comando) {
+    case COM_EJECUTAR_SCRIPT:
+        if (string_array_size(comando_dividido) < 2) {
+            printf("ERROR: Parámetro faltante.\n");
+            return;
+        }
+        c_ejecutar_script(comando_dividido[1]);
+        break;
+    case COM_INICIAR_PROCESO:
+        if (string_array_size(comando_dividido) < 2) {
+            printf("ERROR: Parámetro faltante.\n");
+            return;
+        }
+        c_iniciar_proceso(comando_dividido[1]);
+        break;
+    case COM_FINALIZAR_PROCESO:
+        if (string_array_size(comando_dividido) < 2) {
+            printf("ERROR: Parámetro faltante.\n");
+            return;
+        }
+        c_finalizar_proceso(atoi(comando_dividido[1]));
+        break;
+    case COM_DETENER_PLANIFICACION:
+        c_detener_planificacion();
+        break;
+    case COM_INICIAR_PLANIFICACION:
+        c_iniciar_planificacion();
+        break;
+    case COM_MULTIPROGRAMACION:
+        if (string_array_size(comando_dividido) < 2) {
+            printf("ERROR: Parámetro faltante.\n");
+            return;
+        }
+        c_multiprogramacion(atoi(comando_dividido[1]));
+        break;
+    case COM_PROCESO_ESTADO:
+        c_proceso_estado();
+        break;
+    }
+    string_array_destroy(comando_dividido);
+}
+
 
 void c_ejecutar_script(char *path) {
 
@@ -133,7 +132,7 @@ void c_proceso_estado() {
     list_iterate(cola_ready_aux->elements, imprimir_pid);
     printf("\n+---- EXEC ----------------\n");
     if (exec != NULL) {
-        printf("%i\n", exec->pid);
+        printf("| %i\n", exec->pid);
     }
     printf("\n+---- BLOCKED -------------\n");
     list_iterate(cola_blocked->elements, imprimir_pid);

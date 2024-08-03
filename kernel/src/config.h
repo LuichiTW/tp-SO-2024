@@ -10,7 +10,7 @@ enum algoritmo_planificacion {
     ALGO_FIFO,
     ALGO_RR,
     ALGO_VRR
-}
+};
 
 struct config_kernel {
     char *puerto_escucha;

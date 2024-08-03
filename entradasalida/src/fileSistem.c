@@ -1,18 +1,18 @@
 #include "fileSistem.h"
 
-
 // todo: eliminar los bloques vacios que superen el maximo de bloques
 // todo: implementar el aviso de que el archivo supera el tamaño maximo
 // todo: logs principales
 
-
-
-char *buscar_metadata(int posicion){
-    t_metadata *aux = metadata; //lista metadata
-    while(aux->bloque_inicial != posicion){
+char *buscar_metadata(int posicion)
+{
+    t_metadata *aux = metadata; // lista metadata
+    while (aux->bloque_inicial != posicion)
+    {
         aux = aux->siguiente;
     }
-    if(aux != NULL){
+    if (aux != NULL)
+    {
         return aux->nombre;
     }
     return NULL;
@@ -40,7 +40,6 @@ void comprobar_filesystem(t_config_interfaz *config_dialfs)
         ftruncate(fileno(archivo), config_dialfs->block_count * config_dialfs->block_size);
         fclose(archivo);
         // creo los bloques
-
     }
     else
     {
@@ -75,13 +74,12 @@ void comprobar_filesystem(t_config_interfaz *config_dialfs)
         bitmap = cargar_bitmap(config_dialfs);
     }
 
-    //carga la metadata
+    // carga la metadata
     metadata = cargar_metadata(config_dialfs);
 
     free(path_bloques);
     free(path_bitmap);
 }
-
 
 int archivo_esta_vacio(char *nombre_archivo)
 {
@@ -100,21 +98,20 @@ void compactacion(t_bloque *bloques, t_bitarray *bitmap)
     bloques = compactar_bloque(bloques);
 
     // actualizar bloques.dat
-    guardarListaEnArchivo(bloques); 
+    guardarListaEnArchivo(bloques);
 
-    //actualizar metadata
+    // actualizar metadata
     compactacion_metadata();
     metadata = cargar_metadata(config_interfaz);
 
     // actualizar bitmap
     actualizar_bitmap(bitmap, bloques);
     guardar_bitmap(bitmap, config_interfaz);
-
 }
 
 void compactacion_metadata()
 {
-    
+
     int l = 0;
     while ((l < config_interfaz->block_count))
     {
@@ -145,6 +142,7 @@ t_bitarray *crear_bitmap(t_config_interfaz *config_dialfs)
     int cantidad_bloques = config_dialfs->block_count;
     char *bitarray = malloc(cantidad_bloques);
     t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, cantidad_bloques, LSB_FIRST);
+    free(bitarray);
     return nuevo_bitarray;
 }
 
@@ -224,6 +222,7 @@ t_bitarray *cargar_bitmap(t_config_interfaz *config_dialfs)
     }
     fclose(archivo);
     free(path_bitmap);
+    free(bitarray);
     t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, size, LSB_FIRST);
     return nuevo_bitarray;
 }
@@ -238,51 +237,58 @@ void imprimir_bitmap(t_bitarray *bitmap)
     printf("\n");
 }
 
-void insertar_archivo_bloques(t_bloque *archivo){
+void insertar_archivo_bloques(t_bloque *archivo)
+{
 
-    if (bloques == NULL) {
+    if (bloques == NULL)
+    {
         // Si la primera lista está vacía, simplemente apunta a la segunda lista
         bloques = archivo;
         return;
     }
-    
+
     t_bloque *temp = bloques;
     while (temp->siguiente != NULL)
     {
         temp = temp->siguiente;
     }
     temp->siguiente = archivo;
-
 }
 
-
-void cambiar_seccion_lista(t_bloque *cabeza, int indice_inicial, int cantidad, char *nuevo_dato) {
-    if (cabeza == NULL || cantidad <= 0) {
+void cambiar_seccion_lista(t_bloque *cabeza, int indice_inicial, int cantidad, char *nuevo_dato)
+{
+    if (cabeza == NULL || cantidad <= 0)
+    {
         return;
     }
 
     t_bloque *temp = cabeza;
 
     // Avanzar hasta el índice inicial
-    for (int i = 0; i < indice_inicial && temp != NULL; i++) {
+    for (int i = 0; i < indice_inicial && temp != NULL; i++)
+    {
         temp = temp->siguiente;
     }
 
     // Si no se encuentra el índice inicial, retornar
-    if (temp == NULL) {
+    if (temp == NULL)
+    {
         return;
     }
 
     // Cambiar los valores de los nodos desde el índice inicial hasta la cantidad especificada
-    for (int i = 0; i < cantidad && temp != NULL; i++) {
+    for (int i = 0; i < cantidad && temp != NULL; i++)
+    {
         strcpy(temp->dato, nuevo_dato);
         temp = temp->siguiente;
     }
 }
 
-// Función para extraer una parte de la lista 
-t_bloque* extraer_parte_lista(t_bloque *cabeza, int indice_inicial, int cantidad) {
-    if (cabeza == NULL || cantidad <= 0) {
+// Función para extraer una parte de la lista
+t_bloque *extraer_parte_lista(t_bloque *cabeza, int indice_inicial, int cantidad)
+{
+    if (cabeza == NULL || cantidad <= 0)
+    {
         return NULL;
     }
 
@@ -292,13 +298,15 @@ t_bloque* extraer_parte_lista(t_bloque *cabeza, int indice_inicial, int cantidad
     t_bloque *fin_extraccion = NULL;
 
     // Avanzar hasta el índice inicial
-    for (int i = 0; i < indice_inicial && temp != NULL; i++) {
+    for (int i = 0; i < indice_inicial && temp != NULL; i++)
+    {
         prev = temp;
         temp = temp->siguiente;
     }
 
     // Si no se encuentra el índice inicial, retornar NULL
-    if (temp == NULL) {
+    if (temp == NULL)
+    {
         return NULL;
     }
 
@@ -306,28 +314,34 @@ t_bloque* extraer_parte_lista(t_bloque *cabeza, int indice_inicial, int cantidad
     inicio_extraccion = temp;
 
     // Avanzar hasta el final de la cantidad a extraer
-    for (int i = 0; i < cantidad && temp != NULL; i++) {
+    for (int i = 0; i < cantidad && temp != NULL; i++)
+    {
         fin_extraccion = temp;
         temp = temp->siguiente;
     }
 
     // Ajustar los punteros para mantener la integridad de la lista original
-    if (prev != NULL) {
+    if (prev != NULL)
+    {
         prev->siguiente = temp;
-    } else {
+    }
+    else
+    {
         cabeza = temp;
     }
 
     // Terminar la sublista extraída
-    if (fin_extraccion != NULL) {
+    if (fin_extraccion != NULL)
+    {
         fin_extraccion->siguiente = NULL;
     }
 
     return inicio_extraccion;
 }
 
-int crear_archivo_bloques(t_bloque *cabeza){
-    //carga un dato vacio en el bloque
+int crear_archivo_bloques(t_bloque *cabeza)
+{
+    // carga un dato vacio en el bloque
     char *dato = "";
     t_bloque *nuevoNodo = crear_bloque(strlen(dato));
     for (int i = 0; i < bitmap->size; i++)
@@ -336,6 +350,7 @@ int crear_archivo_bloques(t_bloque *cabeza){
         {
             bitarray_set_bit(bitmap, i);
             nuevoNodo->siguiente = NULL;
+            cabeza = cabeza->siguiente;
             cabeza = nuevoNodo;
             return i;
         }
@@ -343,20 +358,23 @@ int crear_archivo_bloques(t_bloque *cabeza){
     return -1;
 }
 
-void eliminar_archivo_bloques(t_bloque *cabeza, int bloque_inicial, int tamanio){
+void eliminar_archivo_bloques(t_bloque *cabeza, int bloque_inicial, int tamanio)
+{
     t_bloque *temp = cabeza;
     t_bloque *prev = NULL;
     int i = 0;
 
     // Avanzar hasta el bloque inicial
-    while (temp != NULL && i < bloque_inicial) {
+    while (temp != NULL && i < bloque_inicial)
+    {
         prev = temp;
         temp = temp->siguiente;
         i++;
     }
 
     // Liberar los bloques desde el bloque inicial hasta el tamaño especificado
-    for (int j = 0; j < tamanio && temp != NULL; j++) {
+    for (int j = 0; j < tamanio && temp != NULL; j++)
+    {
         t_bloque *a_eliminar = temp;
         temp = temp->siguiente;
         bitarray_clean_bit(bitmap, bloque_inicial + j);
@@ -364,9 +382,12 @@ void eliminar_archivo_bloques(t_bloque *cabeza, int bloque_inicial, int tamanio)
     }
 
     // Conectar el nodo anterior al último nodo liberado con el siguiente nodo
-    if (prev != NULL) {
+    if (prev != NULL)
+    {
         prev->siguiente = temp;
-    } else {
+    }
+    else
+    {
         // Si el bloque inicial es el primero, actualizar la cabeza
         cabeza = temp;
     }
@@ -399,18 +420,18 @@ t_bloque *crear_bloque(size_t tamano_dato)
     return nuevo_bloque;
 }
 
-
 t_bloque *insertarAlFinal(t_bloque *cabeza, t_config *config_dialfs, char *dato)
 {
     int tamano_bloque = config_get_int_value(config_dialfs, "TAMANO_BLOQUE");
     if (*dato)
     {
+        int tamano_bloque = config_get_int_value(config_dialfs, "TAMANO_BLOQUE");
         while (*dato) // recorre la cadena de caracteres
         {
             t_bloque *nuevoNodo = crear_bloque(tamano_bloque);
 
             strncpy(nuevoNodo->dato, dato, tamano_bloque - 1);
-            nuevoNodo->dato[tamano_bloque] = '\0'; // Asegurarse de que la cadena esté terminada
+            nuevoNodo->dato[tamano_bloque - 1] = '\0'; // Asegurarse de que la cadena esté terminada
             nuevoNodo->siguiente = NULL;
 
             // Avanzar el puntero de dato
@@ -430,30 +451,8 @@ t_bloque *insertarAlFinal(t_bloque *cabeza, t_config *config_dialfs, char *dato)
                 temp->siguiente = nuevoNodo;
             }
         }
+        return cabeza;
     }
-    else
-    {
-        t_bloque *nuevoNodo = crear_bloque(tamano_bloque);
-
-        strncpy(nuevoNodo->dato, dato, tamano_bloque - 1);
-        nuevoNodo->dato[tamano_bloque] = '\0'; // Asegurarse de que la cadena esté terminada
-        nuevoNodo->siguiente = NULL;
-
-        if (cabeza == NULL)
-        {
-            cabeza = nuevoNodo;
-        }
-        else
-        {
-            t_bloque *temp = cabeza;
-            while (temp->siguiente != NULL)
-            {
-                temp = temp->siguiente;
-            }
-            temp->siguiente = nuevoNodo;
-        }
-    }
-    return cabeza;
 }
 
 void guardarListaEnArchivo(t_bloque *cabeza)
@@ -463,6 +462,7 @@ void guardarListaEnArchivo(t_bloque *cabeza)
     if (archivo == NULL)
     {
         perror("Error al abrir el archivo");
+        free(path_bloques);
         return;
     }
 
@@ -497,13 +497,14 @@ t_bloque *leerListaDesdeArchivo(char *nombreArchivo)
         if (fread(&longitud, sizeof(size_t), 1, archivo) != 1)
             break;
 
-        char *dato = malloc(longitud);
+        char *dato = malloc(longitud + 1);
         if (dato == NULL || fread(dato, sizeof(char), longitud, archivo) != longitud)
         {
             free(dato);
             perror("Error al leer el dato");
             break;
         }
+        dato[longitud] = '\0';
 
         t_bloque *nuevoNodo = crear_bloque(longitud);
         if (nuevoNodo == NULL)
@@ -604,4 +605,3 @@ t_metadata *cargar_metadata(t_config_interfaz *config_dialfs)
     }
     return metadata;
 }
-

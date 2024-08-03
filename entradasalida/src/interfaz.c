@@ -167,7 +167,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     memcpy(direcciones, leer_array_string(buffer, &desp), numero_direcciones);
 
     int *tamanios[numero_direcciones];
-    memcpy(tamanios, leer_array_string(buffer, &desp), numero_direcciones);
+    memcpy(tamanios,convertir_strings_enteros(leer_array_string(buffer, &desp),numero_direcciones),numero_direcciones);
 
     texto = readline("> ");
     int anterior = 0;
@@ -188,6 +188,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
 
     free(texto);
     free(buffer);
+    string_array_destroy(direcciones);
     return 0;
 }
 
@@ -205,11 +206,11 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
     memcpy(direcciones, leer_array_string(buffer, &desp), numero_direcciones);
 
     int *tamanios[numero_direcciones];
-    memcpy(tamanios, leer_array_string(buffer, &desp), numero_direcciones);
+    memcpy(tamanios,convertir_strings_enteros(leer_array_string(buffer, &desp),numero_direcciones),numero_direcciones);
 
     char *direccionesT[numero_direcciones];
     desp = 0;
-    for (int i = 0; i < sizeof(direcciones) + 1; i++)
+    for (int i = 0; i < numero_direcciones; i++)
     { // envia a memoria cada direccion con su respectivo tamaño a leer
         t_paquete *paquete = crear_paquete();
         agregar_a_paquete(paquete, direcciones[i], __SIZEOF_INT__);
@@ -229,6 +230,8 @@ int iO_STDOUT_WRITE(t_parametroEsperar parametros)
     log_info(parametros.logger, "PID: %d - Operacion: IO_STDOUT_WRITE", pid );
     
     free(buffer);
+    string_array_destroy(direcciones);
+    string_array_destroy(direccionesT);
     return 0;
 }
 
@@ -355,7 +358,7 @@ int iO_FS_READ(t_parametroEsperar parametros)
 
     int comienzo_archivo = info_archivo(nombre_archivo,"BLOQUE_INICIAL");
 
-    char *texto = NULL;
+    char *texto;
     char *path_bloques = string_from_format("%s%s", config_interfaz->path_base_dialfs, "/bloques.dat");
     FILE *f = fopen(path_bloques, "r");
     int anterior = 0;
@@ -390,6 +393,7 @@ int iO_FS_READ(t_parametroEsperar parametros)
     free(nombre_archivo);
     free(path_bloques);
     free(texto);
+    string_array_destroy(direcciones);
     return 0;
 }
 
@@ -446,6 +450,7 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
     free(buffer);
     free(nombre_archivo);
     free(path_bloques);
+    string_array_destroy(direcciones);
     return 0;
 }
 

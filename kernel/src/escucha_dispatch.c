@@ -29,7 +29,7 @@ void atender_dispatch() {
 }
 
 void manejar_desalojo(char *motivo_raw) {
-    char **motivo = string_split(motivo_raw, " ");
+    char **motivo = string_n_split(motivo_raw, 3 , " ");
 
     if (string_equals_ignore_case(motivo[0], "EXIT")) {
         t_log *logger = kernel_logger();

@@ -324,7 +324,11 @@ int iO_FS_READ(t_parametroEsperar parametros)
     memcpy(direcciones, leer_array_string(buffer, &desp), numero_direcciones);
 
     int *tamanios[numero_direcciones];
-    memcpy(tamanios, leer_array_string(buffer, &desp), numero_direcciones);
+    memcpy(tamanios,convertir_strings_enteros(leer_array_string(buffer, &desp),numero_direcciones),numero_direcciones);
+    
+
+
+    int comienzo_archivo = info_archivo(nombre_archivo,"BLOQUE_INICIAL");
 
     char *texto = NULL;
     char *path_bloques = string_from_format("%s%s", config_interfaz->path_base_dialfs, "/bloques.dat");
@@ -332,8 +336,11 @@ int iO_FS_READ(t_parametroEsperar parametros)
     int anterior = 0;
     for (int i = 0; i < numero_direcciones; i++)
     {
-        fseek(f, *tamanios[i], puntero + anterior);
-        agregar_caracter(texto, fgetc(f));
+        fseek(f, anterior ,(comienzo_archivo*config_interfaz->block_size) + puntero );
+        for(int j=0;j< *tamanios[i];j++){
+            fseek(f, *tamanios[i] ,(comienzo_archivo*config_interfaz->block_size) + puntero + anterior );
+            agregar_caracter(texto, fgetc(f));
+        }
 
         t_paquete *paquete = crear_paquete();
         agregar_a_paquete(paquete, direcciones[i], __SIZEOF_INT__);
@@ -343,8 +350,8 @@ int iO_FS_READ(t_parametroEsperar parametros)
         enviar_peticion(paquete, parametros.conexion_memoria, MEM_ESCRIBIR_MEMORIA);
         eliminar_paquete(paquete);
 
-        anterior = *tamanios[i];
-
+        anterior += *tamanios[i];
+        texto = NULL;
     }
 
     int tamanio_a_leer = suma_array(*tamanios,numero_direcciones);
@@ -356,6 +363,8 @@ int iO_FS_READ(t_parametroEsperar parametros)
     nanosleep(&tiempo, NULL);
     free(buffer);
     free(nombre_archivo);
+    free(path_bloques);
+    free(texto);
     return 0;
 }
 
@@ -372,12 +381,13 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
     int numero_direcciones = leer_entero(buffer,&desp);
 
     int *tamanio_a_escribir[numero_direcciones];
-    memcpy(tamanio_a_escribir, leer_array_string(buffer, &desp), numero_direcciones);
+    memcpy(tamanio_a_escribir,convertir_strings_enteros(leer_array_string(buffer, &desp),numero_direcciones),numero_direcciones);
     int puntero = leer_entero(buffer, &desp);
 
     char *direcciones[numero_direcciones];
     memcpy(direcciones, leer_array_string(buffer, &desp), numero_direcciones);
 
+    int comienzo_archivo = info_archivo(nombre_archivo,"BLOQUE_INICIAL");
     desp = 0;
 
     char *path_bloques = string_from_format("%s%s", config_interfaz->path_base_dialfs, "/bloques.dat");
@@ -395,21 +405,22 @@ int iO_FS_WRITE(t_parametroEsperar parametros)
         int socketCliente = esperar_cliente(parametros.conexion_memoria, parametros.logger);
         buffer = recibir_buffer(&size, socketCliente);
         char *texto = leer_string(buffer, &desp); 
-        fseek(f, *tamanio_a_escribir[i], puntero + anterior);
+
+        fseek(f, anterior, (comienzo_archivo*config_interfaz->block_size) + puntero);
         fwrite(texto, sizeof(char), strlen(texto), f);
         eliminar_paquete(paquete);
-        anterior = *tamanio_a_escribir[i];
+        anterior += *tamanio_a_escribir[i];
     }
 
     int tamanio_total = suma_array(*tamanio_a_escribir, numero_direcciones);
 
-    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_WRITE - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d",
-             pid, nombre_archivo, tamanio_total, puntero);
+    log_info(parametros.logger, "PID: %d - Operacion: IO_FS_WRITE - Escribir Archivo: %s - Tamaño a Escribir: %d - Puntero Archivo: %d",pid, nombre_archivo, tamanio_total, puntero);
 
     fclose(f);
     nanosleep(&tiempo, NULL);
     free(buffer);
     free(nombre_archivo);
+    free(path_bloques);
     return 0;
 }
 
@@ -544,4 +555,11 @@ char** leer_array_string(char*buffer, int* desp)
 	arr[len] = NULL;
 
 	return arr;
+}
+int *convertir_strings_enteros(char **strings,int tamanio){
+    int *enteros = (int*)malloc(tamanio *sizeof(int));
+    for (int i = 0; i < tamanio; i++) {
+        enteros[i] = atoi(strings[i]);
+    }
+    return enteros;
 }

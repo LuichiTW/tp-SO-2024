@@ -45,6 +45,7 @@ void manejar_desalojo(char *motivo_raw) {
             log_destroy(logger);
             finalizar_proceso(exec);
         }
+        // TODO interrupt por quantum
         planificar();
     }
 

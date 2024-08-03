@@ -4,6 +4,13 @@
 #include <stdlib.h>
 #include <commons/config.h>
 #include <commons/log.h>
+#include <commons/string.h>
+
+enum algoritmo_planificacion {
+    ALGO_FIFO,
+    ALGO_RR,
+    ALGO_VRR
+}
 
 struct config_kernel {
     char *puerto_escucha;
@@ -12,7 +19,7 @@ struct config_kernel {
     char *ip_cpu;
     char *puerto_cpu_dispatch;
     char *puerto_cpu_interrupt;
-    char *algoritmo_planificacion;
+    enum algoritmo_planificacion algoritmo_planificacion;
     int quantum;
     // ? recursos
     // ? instancias_recursos

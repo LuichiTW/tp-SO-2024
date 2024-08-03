@@ -12,9 +12,6 @@ t_list *lista_procesos;
 sem_t sem_planificacion_general;
 sem_t sem_planificacion;
 
-// ! Revisar planificacion_activada por espera activa
-// ? Para eso podría usar semáforos
-// Afectar también a finalizar_proceso
 
 int ultimo_pid = 0;
 

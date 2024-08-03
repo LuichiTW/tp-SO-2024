@@ -75,7 +75,12 @@ void interpretar_comando(char *comando_str) {
 
 
 void c_ejecutar_script(char *path) {
-
+    char **lista_comando = leer_script(path);
+    int size_lista = string_array_size(lista_comando);
+    for (int i = 0; i < size_lista; i++) {
+        interpretar_comando(lista_comando[i]);
+    }
+    
 }
 void c_iniciar_proceso(char *path) {
     t_pcb *pcb = crear_proceso();
@@ -145,4 +150,36 @@ void c_proceso_estado() {
 void detener_planificacion_thread() {
     sem_wait(&sem_planificacion_general);
     sem_wait(&sem_planificacion);
+}
+
+
+char **leer_script(const char *path) {
+    long filesize;
+    char *content;
+    char **lista;
+
+    FILE *stream;
+    stream = fopen(path, "r");
+
+    // Obtengo el tamaño del archivo;
+    fseek(stream, 0L, SEEK_END);
+    filesize = ftell(stream);
+
+    // Vuelvo al inicio del archivo
+    fseek(stream, 0L, SEEK_SET);
+
+    // Leo el contenido del script
+    content = malloc((filesize + 1) * sizeof(char));
+    fread(content, 1, filesize, stream);
+    fclose(stream);
+
+    // Agrego el \0 para terminar la cadena
+    content[filesize] = '\0';
+
+    // Guardo las líneas como array en lista, que sobreescribe a la original
+    lista = string_split(content, "\n");
+
+    free(content);
+
+    return lista;
 }

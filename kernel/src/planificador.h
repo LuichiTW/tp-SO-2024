@@ -20,9 +20,16 @@ enum estado {
     ESTADO_EXIT
 };
 
+enum motivo_bloqueo {
+    BLOQUEO_NINGUNO,
+    BLOQUEO_IO,
+    BLOQUEO_RECURSO
+};
+
 typedef struct {
     int pid;
     enum estado estado;
+    enum motivo_bloqueo motivo_bloqueo;
 } t_estado_proceso;
 
 struct arg_contar_quantum {
@@ -48,6 +55,7 @@ void planificar();
 void realizar_planificacion();
 
 void agregar_a_ready(t_pcb *pcb);
+void agregar_a_ready_aux(t_pcb *pcb);
 void agregar_a_exec(t_pcb *pcb);
 void agregar_a_exit(t_pcb *pcb);
 
@@ -55,12 +63,16 @@ t_pcb *crear_proceso();
 void ejecutar_proceso(t_pcb *pcb);
 void finalizar_proceso(t_pcb *pcb);
 
+void desbloquear_proceso(int pid);
+
 void contar_quantum(void *args);
 
 t_estado_proceso *buscar_estado_proceso(int pid);
 t_pcb *buscar_pcb_por_pid(int pid);
 t_queue *obtener_cola_por_estado(enum estado estado);
 
-void log_cola_ready();
+void controlar_quantum(t_pcb *pcb);
+
+void log_cola_ready(bool ready_aux);
 
 #endif // PLANIFICADOR_H

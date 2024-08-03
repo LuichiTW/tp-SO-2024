@@ -3,6 +3,7 @@
 
 #include "conexion.h"
 #include "planificador.h"
+#include "io.h"
 
 void atender_dispatch();
 void manejar_desalojo(char *motivo_raw);

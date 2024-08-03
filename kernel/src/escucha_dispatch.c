@@ -38,6 +38,13 @@ void manejar_desalojo(char *motivo_raw) {
         finalizar_proceso(exec);
         planificar();
     }
+    if (string_equals_ignore_case(motivo[0], "OUT_OF_MEMORY")) {
+        t_log *logger = kernel_logger();
+        log_info(logger, "Finaliza el proceso %i - Motivo: OUT_OF_MEMORY", exec->pid);
+        log_destroy(logger);
+        finalizar_proceso(exec);
+        planificar();
+    }
     if (string_equals_ignore_case(motivo[0], "INTERRUPT")) {
         if (string_equals_ignore_case(motivo[1], "FINALIZAR_PROCESO")) {
             t_log *logger = kernel_logger();
@@ -50,10 +57,17 @@ void manejar_desalojo(char *motivo_raw) {
             log_info(logger, "PID: %i - Desalojado por fin de Quantum", exec->pid);
             log_destroy(logger);
 
+            exec->quantum = 0;
             agregar_a_ready(exec);
+            log_cola_ready(false);
             exec = NULL;
         }
         planificar();
+    }
+    if (string_equals_ignore_case(motivo[0], "IO_GEN_SLEEP")) {
+        op_code op = IO_GEN_SLEEP;
+        intentar_peticion_io(motivo[1], exec->pid, op, motivo[2]);
+        exec = NULL;
     }
 
     string_array_destroy(motivo);

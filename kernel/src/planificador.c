@@ -53,12 +53,18 @@ void realizar_planificacion() {
         ingreso_a_ready = true;
     }
     if (ingreso_a_ready) {
-        log_cola_ready();
+        log_cola_ready(false);
+    }
+
+    // READY_AUX -> EXEC
+    if (exec == NULL && !queue_is_empty(cola_ready_aux)) {
+        t_pcb *pcb_exec = (t_pcb*) queue_pop(cola_ready_aux);
+        ejecutar_proceso(pcb_exec);
+        log_info(logger, "PID: %i - Estado Anterior: READY_AUX - Estado Actual: EXEC", pcb_exec->pid);
     }
 
     // READY -> EXEC
     if (exec == NULL && !queue_is_empty(cola_ready)) {
-        // TODO chequear con cola ready_aux para VRR (y cambiar el log)
         t_pcb *pcb_exec = (t_pcb*) queue_pop(cola_ready);
         ejecutar_proceso(pcb_exec);
         log_info(logger, "PID: %i - Estado Anterior: READY - Estado Actual: EXEC", pcb_exec->pid);
@@ -77,6 +83,15 @@ void agregar_a_ready(t_pcb *pcb) {
     }
     est->estado = ESTADO_READY;
     queue_push(cola_ready, pcb);
+
+    sem_post(&sem_planificacion);
+}
+void agregar_a_ready_aux(t_pcb *pcb) {
+    sem_wait(&sem_planificacion);
+
+    t_estado_proceso *est = buscar_estado_proceso(pcb->pid);
+    est->estado = ESTADO_READY_AUX;
+    queue_push(cola_ready_aux, pcb);
 
     sem_post(&sem_planificacion);
 }
@@ -120,6 +135,7 @@ t_pcb *crear_proceso() {
     t_estado_proceso *est = malloc(sizeof(*est));
     est->pid = pcb->pid;
     est->estado = ESTADO_NEW;
+    est->motivo_bloqueo = BLOQUEO_NINGUNO;
     list_add(lista_procesos, est);
 
     return pcb;
@@ -223,21 +239,62 @@ void contar_quantum(void *args) {
 }
 
 
-void log_cola_ready() {
+void desbloquear_proceso(int pid) {
+    t_estado_proceso *est = buscar_estado_proceso(pid);
+    t_pcb *pcb = buscar_pcb_por_pid(pid);
+    if (config_kernel.algoritmo_planificacion != ALGO_VRR) {
+        est->estado = ESTADO_READY;
+        agregar_a_ready(pcb);
+    }
+    else {
+        if (pcb->quantum > 0 && est->motivo_bloqueo == BLOQUEO_IO) {
+            est->estado = ESTADO_READY_AUX;
+            agregar_a_ready_aux(pcb);
+        }
+        else {
+            est->estado = ESTADO_READY;
+            agregar_a_ready(pcb);
+        }
+    }
+    planificar();
+}
+
+
+void controlar_quantum(t_pcb *pcb) {
+    if (config_kernel.algoritmo_planificacion != ALGO_VRR) return;
+    int64_t tiempo_actual = temporal_gettime(temporal_global);
+    int quantum_pasado = tiempo_actual - tiempo_inicio_cuenta_q;
+    pcb->quantum = quantum_pasado;
+}
+
+
+void log_cola_ready(bool ready_aux) {
     t_log *logger = kernel_logger();
-    int cant_proc_ready = queue_size(cola_ready);
+    t_queue *cola;
+    if (ready_aux) {
+        cola = cola_ready_aux;
+    }
+    else {
+        cola = cola_ready;
+    }
+    int cant_proc_ready = queue_size(cola);
     char *lista_pid = string_new();
     for (int i = 0; i < cant_proc_ready; i++) {
         if (i > 0) {
             string_append(&lista_pid, ",");
         }
-        t_pcb *pcb = list_get(cola_ready->elements, i);
+        t_pcb *pcb = list_get(cola->elements, i);
         char *pid_str = string_itoa(pcb->pid);
         string_append(&lista_pid, pid_str);
 
         free(pid_str);
     }
-    log_info(logger, "Cola Ready: [%s]", lista_pid);
+    if (ready_aux) {
+        log_info(logger, "Cola Ready Prioridad: [%s]", lista_pid);
+    }
+    else {
+        log_info(logger, "Cola Ready: [%s]", lista_pid);
+    }
     
     free(lista_pid);
     log_destroy(logger);

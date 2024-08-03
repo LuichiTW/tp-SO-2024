@@ -23,6 +23,7 @@
 #include "planificador.h"
 #include "consola.h"
 #include "escucha_dispatch.h"
+#include "io.h"
 
 typedef struct
 

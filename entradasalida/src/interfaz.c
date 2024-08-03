@@ -163,7 +163,7 @@ int iO_STDIN_READ(t_parametroEsperar parametros)
     int pid = leer_entero(buffer, &desp);
     
     int numero_direcciones = leer_entero(buffer,&desp);
-    char **direcciones[numero_direcciones];
+    char *direcciones[numero_direcciones];
     memcpy(direcciones, leer_array_string(buffer, &desp), numero_direcciones);
 
     int *tamanios[numero_direcciones];

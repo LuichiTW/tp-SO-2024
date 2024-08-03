@@ -22,7 +22,7 @@ int main(int argc, char **argv){
 
     //manda la informacion de interfaz
     t_paquete *paquete = crear_paquete();
-    agregar_a_paquete(paquete, nombreInterfaz, strlen(argv[1]) + 1); //argv[1]
+    agregar_a_paquete(paquete, argv[1], strlen(argv[1]) + 1); //argv[1]
     agregar_a_paquete(paquete, obtener_tipo_interfaz(config_interfaz->tipo_interfaz), sizeof(int));
     enviar_paquete(paquete, parametros.conexion_kernel);
     eliminar_paquete(paquete);

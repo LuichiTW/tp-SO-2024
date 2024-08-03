@@ -60,4 +60,6 @@ void fIO_FS_READ(char interface[], char NombreArchivo[], enum lista_registros_CP
 
 void fEXIT();
 
+char *array_a_string(int *direcciones,int tamanio);
+
 #endif // FUNEXECUTE

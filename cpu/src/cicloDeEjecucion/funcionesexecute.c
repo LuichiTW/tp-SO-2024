@@ -199,56 +199,83 @@ void fIO_GEN_SLEEP(char interface[], int unidadesDeTrabajo){
     devolver_contexto_ejecucion(motivo_desalojo);
     free(motivo_desalojo);
 }
-void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
-    /* t_paquete *paquete;
-    int dir_fisica;
-    int tam_lectura;
-    
-    dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
-    tam_lectura = *((int*) obtenerRegistro(Tamanho));
+void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanio){//!OBLIGATORIO
+    int dir_logica = *((int *) obtenerRegistro(Direccion));
+    int registro_tamanios = *((int *) obtenerRegistro(Tamanio));
+    t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, registro_tamanios);
+    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,registro_tamanios);
+    char *array_tamanios = array_a_string(t_lista_dir_fisicas.cant_paginas,registro_tamanios);
 
-    paquete = crear_paquete();
-
-    agregar_a_paquete(paquete, interface, string_length(interface));
-    agregar_a_paquete(paquete, &tam_lectura, sizeof(tam_lectura));
-    agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
-
-    enviar_peticion(paquete, sockets_cpu.socket_servidor_cpu_dispatch, KER_STDIN_READ);
-    eliminar_paquete(paquete); */
+    char *motivo_desalojo = string_from_format("IO_STDIN_READ %s %s %d", interface, array_direcciones, array_tamanios);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
-void fIO_STDOUT_WRITE(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho){//!OBLIGATORIO
-    /* t_paquete *paquete;
-    int dir_fisica;
-    int tam_escritura;
+void fIO_STDOUT_WRITE(char interface[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanio){//!OBLIGATORIO
+    int dir_logica = *((int *) obtenerRegistro(Direccion));
+    int registro_tamanios = *((int *) obtenerRegistro(Tamanio));
+    t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, registro_tamanios);
+    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,registro_tamanios);
+    char *array_tamanios = array_a_string(t_lista_dir_fisicas.cant_paginas,registro_tamanios);
 
-    dir_fisica = obtener_direccion_fisica(separar_dir_logica(Direccion));
-    tam_escritura = *((int*) obtenerRegistro(Tamanho));
-
-    paquete = crear_paquete();
-    
-    agregar_a_paquete(paquete, interface, string_length(interface));
-    agregar_a_paquete(paquete, &tam_escritura, sizeof(tam_escritura));
-    agregar_a_paquete(paquete, &dir_fisica, sizeof(dir_fisica));
-
-    enviar_peticion(paquete, sockets_cpu.socket_servidor_cpu_dispatch, KER_STDOUT_WRITE);
-    eliminar_paquete(paquete); */
+    char *motivo_desalojo = string_from_format("IO_STDIN_WRITE %s %s %d", interface, array_direcciones, array_);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
 void fIO_FS_CREATE(char interface[], char NombreArchivo[]){
-
+    char *motivo_desalojo = string_from_format("IO_FS_CREATE %s %s", interface, NombreArchivo);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
 void fIO_FS_DELETE(char interface[], char NombreArchivo[]){
-
+    char *motivo_desalojo = string_from_format("IO_FS_DELETE %s %s", interface, NombreArchivo);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
-void fIO_FS_TRUNCATE(char interface[], char NombreArchivo[], enum lista_registros_CPU Tamanho){
+void fIO_FS_TRUNCATE(char interface[], char NombreArchivo[], enum lista_registros_CPU Tamanio){
+    int tam_registro = *((int *) obtenerRegistro(Tamanio));
 
+    char *motivo_desalojo = string_from_format("IO_FS_TRUNCATE %s %s %s", interface, NombreArchivo,tam_registro);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
-void fIO_FS_WRITE(char interface[], char NombreArchivo[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho, enum lista_registros_CPU PunteroArchivo){
+void fIO_FS_WRITE(char interface[], char NombreArchivo[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanio, enum lista_registros_CPU PunteroArchivo){
+    int dir_logica = *((int *) obtenerRegistro(Direccion));
+    int registro_tamanios = *((int *) obtenerRegistro(Tamanio));
+    int puntero = *((int *) obtenerRegistro(PunteroArchivo));
+    t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, registro_tamanios);
+    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,registro_tamanios);
+    char *array_tamanios = array_a_string(t_lista_dir_fisicas.cant_paginas,registro_tamanios);
 
+    char *motivo_desalojo = string_from_format("IO_FS_WRITE %s %s %s %s", interface, NombreArchivo,array_direcciones,array_tamanios,puntero);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
-void fIO_FS_READ(char interface[], char NombreArchivo[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanho, enum lista_registros_CPU PunteroArchivo){
+void fIO_FS_READ(char interface[], char NombreArchivo[], enum lista_registros_CPU Direccion, enum lista_registros_CPU Tamanio, enum lista_registros_CPU PunteroArchivo){
+    int dir_logica = *((int *) obtenerRegistro(Direccion));
+    int registro_tamanios = *((int *) obtenerRegistro(Tamanio));
+    int puntero = *((int *) obtenerRegistro(PunteroArchivo));
+    t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, registro_tamanios);
+    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,registro_tamanios);
+    char *array_tamanios = array_a_string(t_lista_dir_fisicas.cant_paginas,registro_tamanios);
 
+    char *motivo_desalojo = string_from_format("IO_FS_READ %s %s %s %s", interface, NombreArchivo,array_direcciones,array_tamanios,puntero);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
 void fEXIT(){
     devolver_contexto_ejecucion("EXIT");
+}
+
+char *array_a_string(int *direcciones,int tamanio){
+    char *array;
+    for(int i=0;i<tamanio;i++){
+        if ((i > 0) && (i != tamanio-1)) {
+            string_append(array, ",");
+        }
+        char *numero = string_itoa(direcciones[i]);
+        string_append(array,numero);
+        free(numero);
+    }
+    return array;
 }
 

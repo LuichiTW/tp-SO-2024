@@ -65,9 +65,11 @@ void manejar_desalojo(char *motivo_raw) {
         planificar();
     }
     if (string_equals_ignore_case(motivo[0], "IO_GEN_SLEEP")) {
+        t_pcb *pcb = exec;
         op_code op = IO_GEN_SLEEP;
-        intentar_peticion_io(motivo[1], exec->pid, op, motivo[2]);
         exec = NULL;
+        intentar_peticion_io(motivo[1], pcb->pid, op, motivo[2]);
+        controlar_quantum(pcb);
     }
 
     string_array_destroy(motivo);

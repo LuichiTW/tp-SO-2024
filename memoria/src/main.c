@@ -130,8 +130,8 @@ void recibir_solicitudes(int *socket_cliente_dir) {
 
                 delay(config_memoria.retardo_respuesta);
                 enviar_entero(0, socket_cliente);
+                free(valor);
             }
-            free(valor);
             break;
             
         case MEM_RESIZE_PROCESO:

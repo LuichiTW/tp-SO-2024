@@ -235,9 +235,15 @@ void fCOPY_STRING(int tamanho)
 }
 void fWAIT(char recurso[])
 {
+    char *motivo_desalojo = string_from_format("%s", recurso);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
 void fSIGNAL(char recurso[])
 {
+    char *motivo_desalojo = string_from_format("%s", recurso);
+    devolver_contexto_ejecucion(motivo_desalojo);
+    free(motivo_desalojo);
 }
 void fIO_GEN_SLEEP(char interface[], int unidadesDeTrabajo)
 {

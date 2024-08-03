@@ -10,7 +10,7 @@ char *enviar_instruccion(int pid, uint n_instruccion) {
     if (n_instruccion >= proceso->cant_instrucciones) {
         // ! Se pasó del número
     }
-
+    free(proceso);
     return lista_instrucciones[n_instruccion];
 }
 
@@ -37,6 +37,8 @@ int crear_proceso(int pid, const char *scriptname) {
     t_log *logger = crear_memlogger();
     log_info(logger, "PID: %i - Tamaño: 0", pid);
     log_destroy(logger);
+    free(proceso);
+    free(tabla);
 
     return 0; // ? OK
 }
@@ -122,6 +124,7 @@ int acceso_tabla_paginas(int pid, int pagina_buscada) {
     t_log *logger = crear_memlogger();
     log_info(logger, "PID: %i - Pagina: %i - Marco: %i", pid, pagina_buscada, pagina->frame);
     log_destroy(logger);
+    free(tabla);
 
     return pagina->frame;
 
@@ -191,6 +194,7 @@ int resize_proceso(int pid, uint nuevo_tam) {
         log_info(logger, "PID: %i - Tamaño Actual: %i - Tamaño a Reducir: %i", pid, cant_paginas_actual*config_memoria.tam_pagina, cant_paginas_nueva*config_memoria.tam_pagina);
         log_destroy(logger);
     }
+    free(tabla_paginas);
     return 0;
 
 }

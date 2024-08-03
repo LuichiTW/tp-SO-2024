@@ -111,7 +111,7 @@ t_tabla_paginas *obtener_tabla_por_pid(int pid) {
         return tabla->pid == pid;
     }
 
-    return list_find(tablas_paginas, (void*) es_el_buscado);
+    return list_find(tablas_paginas, (void*) es_el_buscado); 
 }
 
 t_proceso *obtener_proceso_por_pid(int pid) {

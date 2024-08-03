@@ -14,11 +14,11 @@ char *nombreInterfaz = "TECLADO";
 char *pathInterfaz = "./dialfs.config"; 
 
 // considerar pasar los argumentos de creacion de interfaces por el main y no por la funcion (issue #3709)
-int main(){
+int main(int argc, char **argv){
     //inicia logger y config
     t_log *logger = iniciar_logger_io();
 
-    t_config *config = iniciar_config(pathInterfaz);
+    t_config *config = iniciar_config(pathInterfaz); //argv[2]
 
     //carga los datos de la interfaz y crea las conxiones por el tipo de interfaz
     manejo_config_interfaz(config);

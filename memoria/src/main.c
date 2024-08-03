@@ -131,6 +131,7 @@ void recibir_solicitudes(int *socket_cliente_dir) {
                 delay(config_memoria.retardo_respuesta);
                 enviar_entero(0, socket_cliente);
             }
+            free(valor);
             break;
             
         case MEM_RESIZE_PROCESO:
@@ -188,6 +189,7 @@ void hacer_handshake(int socket_cliente) {
             enviar_entero(MOD_MEMORIA, socket_cliente);
             break;
     }
+    free(modulo_str);
 }
 
 

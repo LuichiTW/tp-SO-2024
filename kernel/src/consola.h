@@ -39,6 +39,7 @@ void c_proceso_estado();
 
 void detener_planificacion_thread();
 
+void print_bloqueados();
 char **leer_script(const char *path);
 
 #endif // CONSOLA_H

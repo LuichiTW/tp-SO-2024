@@ -222,8 +222,8 @@ t_bitarray *cargar_bitmap(t_config_interfaz *config_dialfs)
     }
     fclose(archivo);
     free(path_bitmap);
-    free(bitarray);
     t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, size, LSB_FIRST);
+    free(bitarray);
     return nuevo_bitarray;
 }
 

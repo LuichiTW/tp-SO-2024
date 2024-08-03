@@ -198,6 +198,7 @@ void guardar_bitmap(t_bitarray *bitmap, t_config_interfaz *config_dialfs)
     }
     fwrite(bitmap->bitarray, sizeof(char), bitmap->size, archivo);
     fclose(archivo);
+    free(path_bitmap);
 }
 
 // carga el bitmap desde un archivo
@@ -222,6 +223,7 @@ t_bitarray *cargar_bitmap(t_config_interfaz *config_dialfs)
         return NULL;
     }
     fclose(archivo);
+    free(path_bitmap);
     t_bitarray *nuevo_bitarray = bitarray_create_with_mode(bitarray, size, LSB_FIRST);
     return nuevo_bitarray;
 }
@@ -475,6 +477,7 @@ void guardarListaEnArchivo(t_bloque *cabeza)
         temp = temp->siguiente;
     }
     fclose(archivo);
+    free(path_bloques);
 }
 
 // Función para leer la lista desde el archivo

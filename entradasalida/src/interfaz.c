@@ -102,6 +102,7 @@ void manejo_config_interfaz(t_config *config)
         perror("Error al obtener el valor de TIPO_INTERFAZ");
         exit(EXIT_FAILURE);
     }
+    free(tipo_interfaz);
 }
 
 //! realizar unit testing para cada funcion de interfaz
@@ -480,6 +481,7 @@ int info_archivo(char *nombre_archivo, char *parametro)
     t_config *metadata = config_create(path_metadata);
     int info = config_get_int_value(metadata, parametro);
     config_destroy(metadata);
+    free(path_metadata);
     return info;
 }
 
@@ -528,6 +530,7 @@ char* leer_subcadena(const char* cadena, size_t inicio, size_t fin) {
 
     return subcadena;
 }
+
 char* agregar_caracter(const char* texto, char caracter) {
     size_t longitud = strlen(texto);
     char* nuevo_texto = (char*)malloc((longitud + 2) * sizeof(char)); // +2 para el nuevo caracter y '\0'

@@ -26,17 +26,45 @@ t_config *iniciar_config(char *path_config)
     return config;
 }
 
-void manejo_config_interfaz(t_config *config)
+int obtener_tipo_interfaz(char *tipo_interfaz)
 {
-    char *tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
-    parametros.logger = logger; //??
-    if (tipo_interfaz == NULL)
+    if (strcmp(tipo_interfaz, "GENERICA") == 0)
+    {
+        return GENERICA;
+    }
+    else if (strcmp(tipo_interfaz, "STDIN") == 0)
+    {
+        return STDIN;
+    }
+    else if (strcmp(tipo_interfaz, "STDOUT") == 0)
+    {
+        return STDOUT;
+    }
+    else if (strcmp(tipo_interfaz, "DIALFS") == 0)
+    {
+        return DIALFS;
+    }
+    else
     {
         perror("Error al obtener el valor de TIPO_INTERFAZ");
         exit(EXIT_FAILURE);
     }
-    if (strcmp(tipo_interfaz, "GENERICA") == 0)
+}
+
+void manejo_config_interfaz(t_config *config)
+{
+    config_interfaz->tipo_interfaz = config_get_string_value(config, "TIPO_INTERFAZ");
+    parametros.logger = logger; //??
+    
+    if (config_interfaz->tipo_interfaz == NULL)
     {
+        perror("Error al obtener el valor de TIPO_INTERFAZ");
+        exit(EXIT_FAILURE);
+    }
+
+    switch (obtener_tipo_interfaz(config_interfaz->tipo_interfaz))
+    {
+    case GENERICA:
         log_info(logger, "Interfaz generica");
         // cargar config de interfaz generica
         config_interfaz->ip_kernel = config_get_string_value(config, "IP_KERNEL");
@@ -46,9 +74,8 @@ void manejo_config_interfaz(t_config *config)
         // crear conexiones
         parametros.conexion_kernel = crear_conexion(config_interfaz->ip_kernel, config_interfaz->puerto_kernel, "conexion con IO");
         parametros.server_fd = iniciar_servidor(config_interfaz->puerto_kernel);
-    }
-    else if (strcmp(tipo_interfaz, "STDIN") == 0)
-    {
+        break;
+    case STDIN:
         log_info(logger, "Interfaz STDIN");
         // cargar config de interfaz stdin
         config_interfaz->ip_memoria = config_get_string_value(config, "IP_MEMORIA");
@@ -60,9 +87,8 @@ void manejo_config_interfaz(t_config *config)
         parametros.conexion_memoria = crear_conexion(config_interfaz->ip_memoria, config_interfaz->puerto_memoria, "conexion con IO");
         parametros.conexion_kernel = crear_conexion(config_interfaz->ip_kernel, config_interfaz->puerto_kernel, "conexion con IO");
         parametros.server_fd = iniciar_servidor(config_interfaz->puerto_kernel);
-    }
-    else if (strcmp(tipo_interfaz, "STDOUT") == 0)
-    {
+        break;
+    case STDOUT:
         log_info(logger, "Interfaz STDOUT");
         // cargar config de interfaz stdout
         config_interfaz->ip_memoria = config_get_string_value(config, "IP_MEMORIA");
@@ -74,9 +100,8 @@ void manejo_config_interfaz(t_config *config)
         parametros.conexion_memoria = crear_conexion(config_interfaz->ip_memoria, config_interfaz->puerto_memoria, "conexion con IO");
         parametros.conexion_kernel = crear_conexion(config_interfaz->ip_kernel, config_interfaz->puerto_kernel, "conexion con IO");
         parametros.server_fd = iniciar_servidor(config_interfaz->puerto_kernel);
-    }
-    else if (strcmp(tipo_interfaz, "DIALFS") == 0)
-    {
+        break;
+    case DIALFS:
         log_info(logger, "Interfaz DIALFS");
         // cargar config de interfaz dialfs
         config_interfaz->tiempo_unidad_trabajo = config_get_int_value(config, "TIEMPO_UNIDAD_TRABAJO");
@@ -96,13 +121,12 @@ void manejo_config_interfaz(t_config *config)
 
         // comprobar filesystem
         comprobar_filesystem(config_interfaz);
-    }
-    else
-    {
+        break;    
+    default:
         perror("Error al obtener el valor de TIPO_INTERFAZ");
         exit(EXIT_FAILURE);
+        break;
     }
-    free(tipo_interfaz);
 }
 
 //! realizar unit testing para cada funcion de interfaz

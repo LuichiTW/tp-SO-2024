@@ -23,6 +23,13 @@ int main(int argc, char **argv){
     //carga los datos de la interfaz y crea las conxiones por el tipo de interfaz
     manejo_config_interfaz(config);
 
+    //manda la informacion de interfaz
+    t_paquete *paquete = crear_paquete();
+    agregar_a_paquete(paquete, nombreInterfaz, strlen(nombreInterfaz) + 1); //argv[1]
+    agregar_a_paquete(paquete, obtener_tipo_interfaz(config_interfaz->tipo_interfaz), sizeof(int));
+    enviar_paquete(paquete, parametros.conexion_kernel);
+    eliminar_paquete(paquete);
+
     //espera las instrucciones de la interfaz
     esperar(parametros);
 

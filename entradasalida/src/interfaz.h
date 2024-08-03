@@ -32,6 +32,7 @@ extern t_parametroEsperar parametros;
 t_log *iniciar_logger_io(void);
 t_config *iniciar_config(char *tipo_interfaz);
 void manejo_config_interfaz(t_config *config);
+int obtener_tipo_interfaz(char *tipo_interfaz);
 
 // instrucciones interfaz
 int iO_GEN_SLEEP(t_parametroEsperar parametros);

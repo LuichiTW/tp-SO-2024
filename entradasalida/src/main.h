@@ -27,6 +27,7 @@ typedef struct
 
 typedef struct
 {
+	char *tipo_interfaz;
 	int tiempo_unidad_trabajo;
 	char *path_base_dialfs;
 	int block_size;

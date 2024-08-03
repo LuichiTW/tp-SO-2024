@@ -203,8 +203,8 @@ void fIO_STDIN_READ(char interface[], enum lista_registros_CPU Direccion, enum l
     int dir_logica = *((int *) obtenerRegistro(Direccion));
     int registro_tamanios = *((int *) obtenerRegistro(Tamanio));
     t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, registro_tamanios);
-    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,registro_tamanios);
-    char *array_tamanios = array_a_string(t_lista_dir_fisicas.cant_paginas,registro_tamanios);
+    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,lista_dir.cant_paginas);
+    char *array_tamanios = array_a_string(lista_dir.bytes_por_pag,lista_dir.cant_paginas);
 
     char *motivo_desalojo = string_from_format("IO_STDIN_READ %s %s %d", interface, array_direcciones, array_tamanios);
     devolver_contexto_ejecucion(motivo_desalojo);
@@ -214,8 +214,8 @@ void fIO_STDOUT_WRITE(char interface[], enum lista_registros_CPU Direccion, enum
     int dir_logica = *((int *) obtenerRegistro(Direccion));
     int registro_tamanios = *((int *) obtenerRegistro(Tamanio));
     t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, registro_tamanios);
-    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,registro_tamanios);
-    char *array_tamanios = array_a_string(t_lista_dir_fisicas.cant_paginas,registro_tamanios);
+    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,lista_dir.cant_paginas);
+    char *array_tamanios = array_a_string(lista_dir.bytes_por_pag,lista_dir.cant_paginas);
 
     char *motivo_desalojo = string_from_format("IO_STDIN_WRITE %s %s %d", interface, array_direcciones, array_);
     devolver_contexto_ejecucion(motivo_desalojo);
@@ -243,8 +243,8 @@ void fIO_FS_WRITE(char interface[], char NombreArchivo[], enum lista_registros_C
     int registro_tamanios = *((int *) obtenerRegistro(Tamanio));
     int puntero = *((int *) obtenerRegistro(PunteroArchivo));
     t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, registro_tamanios);
-    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,registro_tamanios);
-    char *array_tamanios = array_a_string(t_lista_dir_fisicas.cant_paginas,registro_tamanios);
+    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,lista_dir.cant_paginas);
+    char *array_tamanios = array_a_string(lista_dir.bytes_por_pag,lista_dir.cant_paginas);
 
     char *motivo_desalojo = string_from_format("IO_FS_WRITE %s %s %s %s", interface, NombreArchivo,array_direcciones,array_tamanios,puntero);
     devolver_contexto_ejecucion(motivo_desalojo);
@@ -255,8 +255,8 @@ void fIO_FS_READ(char interface[], char NombreArchivo[], enum lista_registros_CP
     int registro_tamanios = *((int *) obtenerRegistro(Tamanio));
     int puntero = *((int *) obtenerRegistro(PunteroArchivo));
     t_lista_dir_fisicas lista_dir = obtener_direcciones_fisicas(dir_logica, registro_tamanios);
-    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,registro_tamanios);
-    char *array_tamanios = array_a_string(t_lista_dir_fisicas.cant_paginas,registro_tamanios);
+    char *array_direcciones = array_a_string(lista_dir.dir_fisicas,lista_dir.cant_paginas);
+    char *array_tamanios = array_a_string(lista_dir.bytes_por_pag,lista_dir.cant_paginas);
 
     char *motivo_desalojo = string_from_format("IO_FS_READ %s %s %s %s", interface, NombreArchivo,array_direcciones,array_tamanios,puntero);
     devolver_contexto_ejecucion(motivo_desalojo);
@@ -269,7 +269,7 @@ void fEXIT(){
 char *array_a_string(int *direcciones,int tamanio){
     char *array;
     for(int i=0;i<tamanio;i++){
-        if ((i > 0) && (i != tamanio-1)) {
+        if ((i > 0)) {
             string_append(array, ",");
         }
         char *numero = string_itoa(direcciones[i]);

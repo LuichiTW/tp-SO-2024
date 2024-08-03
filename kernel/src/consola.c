@@ -140,10 +140,21 @@ void c_proceso_estado() {
         printf("| %i\n", exec->pid);
     }
     printf("\n+---- BLOCKED -------------\n");
-    list_iterate(cola_blocked->elements, imprimir_pid);
+    print_bloqueados();
     printf("\n+---- EXIT ----------------\n");
     list_iterate(cola_exit->elements, imprimir_pid);
     printf("\n");
+}
+
+
+void print_bloqueados() {
+    void print_si_bloqueado (void *vest) {
+        t_estado_proceso *est = (*est) vest;
+        if (est->motivo_bloqueo != BLOQUEO_NINGUNO) {
+            printf("| %i\n", est->pid);
+        }
+    }
+    list_iterate(lista_procesos, print_si_bloqueado);
 }
 
 

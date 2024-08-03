@@ -71,6 +71,54 @@ void manejar_desalojo(char *motivo_raw) {
         intentar_peticion_io(motivo[1], pcb->pid, op, motivo[2]);
         controlar_quantum(pcb);
     }
-
+    if (string_equals_ignore_case(motivo[0], "IO_STDIN_READ")) {
+        t_pcb *pcb = exec;
+        op_code op = IO_STDIN_READ;
+        exec = NULL;
+        intentar_peticion_io(motivo[1], pcb->pid, op, motivo[2]);
+        controlar_quantum(pcb);
+    }
+    if (string_equals_ignore_case(motivo[0], "IO_STDOUT_WRITE")) {
+        t_pcb *pcb = exec;
+        op_code op = IO_STDOUT_WRITE;
+        exec = NULL;
+        intentar_peticion_io(motivo[1], pcb->pid, op, motivo[2]);
+        controlar_quantum(pcb);
+    }
+    if (string_equals_ignore_case(motivo[0], "IO_FS_CREATE")) {
+        t_pcb *pcb = exec;
+        op_code op = IO_FS_CREATE;
+        exec = NULL;
+        intentar_peticion_io(motivo[1], pcb->pid, op, motivo[2]);
+        controlar_quantum(pcb);
+    }
+    if (string_equals_ignore_case(motivo[0], "IO_FS_DELETE")) {
+        t_pcb *pcb = exec;
+        op_code op = IO_FS_DELETE;
+        exec = NULL;
+        intentar_peticion_io(motivo[1], pcb->pid, op, motivo[2]);
+        controlar_quantum(pcb);
+    }
+    if (string_equals_ignore_case(motivo[0], "IO_FS_TRUNCATE")) {
+        t_pcb *pcb = exec;
+        op_code op = IO_FS_TRUNCATE;
+        exec = NULL;
+        intentar_peticion_io(motivo[1], pcb->pid, op, motivo[2]);
+        controlar_quantum(pcb);
+    }
+    if (string_equals_ignore_case(motivo[0], "IO_FS_READ")) {
+        t_pcb *pcb = exec;
+        op_code op = IO_FS_READ;
+        exec = NULL;
+        intentar_peticion_io(motivo[1], pcb->pid, op, motivo[2]);
+        controlar_quantum(pcb);
+    }
+    if (string_equals_ignore_case(motivo[0], "IO_FS_WRITE")) {
+        t_pcb *pcb = exec;
+        op_code op = IO_FS_WRITE;
+        exec = NULL;
+        intentar_peticion_io(motivo[1], pcb->pid, op, motivo[2]);
+        controlar_quantum(pcb);
+    }
     string_array_destroy(motivo);
 }

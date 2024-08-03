@@ -176,7 +176,7 @@ void fRESIZE(int tamanho)
     { // Out of memory sería
         char *motivo_desalojo = "OUT_OF_MEMORY";
         devolver_contexto_ejecucion(motivo_desalojo);
-        free(motivo_desalojo);
+        //free(motivo_desalojo);
     }
 }
 void fCOPY_STRING(int tamanho)
